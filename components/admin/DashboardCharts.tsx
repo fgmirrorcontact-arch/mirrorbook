@@ -40,8 +40,8 @@ export default function DashboardCharts({ data }: { data: ChartPoint[] }) {
               width={44}
             />
             <Tooltip
-              formatter={(v: number) => [
-                `${(v / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €`,
+              formatter={(v) => [
+                `${((Number(v) || 0) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €`,
                 'CA',
               ]}
               contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: 12 }}
@@ -78,7 +78,7 @@ export default function DashboardCharts({ data }: { data: ChartPoint[] }) {
               width={28}
             />
             <Tooltip
-              formatter={(v: number) => [v, 'Nouveaux abonnés']}
+              formatter={(v) => [v, 'Nouveaux abonnés']}
               contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: 12 }}
             />
             <Area
