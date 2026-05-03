@@ -78,7 +78,7 @@ export async function POST(
       current_period_end,
       status,
       cancel_at_period_end: false,
-    })
+    } as never)
     .select()
     .single()
 
