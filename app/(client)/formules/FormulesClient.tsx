@@ -2,76 +2,18 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Loader2, Check, Timer } from 'lucide-react'
-import { toast } from '@/components/ui/use-toast'
+import { Check, Timer } from 'lucide-react'
 import type { Service, ServiceCommitmentTier } from '@/types'
 import { formatPrice } from '@/lib/utils'
-
-interface SubscribeButtonProps {
-  serviceId: string
-  tierId: string | null
-  isAuthenticated: boolean
-}
-
-function SubscribeButton({ serviceId, tierId, isAuthenticated }: SubscribeButtonProps) {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
-
-  async function handleSubscribe() {
-    if (!isAuthenticated) {
-      router.push(`/login?redirect=/formules`)
-      return
-    }
-
-    setLoading(true)
-    try {
-      const res = await fetch('/api/subscriptions/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          service_id: serviceId,
-          ...(tierId && { tier_id: tierId }),
-        }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(typeof data.error === 'string' ? data.error : 'Erreur lors de la redirection')
-      }
-
-      window.location.href = data.url
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Une erreur est survenue.'
-      toast({ title: 'Erreur', description: message, variant: 'destructive' })
-      setLoading(false)
-    }
-  }
-
-  return (
-    <Button size="lg" className="w-full font-bold uppercase tracking-wider" onClick={handleSubscribe} disabled={loading}>
-      {loading ? (
-        <>
-          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          Redirection…
-        </>
-      ) : (
-        "S'abonner"
-      )}
-    </Button>
-  )
-}
 
 interface ServiceCardProps {
   service: Service
   tiers: ServiceCommitmentTier[]
   isActive: boolean
-  isAuthenticated: boolean
 }
 
-export function ServiceCard({ service, tiers, isActive, isAuthenticated }: ServiceCardProps) {
+export function ServiceCard({ service, tiers, isActive }: ServiceCardProps) {
   const [selectedTierIndex, setSelectedTierIndex] = useState<number>(0)
   const [showMore, setShowMore] = useState(false)
   const isLong = (service.description?.length ?? 0) > 120
@@ -79,14 +21,11 @@ export function ServiceCard({ service, tiers, isActive, isAuthenticated }: Servi
   const hasTiers = tiers.length > 0
   const activeTier = hasTiers ? tiers[selectedTierIndex] : null
   const displayedPrice = activeTier ? activeTier.price_cents : service.price_cents
-  const selectedStripePrice = activeTier ? activeTier.stripe_price_id : service.stripe_price_id
-  const hasStripePrice = !!selectedStripePrice
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col h-full shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out">
       <h2 className="text-lg font-bold text-charbon mb-3 min-h-[3.5rem] flex items-start">{service.name}</h2>
 
-      {/* Partie variable — s'étire pour pousser le bas vers le bas */}
       <div className="flex-1 min-h-0">
         {service.description && (
           <div className="mb-3">
@@ -121,7 +60,6 @@ export function ServiceCard({ service, tiers, isActive, isAuthenticated }: Servi
         )}
       </div>
 
-      {/* Partie fixe — toujours au même endroit */}
       <div className="pt-4 border-t border-gray-100 mt-4">
         <div className="text-3xl font-bold text-vert mb-1">
           {formatPrice(displayedPrice)}
@@ -143,16 +81,12 @@ export function ServiceCard({ service, tiers, isActive, isAuthenticated }: Servi
             <Button variant="outline" size="lg" className="w-full" disabled>
               Abonnement actif
             </Button>
-          ) : !hasStripePrice ? (
-            <Button size="lg" className="w-full" disabled>
-              Bientôt disponible
-            </Button>
           ) : (
-            <SubscribeButton
-              serviceId={service.id}
-              tierId={activeTier ? activeTier.id : null}
-              isAuthenticated={isAuthenticated}
-            />
+            <Link href={`/book?service=${service.id}`} className="block">
+              <Button size="lg" className="w-full font-bold uppercase tracking-wider">
+                Réserver
+              </Button>
+            </Link>
           )}
         </div>
       </div>
@@ -191,7 +125,7 @@ export function SingleServiceCard({ service }: { service: Service }) {
             </p>
           )}
         </div>
-        <Link href="/book">
+        <Link href={`/book?service=${service.id}`}>
           <Button size="sm" className="shrink-0">Réserver</Button>
         </Link>
       </div>

@@ -258,7 +258,6 @@ export default async function HomePage() {
                     service={service}
                     tiers={tiersByService[service.id] ?? []}
                     isActive={activeServiceIds.has(service.id)}
-                    isAuthenticated={!!user}
                   />
                 </div>
               ))}

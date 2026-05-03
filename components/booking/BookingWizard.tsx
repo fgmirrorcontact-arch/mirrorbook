@@ -23,10 +23,21 @@ const STEP_ORDER = STEPS.map((s) => s.key)
 interface BookingWizardProps {
   services: Service[]
   addons?: ServiceAddon[]
+  initialServiceId?: string
 }
 
-export default function BookingWizard({ services, addons = [] }: BookingWizardProps) {
-  const { step, setStep } = useBookingStore()
+export default function BookingWizard({ services, addons = [], initialServiceId }: BookingWizardProps) {
+  const { step, setStep, setService, reset } = useBookingStore()
+
+  useEffect(() => {
+    if (!initialServiceId) return
+    const service = services.find((s) => s.id === initialServiceId)
+    if (!service) return
+    reset()
+    setService(service)
+    setStep('slot')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     if (step !== 'auth') return

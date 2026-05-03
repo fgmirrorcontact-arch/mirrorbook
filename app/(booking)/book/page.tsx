@@ -9,7 +9,8 @@ export const metadata = {
   title: 'Réserver — Mirrorbook',
 }
 
-export default async function BookPage() {
+export default async function BookPage({ searchParams }: { searchParams: Promise<{ service?: string }> }) {
+  const { service: initialServiceId } = await searchParams
   const supabase = await getSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -55,6 +56,7 @@ export default async function BookPage() {
         <BookingWizard
           services={(services as Service[]) ?? []}
           addons={(addons as ServiceAddon[]) ?? []}
+          initialServiceId={initialServiceId}
         />
       </main>
     </div>
