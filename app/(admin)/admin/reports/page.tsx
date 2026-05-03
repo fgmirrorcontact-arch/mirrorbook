@@ -32,7 +32,7 @@ const SECTIONS = [
 
 export default function AdminReportsPage() {
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Rapports</h1>
       <p className="text-gray-500 text-sm mb-8">
         Analyses détaillées de l'activité de votre centre de lavage.

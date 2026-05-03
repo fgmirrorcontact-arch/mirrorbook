@@ -165,6 +165,7 @@ export default function AdminPromosClient({ promos }: AdminPromosClientProps) {
         </div>
 
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
@@ -232,6 +233,7 @@ export default function AdminPromosClient({ promos }: AdminPromosClientProps) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 
@@ -242,7 +244,7 @@ export default function AdminPromosClient({ promos }: AdminPromosClientProps) {
           </DialogHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="promo-code">Code</Label>
                 <Input
@@ -296,7 +298,7 @@ export default function AdminPromosClient({ promos }: AdminPromosClientProps) {
               <Input id="promo-desc" placeholder="Promotion été…" {...register('description')} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="promo-from">Valide à partir du</Label>
                 <Input id="promo-from" type="date" {...register('valid_from')} />
@@ -307,7 +309,7 @@ export default function AdminPromosClient({ promos }: AdminPromosClientProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="promo-min">Achat min. (€)</Label>
                 <Input id="promo-min" type="number" step="0.01" min="0" placeholder="0" {...register('min_purchase_cents')} />

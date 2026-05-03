@@ -39,8 +39,8 @@ export default async function AdminSubscriptionsPage() {
   })
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Abonnements</h1>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -50,6 +50,7 @@ export default async function AdminSubscriptionsPage() {
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50">
@@ -100,6 +101,7 @@ export default async function AdminSubscriptionsPage() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

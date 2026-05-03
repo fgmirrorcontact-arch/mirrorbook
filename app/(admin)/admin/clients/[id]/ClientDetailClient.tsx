@@ -255,7 +255,7 @@ export default function ClientDetailClient({
   }, {})
 
   return (
-    <div className="p-8 max-w-6xl">
+    <div className="p-4 sm:p-8 max-w-6xl">
       {/* Back */}
       <Link href="/admin/clients" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 mb-6">
         <ArrowLeft className="h-4 w-4" />
@@ -263,12 +263,12 @@ export default function ClientDetailClient({
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{profile.full_name ?? '—'}</h1>
           <p className="text-sm text-gray-500 mt-0.5">{email ?? '—'} · Client depuis le {new Date(profile.created_at).toLocaleDateString('fr-FR')}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {confirmDelete ? (
             <>
               <Button variant="destructive" size="sm" onClick={deleteClient} disabled={deleting}>
@@ -299,7 +299,7 @@ export default function ClientDetailClient({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* ── Info ── */}
         <div className="col-span-1 bg-white border border-gray-200 rounded-xl p-5 space-y-4">
           <h2 className="text-sm font-semibold text-gray-700">Informations</h2>
@@ -384,7 +384,7 @@ export default function ClientDetailClient({
         </div>
 
         {/* ── Abonnement ── */}
-        <div className="col-span-2 bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5 space-y-4">
           <h2 className="text-sm font-semibold text-gray-700">Abonnements & crédits</h2>
 
           {subscriptions.length === 0 ? (
@@ -433,7 +433,7 @@ export default function ClientDetailClient({
           {activeSubs.length > 0 && (
             <div className="border-t border-gray-100 pt-4 space-y-3">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Ajouter des crédits manuellement</p>
-              <div className="flex items-end gap-3">
+              <div className="flex flex-wrap items-end gap-3">
                 <div className="space-y-1 flex-1">
                   <Label className="text-xs">Abonnement</Label>
                   <select
@@ -481,6 +481,7 @@ export default function ClientDetailClient({
         {bookings.length === 0 ? (
           <p className="px-5 py-10 text-center text-sm text-gray-400">Aucune réservation.</p>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
@@ -526,6 +527,7 @@ export default function ClientDetailClient({
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

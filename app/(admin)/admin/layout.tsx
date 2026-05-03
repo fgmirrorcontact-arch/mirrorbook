@@ -2,33 +2,9 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import LogoutButton from '@/components/LogoutButton'
-import {
-  LayoutDashboard,
-  Calendar,
-  Package,
-  Users,
-  BookOpen,
-  CreditCard,
-  Tag,
-  BarChart3,
-  Car,
-  Clock,
-  UserCog,
-  ExternalLink,
-} from 'lucide-react'
-
-const NAV_ITEMS = [
-  { href: '/admin', label: 'Vue d\'ensemble', icon: LayoutDashboard },
-  { href: '/admin/calendar', label: 'Calendrier', icon: Calendar },
-  { href: '/admin/bookings', label: 'Réservations', icon: BookOpen },
-  { href: '/admin/clients', label: 'Clients', icon: Users },
-  { href: '/admin/subscriptions', label: 'Abonnements', icon: CreditCard },
-  { href: '/admin/services', label: 'Prestations', icon: Package },
-  { href: '/admin/employees', label: 'Employés', icon: UserCog },
-  { href: '/admin/disponibilites', label: 'Disponibilités', icon: Clock },
-  { href: '/admin/promos', label: 'Codes promo', icon: Tag },
-  { href: '/admin/reports', label: 'Rapports', icon: BarChart3 },
-]
+import AdminMobileNav from '@/components/admin/AdminMobileNav'
+import { NAV_ITEMS } from '@/components/admin/nav-items'
+import { Car, ExternalLink } from 'lucide-react'
 
 export default async function AdminLayout({
   children,
@@ -50,10 +26,15 @@ export default async function AdminLayout({
 
   if (!profile || profile.role !== 'admin') redirect('/')
 
+  const userName = profile.full_name ?? user.email ?? ''
+
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-60 bg-charbon text-gray-300 flex flex-col shrink-0">
+      {/* Mobile nav — hidden on lg+ */}
+      <AdminMobileNav userName={userName} />
+
+      {/* Sidebar — hidden on mobile */}
+      <aside className="hidden lg:flex w-60 bg-charbon text-gray-300 flex-col shrink-0">
         {/* Brand */}
         <div className="px-5 py-5 border-b border-white/10">
           <Link
@@ -95,7 +76,7 @@ export default async function AdminLayout({
 
         {/* User + logout */}
         <div className="px-4 py-4 border-t border-white/10">
-          <p className="text-xs text-gray-500 px-1 mb-2 truncate">{profile.full_name ?? user.email}</p>
+          <p className="text-xs text-gray-500 px-1 mb-2 truncate">{userName}</p>
           <LogoutButton
             redirectTo="/admin-login"
             variant="ghost"
@@ -104,8 +85,8 @@ export default async function AdminLayout({
         </div>
       </aside>
 
-      {/* Content */}
-      <main className="flex-1 overflow-y-auto">
+      {/* Content — top padding on mobile for fixed header */}
+      <main className="flex-1 overflow-y-auto pt-14 lg:pt-0">
         {children}
       </main>
     </div>

@@ -145,7 +145,7 @@ export default async function DashboardPage() {
               {subscriptions!.map((sub) => (
                 <div
                   key={sub.id}
-                  className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center justify-between"
+                  className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex flex-wrap items-center justify-between gap-3"
                 >
                   <div>
                     <p className="font-medium text-charbon text-sm">

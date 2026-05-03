@@ -195,7 +195,7 @@ export default async function AdminOverviewPage() {
   ]
 
   return (
-    <div className="p-8 max-w-7xl">
+    <div className="p-4 sm:p-8 max-w-7xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-8">Vue d'ensemble</h1>
 
       {/* ── KPI cards ── */}

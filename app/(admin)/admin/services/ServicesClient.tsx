@@ -318,9 +318,9 @@ export default function AdminServicesClient({ services, addons }: Props) {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Catalogue</h1>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -360,6 +360,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
       {/* Services table */}
       {tab === 'services' && (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
@@ -436,6 +437,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
@@ -447,6 +449,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
               Aucun complément. Créez-en un avec le bouton ci-dessus.
             </p>
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
@@ -516,6 +519,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       )}
@@ -552,7 +556,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
             </div>
 
             {!isSubscription && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="svc-price">Prix (€)</Label>
                   <div className="relative">
@@ -620,7 +624,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="svc-min-lead">Délai min avant réservation</Label>
                 <div className="flex items-center gap-1.5">
@@ -792,7 +796,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Prix (€)</Label>
                 <div className="relative">

@@ -229,7 +229,7 @@ export default function AvailabilityClient({ employees: initialEmployees, allSch
   }
 
   return (
-    <div className="p-8 space-y-8 max-w-3xl">
+    <div className="p-4 sm:p-8 space-y-8 max-w-3xl">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Disponibilités</h1>
         <p className="text-sm text-gray-500 mt-0.5">Gérez l'équipe, les horaires et les jours bloqués.</p>
@@ -248,7 +248,7 @@ export default function AvailabilityClient({ employees: initialEmployees, allSch
         {/* Formulaire création */}
         {showCreate && (
           <div className="border border-dashed border-vert/30 rounded-lg p-4 bg-vert/5 space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Nom affiché</Label>
                 <Input placeholder="Alexandre" value={newName} onChange={(e) => setNewName(e.target.value)} />
@@ -297,7 +297,7 @@ export default function AvailabilityClient({ employees: initialEmployees, allSch
         {selected && (
           <div className="border-t border-gray-100 pt-4 space-y-3">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Modifier — {selected.display_name}</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Nom</Label>
                 <Input value={empName} onChange={(e) => setEmpName(e.target.value)} />
