@@ -41,26 +41,7 @@ export default function SignupPage() {
       setAuthError(error.message)
       return
     }
-    setSuccess(true)
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="w-full max-w-sm bg-white border border-gray-200 rounded-xl p-8 shadow-sm text-center">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
-            Vérifiez votre boîte mail
-          </h2>
-          <p className="text-gray-500 text-sm mb-6">
-            Un e-mail de confirmation vous a été envoyé. Cliquez sur le lien
-            pour activer votre compte.
-          </p>
-          <Link href="/login">
-            <Button variant="outline">Retour à la connexion</Button>
-          </Link>
-        </div>
-      </div>
-    )
+    router.push('/dashboard')
   }
 
   return (
