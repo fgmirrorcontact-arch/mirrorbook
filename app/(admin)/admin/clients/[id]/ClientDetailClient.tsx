@@ -252,7 +252,9 @@ export default function ClientDetailClient({
   }
 
   // ── Subscription create ──────────────────────────────────────────────────────
-  const subscriptionServices = services.filter((s) => s.is_subscription)
+  const subscriptionServices = services.filter((s) => s.is_subscription).length > 0
+    ? services.filter((s) => s.is_subscription)
+    : services
   const [showCreateSub, setShowCreateSub] = useState(false)
   const [newSubServiceId, setNewSubServiceId] = useState(subscriptionServices[0]?.id ?? '')
   const [newSubStart, setNewSubStart] = useState(() => new Date().toISOString().slice(0, 10))

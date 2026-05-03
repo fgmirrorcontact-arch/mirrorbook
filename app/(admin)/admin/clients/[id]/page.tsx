@@ -33,7 +33,7 @@ export default async function ClientDetailPage({
       .select('*, services(name, tokens_per_renewal)')
       .eq('client_id', id)
       .order('created_at', { ascending: false }),
-    admin.from('services').select('id, name, is_subscription').eq('is_active', true).order('sort_order'),
+    admin.from('services').select('id, name, is_subscription').order('sort_order'),
     admin.from('promo_codes').select('id, code, discount_type, discount_value').eq('is_active', true),
   ])
 
