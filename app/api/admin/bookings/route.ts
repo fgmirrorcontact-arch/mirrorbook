@@ -19,7 +19,7 @@ const createBookingSchema = z
     employee_id: uuidLike,
     service_id: uuidLike,
     addon_ids: z.array(uuidLike).default([]),
-    start_at: z.string().datetime(),
+    start_at: z.string().min(1),
     payment_method: z
       .enum(['cash', 'card_present', 'stripe_one_time', 'subscription_token'])
       .default('cash'),
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) {
     console.error('[admin/bookings] 422 body:', JSON.stringify(body))
     console.error('[admin/bookings] 422 errors:', JSON.stringify(parsed.error.flatten()))
-    return Response.json({ error: parsed.error.flatten() }, { status: 422 })
+    return Response.json({ error: 'Données invalides' }, { status: 422 })
   }
 
   const admin = getSupabaseAdminClient()

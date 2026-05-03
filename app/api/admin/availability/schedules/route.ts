@@ -4,7 +4,7 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
 
 const scheduleSchema = z.object({
-  employee_id: z.string().uuid(),
+  employee_id: z.string().min(1),
   schedules: z.array(z.object({
     day_of_week: z.number().int().min(0).max(6),
     is_active: z.boolean(),
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
 
   const body = await request.json()
   const parsed = scheduleSchema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+  if (!parsed.success) return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
 
   const { employee_id, schedules } = parsed.data
   const admin = getSupabaseAdminClient()

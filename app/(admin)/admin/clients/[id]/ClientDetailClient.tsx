@@ -35,6 +35,7 @@ interface Booking {
 
 interface Subscription {
   id: string
+  service_id: string
   status: SubStatus
   current_period_start: string
   current_period_end: string
@@ -185,8 +186,7 @@ export default function ClientDetailClient({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         subscription_id: tokenSubId,
-        service_id: services.find((s) => s.name === selectedSub.services?.name)?.id
-          ?? subscriptions.find((s) => s.id === tokenSubId)?.services?.name,
+        service_id: selectedSub.service_id,
         quantity: tokenQty,
         expires_at: tokenExpiry || null,
       }),

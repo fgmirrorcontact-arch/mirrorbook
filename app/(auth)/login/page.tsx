@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,6 +20,8 @@ type FormValues = z.infer<typeof schema>
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') ?? '/dashboard'
   const [authError, setAuthError] = useState<string | null>(null)
   const [forgotEmail, setForgotEmail] = useState('')
   const [forgotSent, setForgotSent] = useState(false)
@@ -51,7 +53,7 @@ export default function LoginPage() {
       setAuthError('E-mail ou mot de passe incorrect.')
       return
     }
-    router.push('/dashboard')
+    router.push(redirectTo)
     router.refresh()
   }
 
@@ -154,7 +156,7 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-gray-500 mt-4">
           Pas encore de compte ?{' '}
-          <Link href="/signup" className="text-lime hover:underline font-medium">
+          <Link href={`/signup${searchParams.get('redirect') ? `?redirect=${searchParams.get('redirect')}` : ''}`} className="text-lime hover:underline font-medium">
             Créer un compte
           </Link>
         </p>

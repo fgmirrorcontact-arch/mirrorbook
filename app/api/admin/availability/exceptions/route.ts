@@ -3,7 +3,7 @@ import { getSupabaseServerClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
 const schema = z.object({
-  employee_id: z.string().uuid(),
+  employee_id: z.string().min(1),
   exception_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   is_unavailable: z.boolean().default(true),
   reason: z.string().optional(),
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
   const body = await request.json()
   const parsed = schema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+  if (!parsed.success) return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
 
   const { data, error } = await supabase
     .from('availability_exceptions')

@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null)
   if (!body) return NextResponse.json({ error: 'Corps invalide' }, { status: 400 })
   const parsed = createSchema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+  if (!parsed.success) return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
   const admin = getSupabaseAdminClient()
   const { data, error } = await admin
     .from('service_addons')

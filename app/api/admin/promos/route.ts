@@ -12,7 +12,7 @@ const createSchema = z.object({
   max_uses: z.number().int().min(1).nullable().optional(),
   valid_from: z.string().nullable().optional(),
   valid_until: z.string().nullable().optional(),
-  applicable_service_ids: z.array(z.string().uuid()).nullable().optional(),
+  applicable_service_ids: z.array(z.string().min(1)).nullable().optional(),
   is_active: z.boolean().default(true),
 })
 
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   if (!body) return Response.json({ error: 'Corps invalide' }, { status: 400 })
 
   const parsed = createSchema.safeParse(body)
-  if (!parsed.success) return Response.json({ error: parsed.error.flatten() }, { status: 422 })
+  if (!parsed.success) return Response.json({ error: 'Données invalides' }, { status: 422 })
 
   const admin = getSupabaseAdminClient()
   const { code, description, discount_type, discount_value, min_purchase_cents, max_uses, valid_from, valid_until, applicable_service_ids, is_active } = parsed.data
@@ -70,7 +70,7 @@ export async function PATCH(request: NextRequest) {
 
   const { id, ...fields } = body
   const parsed = createSchema.partial().safeParse(fields)
-  if (!parsed.success) return Response.json({ error: parsed.error.flatten() }, { status: 422 })
+  if (!parsed.success) return Response.json({ error: 'Données invalides' }, { status: 422 })
 
   const admin = getSupabaseAdminClient()
   const { data, error } = await admin.from('promo_codes').update(parsed.data).eq('id', id).select().single()

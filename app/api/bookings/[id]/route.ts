@@ -13,7 +13,7 @@ const patchSchema = z.object({
   status: z.enum(['pending', 'confirmed', 'cancelled', 'completed', 'no_show']).optional(),
   internal_notes: z.string().optional(),
   cancellation_reason: z.string().optional(),
-  start_at: z.string().datetime().optional(),
+  start_at: z.string().min(1).optional(),
 })
 
 // ── GET /api/bookings/[id] ────────────────────────────────────────────────────
@@ -105,7 +105,7 @@ export async function PATCH(
 
   const parsed = patchSchema.safeParse(body)
   if (!parsed.success) {
-    return Response.json({ error: parsed.error.flatten() }, { status: 422 })
+    return Response.json({ error: 'Données invalides' }, { status: 422 })
   }
 
   const supabase = await getSupabaseServerClient()

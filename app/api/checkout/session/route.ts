@@ -10,7 +10,7 @@ const schema = z.object({
   employee_id: uuidLike,
   service_id: uuidLike,
   addon_ids: z.array(uuidLike).default([]),
-  start_at: z.string().datetime(),
+  start_at: z.string().min(1),
   promo_code_id: uuidLike.nullable().optional(),
   notes: z.string().nullable().optional(),
 })
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   if (!body) return Response.json({ error: 'Corps invalide' }, { status: 400 })
 
   const parsed = schema.safeParse(body)
-  if (!parsed.success) return Response.json({ error: parsed.error.flatten() }, { status: 422 })
+  if (!parsed.success) return Response.json({ error: 'Données invalides' }, { status: 422 })
 
   const supabase = await getSupabaseServerClient()
   const admin = getSupabaseAdminClient()

@@ -8,13 +8,13 @@ import { bookingConfirmedEmail } from '@/lib/emails/templates'
 
 // ── Validation schema ─────────────────────────────────────────────────────────
 const createBookingSchema = z.object({
-  employee_id: z.string().uuid(),
-  service_id: z.string().uuid(),
-  addon_ids: z.array(z.string().uuid()).default([]),
-  start_at: z.string().datetime(),
+  employee_id: z.string().min(1),
+  service_id: z.string().min(1),
+  addon_ids: z.array(z.string().min(1)).default([]),
+  start_at: z.string().min(1),
   payment_method: z.enum(['stripe_one_time', 'subscription_token']).default('stripe_one_time'),
-  token_id: z.string().uuid().optional(),
-  promo_code_id: z.string().uuid().nullable().optional(),
+  token_id: z.string().min(1).optional(),
+  promo_code_id: z.string().min(1).nullable().optional(),
   notes: z.string().nullable().optional(),
 })
 
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
   const parsed = createBookingSchema.safeParse(body)
   if (!parsed.success) {
-    return Response.json({ error: parsed.error.flatten() }, { status: 422 })
+    return Response.json({ error: 'Données invalides' }, { status: 422 })
   }
 
   const supabase = await getSupabaseServerClient()

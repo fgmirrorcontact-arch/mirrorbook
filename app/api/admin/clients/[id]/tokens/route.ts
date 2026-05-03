@@ -4,9 +4,9 @@ import { getSupabaseServerClient } from '@/lib/supabase/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 
 const schema = z.object({
-  subscription_id: z.string().uuid(),
-  service_id: z.string().uuid(),
-  quantity: z.number().int().min(1).max(20),
+  subscription_id: z.string().min(1),
+  service_id: z.string().min(1),
+  quantity: z.number().min(1).max(20),
   expires_at: z.string().nullable().optional(),
 })
 
@@ -29,7 +29,7 @@ export async function POST(
   if (!body) return Response.json({ error: 'Corps invalide' }, { status: 400 })
 
   const parsed = schema.safeParse(body)
-  if (!parsed.success) return Response.json({ error: parsed.error.flatten() }, { status: 422 })
+  if (!parsed.success) return Response.json({ error: 'Données invalides : ' + JSON.stringify(parsed.error.issues) }, { status: 422 })
 
   const { subscription_id, service_id, quantity, expires_at } = parsed.data
   const admin = getSupabaseAdminClient()
