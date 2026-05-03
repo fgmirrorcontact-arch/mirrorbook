@@ -83,7 +83,7 @@ export function ServiceCard({ service, tiers, isActive, isAuthenticated }: Servi
   const hasStripePrice = !!selectedStripePrice
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col h-full shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col h-full shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out">
       <h2 className="text-lg font-bold text-charbon mb-3 min-h-[3.5rem] flex items-start">{service.name}</h2>
 
       {/* Partie variable — s'étire pour pousser le bas vers le bas */}
@@ -165,7 +165,7 @@ export function SingleServiceCard({ service }: { service: Service }) {
   const isLong = (service.description?.length ?? 0) > 120
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col hover:border-lime/40 transition-colors">
+    <div className="bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col hover:border-lime/40 hover:-translate-y-1 transition-all duration-300 ease-out">
       <h3 className="text-base font-semibold text-white mb-1">{service.name}</h3>
       <div className="flex-1">
         {service.description && (

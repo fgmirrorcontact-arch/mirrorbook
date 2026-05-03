@@ -77,7 +77,7 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
       <div
         key={service.id}
         className={cn(
-          'w-full rounded-xl border-2 overflow-hidden transition-all',
+          'w-full rounded-xl border-2 overflow-hidden transition-all duration-200 ease-out',
           isSelected
             ? 'border-vert shadow-md'
             : 'border-gray-200 bg-white hover:border-vert/40 hover:shadow-sm'
@@ -164,7 +164,7 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
                     type="button"
                     onClick={() => setTier(isTierSelected ? null : tier)}
                     className={cn(
-                      'w-full flex items-center justify-between rounded-lg border-2 px-3 py-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-lime',
+                      'w-full flex items-center justify-between rounded-lg border-2 px-3 py-2 transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-lime',
                       isTierSelected
                         ? 'border-vert bg-vert text-white'
                         : 'border-gray-200 text-gray-700 hover:border-vert/40'
@@ -233,7 +233,7 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
                 <div
                   key={addon.id}
                   className={cn(
-                    'flex items-center justify-between rounded-lg border p-3 transition-colors',
+                    'flex items-center justify-between rounded-lg border p-3 transition-colors duration-200',
                     isSelected ? 'border-vert/30 bg-vert/5' : 'border-gray-200 bg-white'
                   )}
                 >
@@ -251,7 +251,7 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
                       type="button"
                       onClick={() => toggleAddon(addon)}
                       className={cn(
-                        'h-7 w-7 rounded-full flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime',
+                        'h-7 w-7 rounded-full flex items-center justify-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime',
                         isSelected
                           ? 'bg-vert text-lime hover:bg-vert/80'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'

@@ -134,7 +134,7 @@ export default function RescheduleModal({
                 <button
                   type="button"
                   onClick={() => setViewMonth((m) => subMonths(m, 1))}
-                  className="p-1.5 rounded-md hover:bg-gray-100"
+                  className="p-1.5 rounded-md hover:bg-gray-100 transition-colors duration-150"
                 >
                   <ChevronLeft className="h-4 w-4 text-gray-500" />
                 </button>
@@ -144,7 +144,7 @@ export default function RescheduleModal({
                 <button
                   type="button"
                   onClick={() => setViewMonth((m) => addMonths(m, 1))}
-                  className="p-1.5 rounded-md hover:bg-gray-100"
+                  className="p-1.5 rounded-md hover:bg-gray-100 transition-colors duration-150"
                 >
                   <ChevronRight className="h-4 w-4 text-gray-500" />
                 </button>
@@ -169,7 +169,7 @@ export default function RescheduleModal({
                       disabled={out || past}
                       onClick={() => setSelectedDate(day)}
                       className={cn(
-                        'mx-auto h-8 w-8 flex items-center justify-center rounded-full text-sm transition-colors',
+                        'mx-auto h-8 w-8 flex items-center justify-center rounded-full text-sm transition-colors duration-150',
                         'disabled:opacity-30 disabled:cursor-not-allowed',
                         sel && 'bg-vert text-lime font-semibold',
                         !sel && today && 'border-2 border-vert text-vert font-semibold',
@@ -205,7 +205,7 @@ export default function RescheduleModal({
                         type="button"
                         onClick={() => setSelectedSlot(s)}
                         className={cn(
-                          'px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors',
+                          'px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors duration-150',
                           selectedSlot === s
                             ? 'bg-vert border-vert text-lime'
                             : 'border-gray-300 text-gray-700 hover:border-vert/40 hover:text-vert'

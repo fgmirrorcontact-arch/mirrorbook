@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${displayFont.variable} ${bodyFont.variable} h-full antialiased`}
+      className={`${displayFont.variable} ${bodyFont.variable} h-full antialiased scroll-smooth`}
       suppressHydrationWarning
     >
       <body className="min-h-full bg-aluminium text-charbon">

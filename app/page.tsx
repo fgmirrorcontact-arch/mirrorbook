@@ -89,11 +89,11 @@ export default async function HomePage() {
             Mirrorbook
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400">
-            <a href="#concept" className="hover:text-white transition-colors">Le concept</a>
-            <a href="#formules" className="hover:text-white transition-colors">Abonnements</a>
-            <a href="#prestations" className="hover:text-white transition-colors">Prestations</a>
-            <a href="#comment" className="hover:text-white transition-colors">Comment ça marche</a>
-            <a href="#avis" className="hover:text-white transition-colors">Avis</a>
+            <a href="#concept" className="hover:text-white transition-colors duration-200">Le concept</a>
+            <a href="#formules" className="hover:text-white transition-colors duration-200">Abonnements</a>
+            <a href="#prestations" className="hover:text-white transition-colors duration-200">Prestations</a>
+            <a href="#comment" className="hover:text-white transition-colors duration-200">Comment ça marche</a>
+            <a href="#avis" className="hover:text-white transition-colors duration-200">Avis</a>
           </nav>
           <div className="flex items-center gap-3">
             {user ? (
@@ -220,7 +220,7 @@ export default async function HomePage() {
                 body: 'Nos techniciens utilisent des produits professionnels pour un rendu irréprochable, intérieur comme extérieur.',
               },
             ].map(({ icon: Icon, title, body }) => (
-              <div key={title} className="bg-white rounded-xl border border-gray-200 p-8 hover:shadow-md transition-shadow">
+              <div key={title} className="bg-white rounded-xl border border-gray-200 p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out">
                 <div className="h-12 w-12 bg-vert rounded-xl flex items-center justify-center mb-5">
                   <Icon className="h-6 w-6 text-lime" />
                 </div>
@@ -383,7 +383,7 @@ export default async function HomePage() {
             <>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
                 {googleData.reviews.slice(0, 6).map((review, i) => (
-                  <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col gap-3">
+                  <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col gap-3 hover:border-white/20 hover:-translate-y-1 transition-all duration-300 ease-out">
                     <div className="flex items-center gap-3">
                       {review.profile_photo_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -468,12 +468,12 @@ export default async function HomePage() {
           <div>
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Navigation</p>
             <ul className="space-y-2 text-sm font-light">
-              <li><a href="#concept" className="hover:text-white transition-colors">Le concept</a></li>
-              <li><a href="#formules" className="hover:text-white transition-colors">Abonnements</a></li>
-              <li><a href="#prestations" className="hover:text-white transition-colors">Prestations à la séance</a></li>
-              <li><a href="#comment" className="hover:text-white transition-colors">Comment ça marche</a></li>
+              <li><a href="#concept" className="hover:text-white transition-colors duration-200">Le concept</a></li>
+              <li><a href="#formules" className="hover:text-white transition-colors duration-200">Abonnements</a></li>
+              <li><a href="#prestations" className="hover:text-white transition-colors duration-200">Prestations à la séance</a></li>
+              <li><a href="#comment" className="hover:text-white transition-colors duration-200">Comment ça marche</a></li>
               <li>
-                <Link href="/book" className="hover:text-white transition-colors">
+                <Link href="/book" className="hover:text-white transition-colors duration-200">
                   Réserver
                 </Link>
               </li>
@@ -485,16 +485,13 @@ export default async function HomePage() {
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Compte</p>
             <ul className="space-y-2 text-sm font-light">
               <li>
-                <Link href="/login" className="hover:text-white transition-colors">Connexion</Link>
+                <Link href="/login" className="hover:text-white transition-colors duration-200">Connexion</Link>
               </li>
               <li>
-                <Link href="/signup" className="hover:text-white transition-colors">Créer un compte</Link>
+                <Link href="/signup" className="hover:text-white transition-colors duration-200">Créer un compte</Link>
               </li>
               <li>
-                <Link href="/dashboard" className="hover:text-white transition-colors">Mon espace client</Link>
-              </li>
-              <li>
-                <Link href="/formules" className="hover:text-white transition-colors">Toutes les formules</Link>
+                <Link href="/dashboard" className="hover:text-white transition-colors duration-200">Mon espace client</Link>
               </li>
             </ul>
           </div>

@@ -108,7 +108,7 @@ export default async function BookingsPage() {
                     variant: 'secondary' as const,
                   }
                   return (
-                    <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={booking.id} className="hover:bg-gray-50 transition-colors duration-150">
                       <td className="px-5 py-3 font-mono text-xs text-gray-500">
                         {booking.booking_ref}
                       </td>

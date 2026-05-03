@@ -102,7 +102,7 @@ export default function SlotStep() {
           <button
             type="button"
             onClick={() => setViewMonth((m) => subMonths(m, 1))}
-            className="p-1.5 rounded-md hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-md hover:bg-gray-100 transition-colors duration-150"
             aria-label="Mois précédent"
           >
             <ChevronLeft className="h-5 w-5 text-gray-500" />
@@ -113,7 +113,7 @@ export default function SlotStep() {
           <button
             type="button"
             onClick={() => setViewMonth((m) => addMonths(m, 1))}
-            className="p-1.5 rounded-md hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-md hover:bg-gray-100 transition-colors duration-150"
             aria-label="Mois suivant"
           >
             <ChevronRight className="h-5 w-5 text-gray-500" />
@@ -188,7 +188,7 @@ export default function SlotStep() {
                   type="button"
                   onClick={() => setSlot(slot)}
                   className={cn(
-                    'px-4 py-2 rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime',
+                    'px-4 py-2 rounded-lg border text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime',
                     selectedSlot === slot
                       ? 'bg-vert border-vert text-lime'
                       : 'bg-white border-gray-300 text-gray-700 hover:border-vert/40 hover:text-vert'

@@ -52,7 +52,7 @@ export default function BookingWizard({ services, addons = [] }: BookingWizardPr
                 <div className="flex flex-col items-center">
                   <div
                     className={[
-                      'h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-colors',
+                      'h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-colors duration-300',
                       isCompleted
                         ? 'bg-vert border-vert text-lime'
                         : isCurrent
@@ -80,7 +80,7 @@ export default function BookingWizard({ services, addons = [] }: BookingWizardPr
                 {index < STEPS.length - 1 && (
                   <div
                     className={[
-                      'flex-1 h-0.5 mx-2 mb-5 transition-colors',
+                      'flex-1 h-0.5 mx-2 mb-5 transition-colors duration-300',
                       isCompleted ? 'bg-vert' : 'bg-gray-200',
                     ].join(' ')}
                   />

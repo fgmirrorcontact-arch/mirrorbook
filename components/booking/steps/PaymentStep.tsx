@@ -206,7 +206,7 @@ export default function PaymentStep() {
             <button
               type="button"
               onClick={() => setPaymentMethod('token')}
-              className={`flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition-colors ${
+              className={`flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition-colors duration-200 ${
                 paymentMethod === 'token'
                   ? 'border-vert bg-vert/5'
                   : 'border-gray-200 hover:border-gray-300'
@@ -226,7 +226,7 @@ export default function PaymentStep() {
             <button
               type="button"
               onClick={() => setPaymentMethod('stripe')}
-              className={`flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition-colors ${
+              className={`flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition-colors duration-200 ${
                 paymentMethod === 'stripe'
                   ? 'border-vert bg-vert/5'
                   : 'border-gray-200 hover:border-gray-300'
