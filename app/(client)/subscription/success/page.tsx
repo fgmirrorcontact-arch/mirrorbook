@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { CheckCircle2 } from 'lucide-react'
+import { Car, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 
@@ -10,15 +10,28 @@ export default async function SubscriptionSuccessPage() {
   if (!user) redirect('/login')
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-xl border border-gray-200 p-8 text-center">
+    <div className="min-h-screen bg-charbon flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-white/5 border border-white/10 rounded-xl p-8 text-center">
+        <Link
+          href="/"
+          className="flex items-center justify-center gap-2 font-display font-bold italic uppercase text-white text-lg tracking-wide mb-6"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          <Car className="h-5 w-5 text-lime" />
+          Mirrorbook
+        </Link>
         <div className="flex justify-center mb-4">
-          <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle2 className="h-8 w-8 text-green-600" />
+          <div className="h-16 w-16 bg-vert rounded-full flex items-center justify-center">
+            <CheckCircle2 className="h-8 w-8 text-lime" />
           </div>
         </div>
-        <h1 className="text-xl font-bold text-gray-900 mb-2">Abonnement activé !</h1>
-        <p className="text-gray-500 mb-6 text-sm">
+        <h1
+          className="text-2xl font-extrabold italic uppercase text-white mb-2"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          Abonnement activé !
+        </h1>
+        <p className="text-gray-400 mb-6 text-sm font-light">
           Votre abonnement est maintenant actif. Vos crédits de séances seront disponibles dans quelques instants.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -26,7 +39,7 @@ export default async function SubscriptionSuccessPage() {
             <Button variant="outline">Mon espace</Button>
           </Link>
           <Link href="/book">
-            <Button>Réserver une séance</Button>
+            <Button className="font-bold uppercase tracking-wider">Réserver une séance</Button>
           </Link>
         </div>
       </div>

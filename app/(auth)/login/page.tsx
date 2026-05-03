@@ -56,66 +56,76 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-charbon flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="flex justify-center mb-8">
-          <Link href="/" className="flex items-center gap-2 text-indigo-600 font-bold text-xl">
-            <Car className="h-6 w-6" />
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-display font-bold italic uppercase text-white text-2xl tracking-wide"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            <Car className="h-6 w-6 text-lime" />
             Mirrorbook
           </Link>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
-          <h1 className="text-xl font-bold text-gray-900 mb-1">Connexion</h1>
-          <p className="text-sm text-gray-500 mb-6">
+        <div className="bg-white/5 border border-white/10 rounded-xl p-8">
+          <h1
+            className="text-2xl font-extrabold italic uppercase text-white mb-1"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            Connexion
+          </h1>
+          <p className="text-sm text-gray-400 mb-6 font-light">
             Accédez à votre espace client.
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="email" className="text-gray-300">E-mail</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="votre@email.fr"
                 autoComplete="email"
+                className="bg-white/5 border-white/20 text-white placeholder:text-gray-600 focus:border-lime focus:ring-lime"
                 {...register('email')}
               />
               {errors.email && (
-                <p className="text-xs text-red-600">{errors.email.message}</p>
+                <p className="text-xs text-red-400">{errors.email.message}</p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password" className="text-gray-300">Mot de passe</Label>
               <Input
                 id="password"
                 type="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
+                className="bg-white/5 border-white/20 text-white placeholder:text-gray-600 focus:border-lime focus:ring-lime"
                 {...register('password')}
               />
               {errors.password && (
-                <p className="text-xs text-red-600">{errors.password.message}</p>
+                <p className="text-xs text-red-400">{errors.password.message}</p>
               )}
             </div>
 
             {authError && (
-              <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-sm text-red-400 bg-red-900/20 border border-red-800/40 rounded-lg p-3">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 {authError}
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full font-bold uppercase tracking-wider" disabled={isSubmitting}>
               {isSubmitting ? 'Connexion…' : 'Se connecter'}
             </Button>
           </form>
 
-          <div className="mt-5 border-t border-gray-100 pt-4">
+          <div className="mt-5 border-t border-white/10 pt-4">
             {forgotSent ? (
-              <p className="text-sm text-green-600 text-center">
+              <p className="text-sm text-lime text-center">
                 E-mail envoyé — vérifiez votre boîte de réception.
               </p>
             ) : (
@@ -127,12 +137,12 @@ export default function LoginPage() {
                     placeholder="votre@email.fr"
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
-                    className="flex-1 h-9 rounded-md border border-gray-300 bg-white px-3 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="flex-1 h-9 rounded-md border border-white/20 bg-white/5 px-3 text-sm text-white shadow-sm placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-lime"
                   />
                   <button
                     type="button"
                     onClick={handleForgotPassword}
-                    className="h-9 px-3 rounded-md bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors shrink-0"
+                    className="h-9 px-3 rounded-md bg-white/10 text-sm font-medium text-gray-300 hover:bg-white/20 transition-colors shrink-0"
                   >
                     Envoyer
                   </button>
@@ -144,7 +154,7 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-gray-500 mt-4">
           Pas encore de compte ?{' '}
-          <Link href="/signup" className="text-indigo-600 hover:underline font-medium">
+          <Link href="/signup" className="text-lime hover:underline font-medium">
             Créer un compte
           </Link>
         </p>

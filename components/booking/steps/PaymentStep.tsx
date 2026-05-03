@@ -120,8 +120,13 @@ export default function PaymentStep() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-1">Récapitulatif</h2>
-      <p className="text-gray-500 mb-6">Vérifiez les détails avant de confirmer.</p>
+      <h2
+        className="text-2xl font-extrabold italic uppercase text-charbon mb-1"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
+        Récapitulatif
+      </h2>
+      <p className="text-gray-500 mb-6 font-light">Vérifiez les détails avant de confirmer.</p>
 
       <Card className="mb-6">
         <CardContent className="pt-6 space-y-4">
@@ -133,7 +138,7 @@ export default function PaymentStep() {
                 <Badge className="mt-1">Abonnement</Badge>
               )}
               {selectedTier && (
-                <p className="text-sm text-indigo-600 mt-1">
+                <p className="text-sm text-vert mt-1">
                   Engagement {selectedTier.commitment_months} mois
                 </p>
               )}
@@ -161,7 +166,7 @@ export default function PaymentStep() {
           {/* Date & time */}
           {dateTimeDisplay && (
             <div className="border-t border-gray-100 pt-4 flex items-center gap-2 text-sm text-gray-600">
-              <Calendar className="h-4 w-4 text-indigo-500 shrink-0" />
+              <Calendar className="h-4 w-4 text-vert shrink-0" />
               <span className="capitalize">{dateTimeDisplay}</span>
             </div>
           )}
@@ -182,7 +187,7 @@ export default function PaymentStep() {
           {/* Total */}
           <div className="border-t border-gray-200 pt-4 flex justify-between">
             <span className="font-semibold text-gray-900">Total</span>
-            <span className="text-xl font-bold text-indigo-600">
+            <span className="text-xl font-bold text-vert">
               {paymentMethod === 'token' ? (
                 <span className="text-green-600">Inclus dans l'abonnement</span>
               ) : (
@@ -203,13 +208,13 @@ export default function PaymentStep() {
               onClick={() => setPaymentMethod('token')}
               className={`flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition-colors ${
                 paymentMethod === 'token'
-                  ? 'border-indigo-600 bg-indigo-50'
+                  ? 'border-vert bg-vert/5'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >
-              <Ticket className={`h-5 w-5 shrink-0 ${paymentMethod === 'token' ? 'text-indigo-600' : 'text-gray-400'}`} />
+              <Ticket className={`h-5 w-5 shrink-0 ${paymentMethod === 'token' ? 'text-vert' : 'text-gray-400'}`} />
               <div>
-                <p className={`text-sm font-semibold ${paymentMethod === 'token' ? 'text-indigo-700' : 'text-gray-700'}`}>
+                <p className={`text-sm font-semibold ${paymentMethod === 'token' ? 'text-vert' : 'text-gray-700'}`}>
                   Token abonnement
                 </p>
                 <p className="text-xs text-gray-500">
@@ -223,13 +228,13 @@ export default function PaymentStep() {
               onClick={() => setPaymentMethod('stripe')}
               className={`flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition-colors ${
                 paymentMethod === 'stripe'
-                  ? 'border-indigo-600 bg-indigo-50'
+                  ? 'border-vert bg-vert/5'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >
-              <CreditCard className={`h-5 w-5 shrink-0 ${paymentMethod === 'stripe' ? 'text-indigo-600' : 'text-gray-400'}`} />
+              <CreditCard className={`h-5 w-5 shrink-0 ${paymentMethod === 'stripe' ? 'text-vert' : 'text-gray-400'}`} />
               <div>
-                <p className={`text-sm font-semibold ${paymentMethod === 'stripe' ? 'text-indigo-700' : 'text-gray-700'}`}>
+                <p className={`text-sm font-semibold ${paymentMethod === 'stripe' ? 'text-vert' : 'text-gray-700'}`}>
                   Payer par carte
                 </p>
                 <p className="text-xs text-gray-500">{formatPrice(totalCents)}</p>

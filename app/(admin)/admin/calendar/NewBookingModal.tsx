@@ -190,7 +190,7 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
                   type="button"
                   onClick={() => { setClientMode('search'); setSelectedClient(null) }}
                   className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-md transition-colors ${
-                    clientMode === 'search' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-500 hover:text-gray-700'
+                    clientMode === 'search' ? 'bg-vert/10 text-vert font-medium' : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   <Search className="h-3 w-3" /> Existant
@@ -199,7 +199,7 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
                   type="button"
                   onClick={() => { setClientMode('new'); setSelectedClient(null) }}
                   className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-md transition-colors ${
-                    clientMode === 'new' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-500 hover:text-gray-700'
+                    clientMode === 'new' ? 'bg-vert/10 text-vert font-medium' : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   <Plus className="h-3 w-3" /> Nouveau
@@ -210,7 +210,7 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
             {clientMode === 'search' ? (
               <div className="relative" ref={dropdownRef}>
                 {selectedClient ? (
-                  <div className="flex items-center justify-between px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-md">
+                  <div className="flex items-center justify-between px-3 py-2 bg-vert/5 border border-vert/20 rounded-md">
                     <div>
                       <p className="text-sm font-medium text-gray-900">{selectedClient.full_name ?? 'Sans nom'}</p>
                       {selectedClient.phone && <p className="text-xs text-gray-500">{selectedClient.phone}</p>}
@@ -290,7 +290,7 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
                   <label key={a.id} className="flex items-center gap-2.5 cursor-pointer select-none">
                     <input
                       type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 accent-indigo-600"
+                      className="h-4 w-4 rounded border-gray-300 text-vert accent-vert"
                       checked={selectedAddons.includes(a.id)}
                       onChange={() => toggleAddon(a.id)}
                     />
@@ -347,7 +347,7 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
                   onClick={() => setPaymentMethod(pm.value)}
                   className={`px-3 py-2 text-sm rounded-md border transition-colors ${
                     paymentMethod === pm.value
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 font-medium'
+                      ? 'border-vert bg-vert/10 text-vert font-medium'
                       : 'border-gray-200 text-gray-600 hover:border-gray-300 bg-white'
                   }`}
                 >
@@ -361,7 +361,7 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
           <div>
             <Label className="mb-2 block">Notes</Label>
             <textarea
-              className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-lime focus:border-transparent"
               rows={3}
               placeholder="Notes pour le dossier..."
               value={notes}
@@ -403,7 +403,7 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
           <Button
             onClick={handleSubmit}
             disabled={loading}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-vert hover:bg-vert/90 text-lime"
           >
             {loading ? 'Création...' : 'Créer le RDV'}
           </Button>

@@ -112,7 +112,7 @@ export default function RescheduleModal({
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         {done ? (
           <div className="flex flex-col items-center text-center py-6 gap-4">
-            <CheckCircle2 className="h-12 w-12 text-green-500" />
+            <CheckCircle2 className="h-12 w-12 text-vert" />
             <div>
               <p className="text-lg font-semibold text-gray-900">Créneau modifié !</p>
               <p className="text-sm text-gray-500 mt-1">
@@ -171,9 +171,9 @@ export default function RescheduleModal({
                       className={cn(
                         'mx-auto h-8 w-8 flex items-center justify-center rounded-full text-sm transition-colors',
                         'disabled:opacity-30 disabled:cursor-not-allowed',
-                        sel && 'bg-indigo-600 text-white font-semibold',
-                        !sel && today && 'border-2 border-indigo-400 text-indigo-600 font-semibold',
-                        !sel && !today && !out && !past && 'hover:bg-indigo-50 text-gray-900',
+                        sel && 'bg-vert text-lime font-semibold',
+                        !sel && today && 'border-2 border-vert text-vert font-semibold',
+                        !sel && !today && !out && !past && 'hover:bg-vert/10 text-gray-900',
                         out && 'text-gray-300',
                       )}
                     >
@@ -207,8 +207,8 @@ export default function RescheduleModal({
                         className={cn(
                           'px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors',
                           selectedSlot === s
-                            ? 'bg-indigo-600 border-indigo-600 text-white'
-                            : 'border-gray-300 text-gray-700 hover:border-indigo-400 hover:text-indigo-600'
+                            ? 'bg-vert border-vert text-lime'
+                            : 'border-gray-300 text-gray-700 hover:border-vert/40 hover:text-vert'
                         )}
                       >
                         {s}

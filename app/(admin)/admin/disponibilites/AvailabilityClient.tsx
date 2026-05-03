@@ -247,7 +247,7 @@ export default function AvailabilityClient({ employees: initialEmployees, allSch
 
         {/* Formulaire création */}
         {showCreate && (
-          <div className="border border-dashed border-indigo-300 rounded-lg p-4 bg-indigo-50/30 space-y-3">
+          <div className="border border-dashed border-vert/30 rounded-lg p-4 bg-vert/5 space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Nom affiché</Label>
@@ -281,7 +281,7 @@ export default function AvailabilityClient({ employees: initialEmployees, allSch
                 onClick={() => selectEmployee(emp)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
                   selectedId === emp.id
-                    ? 'border-indigo-400 bg-indigo-50 text-indigo-800 shadow-sm'
+                    ? 'border-vert bg-vert/10 text-vert shadow-sm'
                     : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -334,10 +334,10 @@ export default function AvailabilityClient({ employees: initialEmployees, allSch
           {days.map((day, i) => {
             const label = DAYS.find((d) => d.value === day.day_of_week)?.label
             return (
-              <div key={day.day_of_week} className={`rounded-lg border p-3.5 transition-colors ${day.is_active ? 'border-indigo-200 bg-indigo-50/40' : 'border-gray-100 bg-gray-50'}`}>
+              <div key={day.day_of_week} className={`rounded-lg border p-3.5 transition-colors ${day.is_active ? 'border-vert/20 bg-vert/5' : 'border-gray-100 bg-gray-50'}`}>
                 <div className="flex items-center gap-4 flex-wrap">
                   <label className="flex items-center gap-2 cursor-pointer w-28 shrink-0">
-                    <input type="checkbox" checked={day.is_active} onChange={(e) => updateDay(i, { is_active: e.target.checked })} className="h-4 w-4 rounded border-gray-300 text-indigo-600" />
+                    <input type="checkbox" checked={day.is_active} onChange={(e) => updateDay(i, { is_active: e.target.checked })} className="h-4 w-4 rounded border-gray-300 text-vert accent-vert" />
                     <span className="text-sm font-medium text-gray-700">{label}</span>
                   </label>
                   {day.is_active && (
@@ -349,7 +349,7 @@ export default function AvailabilityClient({ employees: initialEmployees, allSch
                       </div>
                       <div className="flex items-center gap-1.5 text-sm">
                         <span className="text-gray-500 shrink-0">Créneaux</span>
-                        <select value={day.slot_duration_minutes} onChange={(e) => updateDay(i, { slot_duration_minutes: Number(e.target.value) })} className="h-8 rounded-md border border-gray-300 bg-white px-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <select value={day.slot_duration_minutes} onChange={(e) => updateDay(i, { slot_duration_minutes: Number(e.target.value) })} className="h-8 rounded-md border border-gray-300 bg-white px-2 text-sm focus:outline-none focus:ring-2 focus:ring-lime">
                           {SLOT_DURATIONS.map((d) => (
                             <option key={d} value={d}>{d >= 60 ? `${d / 60}h` : `${d} min`}</option>
                           ))}

@@ -1,50 +1,54 @@
 @import "tailwindcss";
 
 :root {
-  --font-inter: 'Inter', sans-serif;
+  --font-body: 'Fira Sans Condensed', sans-serif;
+  --font-display: 'Barlow Condensed', sans-serif;
 
-  /* Primary — indigo */
-  --color-primary-50: #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
-  --color-primary-900: #312e81;
+  /* Brand palette */
+  --color-charbon: #181818;
+  --color-aluminium: #EFEFEF;
+  --color-vert: #203727;
+  --color-lime: #E0E704;
+  --color-verre: #94B2C7;
 
-  /* Neutral */
-  --background: #f9fafb;
-  --foreground: #111827;
+  --background: #EFEFEF;
+  --foreground: #181818;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
 
-  /* Primary color scale (indigo) — usable as bg-primary-600, text-primary-500, etc. */
-  --color-primary-50: #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-300: #a5b4fc;
-  --color-primary-400: #818cf8;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
-  --color-primary-900: #312e81;
-  --color-primary-950: #1e1b4b;
+  /* Brand colors */
+  --color-charbon: #181818;
+  --color-aluminium: #EFEFEF;
+  --color-vert: #203727;
+  --color-lime: #E0E704;
+  --color-verre: #94B2C7;
+
+  /* Primary scale → lime */
+  --color-primary-50: #fefee6;
+  --color-primary-100: #fdfdc6;
+  --color-primary-200: #fafb89;
+  --color-primary-300: #f5f640;
+  --color-primary-400: #E0E704;
+  --color-primary-500: #c9d000;
+  --color-primary-600: #a5ab00;
+  --color-primary-700: #7d8200;
+  --color-primary-800: #686b00;
+  --color-primary-900: #585b06;
+  --color-primary-950: #33360a;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
 }
 
-/* Smooth focus rings */
 *:focus-visible {
-  outline: 2px solid #6366f1;
+  outline: 2px solid #E0E704;
   outline-offset: 2px;
 }

@@ -38,7 +38,6 @@ export default function AdminLoginPage() {
       setAuthError('E-mail ou mot de passe incorrect.')
       return
     }
-    // Verify admin role before redirecting
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -56,18 +55,26 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-charbon flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-8">
-          <div className="flex items-center gap-2 text-white font-bold text-xl">
-            <ShieldCheck className="h-6 w-6 text-indigo-400" />
+          <div
+            className="flex items-center gap-2 text-white font-display font-bold italic uppercase text-xl tracking-wide"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            <ShieldCheck className="h-6 w-6 text-lime" />
             Mirrorbook Admin
           </div>
         </div>
 
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-8 shadow-xl">
-          <h1 className="text-xl font-bold text-white mb-1">Connexion</h1>
-          <p className="text-sm text-gray-400 mb-6">Accès réservé aux administrateurs.</p>
+        <div className="bg-white/5 border border-white/10 rounded-xl p-8">
+          <h1
+            className="text-2xl font-extrabold italic uppercase text-white mb-1"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            Connexion
+          </h1>
+          <p className="text-sm text-gray-400 mb-6 font-light">Accès réservé aux administrateurs.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
@@ -77,7 +84,7 @@ export default function AdminLoginPage() {
                 type="email"
                 placeholder="admin@exemple.fr"
                 autoComplete="email"
-                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
+                className="bg-white/5 border-white/20 text-white placeholder:text-gray-600 focus:border-lime focus:ring-lime"
                 {...register('email')}
               />
               {errors.email && (
@@ -92,7 +99,7 @@ export default function AdminLoginPage() {
                 type="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
-                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
+                className="bg-white/5 border-white/20 text-white placeholder:text-gray-600 focus:border-lime focus:ring-lime"
                 {...register('password')}
               />
               {errors.password && (
@@ -101,7 +108,7 @@ export default function AdminLoginPage() {
             </div>
 
             {authError && (
-              <div className="flex items-center gap-2 text-sm text-red-400 bg-red-950 border border-red-800 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-sm text-red-400 bg-red-900/20 border border-red-800/40 rounded-lg p-3">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 {authError}
               </div>
@@ -109,7 +116,7 @@ export default function AdminLoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white"
+              className="w-full font-bold uppercase tracking-wider"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Connexion…' : 'Se connecter'}

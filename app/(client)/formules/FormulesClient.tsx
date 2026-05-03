@@ -50,7 +50,7 @@ function SubscribeButton({ serviceId, tierId, isAuthenticated }: SubscribeButton
   }
 
   return (
-    <Button size="lg" className="w-full" onClick={handleSubscribe} disabled={loading}>
+    <Button size="lg" className="w-full font-bold uppercase tracking-wider" onClick={handleSubscribe} disabled={loading}>
       {loading ? (
         <>
           <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -80,11 +80,11 @@ export function ServiceCard({ service, tiers, isActive, isAuthenticated }: Servi
   const hasStripePrice = !!selectedStripePrice
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col">
+    <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow">
       <div className="mb-4 flex-1">
-        <h2 className="text-lg font-bold text-gray-900 mb-1">{service.name}</h2>
+        <h2 className="text-lg font-bold text-charbon mb-1">{service.name}</h2>
         {service.description && (
-          <p className="text-sm text-gray-500 mb-4 whitespace-pre-line">{service.description}</p>
+          <p className="text-sm text-gray-500 mb-4 whitespace-pre-line font-light">{service.description}</p>
         )}
 
         {hasTiers && (
@@ -95,7 +95,7 @@ export function ServiceCard({ service, tiers, isActive, isAuthenticated }: Servi
             <select
               value={selectedTierIndex}
               onChange={(e) => setSelectedTierIndex(Number(e.target.value))}
-              className="w-full h-9 rounded-md border border-gray-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full h-9 rounded-md border border-gray-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-lime"
             >
               {tiers.map((tier, i) => (
                 <option key={tier.id} value={i}>
@@ -106,7 +106,7 @@ export function ServiceCard({ service, tiers, isActive, isAuthenticated }: Servi
           </div>
         )}
 
-        <div className="text-3xl font-bold text-indigo-600 mb-1">
+        <div className="text-3xl font-bold text-vert mb-1">
           {formatPrice(displayedPrice)}
           <span className="text-base font-normal text-gray-500">/mois</span>
         </div>
@@ -117,7 +117,7 @@ export function ServiceCard({ service, tiers, isActive, isAuthenticated }: Servi
         )}
         {service.duration_minutes > 0 && (
           <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
-            <Check className="h-4 w-4 text-green-500 shrink-0" />
+            <Check className="h-4 w-4 text-lime bg-vert rounded-full p-0.5 shrink-0" />
             <span>Séances de {service.duration_minutes} min</span>
           </div>
         )}

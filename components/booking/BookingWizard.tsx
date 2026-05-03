@@ -28,8 +28,6 @@ interface BookingWizardProps {
 export default function BookingWizard({ services, addons = [] }: BookingWizardProps) {
   const { step, setStep } = useBookingStore()
 
-  // If the user is already authenticated when they land on the auth step,
-  // skip to payment automatically.
   useEffect(() => {
     if (step !== 'auth') return
     const supabase = getSupabaseBrowserClient()
@@ -54,11 +52,11 @@ export default function BookingWizard({ services, addons = [] }: BookingWizardPr
                 <div className="flex flex-col items-center">
                   <div
                     className={[
-                      'h-8 w-8 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-colors',
+                      'h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-colors',
                       isCompleted
-                        ? 'bg-indigo-600 border-indigo-600 text-white'
+                        ? 'bg-vert border-vert text-lime'
                         : isCurrent
-                        ? 'bg-white border-indigo-600 text-indigo-600'
+                        ? 'bg-white border-vert text-vert'
                         : 'bg-white border-gray-300 text-gray-400',
                     ].join(' ')}
                   >
@@ -73,7 +71,7 @@ export default function BookingWizard({ services, addons = [] }: BookingWizardPr
                   <span
                     className={[
                       'mt-1.5 text-xs font-medium',
-                      isCurrent ? 'text-indigo-600' : isUpcoming ? 'text-gray-400' : 'text-gray-600',
+                      isCurrent ? 'text-vert' : isUpcoming ? 'text-gray-400' : 'text-gray-600',
                     ].join(' ')}
                   >
                     {s.label}
@@ -83,7 +81,7 @@ export default function BookingWizard({ services, addons = [] }: BookingWizardPr
                   <div
                     className={[
                       'flex-1 h-0.5 mx-2 mb-5 transition-colors',
-                      isCompleted ? 'bg-indigo-600' : 'bg-gray-200',
+                      isCompleted ? 'bg-vert' : 'bg-gray-200',
                     ].join(' ')}
                   />
                 )}

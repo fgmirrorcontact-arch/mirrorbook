@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import { ServiceCard } from './FormulesClient'
+import { Car } from 'lucide-react'
 import type { ServiceCommitmentTier } from '@/types'
 
 export const metadata = {
@@ -47,10 +48,15 @@ export default async function FormulesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-aluminium">
+      <header className="bg-charbon border-b border-white/10">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-lg font-bold text-indigo-600">
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-display font-bold italic uppercase text-white text-lg tracking-wide"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            <Car className="h-5 w-5 text-lime" />
             Mirrorbook
           </Link>
           <div className="flex items-center gap-3">
@@ -72,8 +78,14 @@ export default async function FormulesPage() {
 
       <main className="max-w-4xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">Nos formules</h1>
-          <p className="text-gray-500 max-w-lg mx-auto">
+          <span className="text-xs font-semibold text-vert uppercase tracking-widest">Abonnements</span>
+          <h1
+            className="text-4xl font-extrabold italic uppercase text-charbon mt-3 mb-3"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            Nos formules
+          </h1>
+          <p className="text-gray-500 max-w-lg mx-auto font-light">
             Abonnez-vous pour bénéficier de séances à tarif préférentiel et d&apos;un accès prioritaire aux créneaux.
           </p>
         </div>

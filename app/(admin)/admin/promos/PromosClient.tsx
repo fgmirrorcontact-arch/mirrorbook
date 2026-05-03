@@ -180,7 +180,7 @@ export default function AdminPromosClient({ promos }: AdminPromosClientProps) {
               {promos.map((promo) => (
                 <tr key={promo.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-5 py-3">
-                    <span className="font-mono font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-xs">
+                    <span className="font-mono font-semibold text-vert bg-vert/10 px-2 py-0.5 rounded text-xs">
                       {promo.code}
                     </span>
                     {promo.description && (
@@ -213,7 +213,7 @@ export default function AdminPromosClient({ promos }: AdminPromosClientProps) {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => openEdit(promo)}
-                        className="text-gray-400 hover:text-indigo-500 transition-colors"
+                        className="text-gray-400 hover:text-vert transition-colors"
                         title="Modifier"
                       >
                         <Pencil className="h-4 w-4" />
@@ -319,7 +319,7 @@ export default function AdminPromosClient({ promos }: AdminPromosClientProps) {
             </div>
 
             <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" {...register('is_active')} className="h-4 w-4 rounded border-gray-300 text-indigo-600" />
+              <input type="checkbox" {...register('is_active')} className="h-4 w-4 rounded border-gray-300 text-vert accent-vert" />
               Actif
             </label>
 

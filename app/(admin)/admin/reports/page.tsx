@@ -44,9 +44,9 @@ export default function AdminReportsPage() {
             key={title}
             className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col"
           >
-            <div className="h-10 w-10 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+            <div className="h-10 w-10 bg-vert/10 rounded-lg flex items-center justify-center mb-4">
               <svg
-                className="h-5 w-5 text-indigo-600"
+                className="h-5 w-5 text-vert"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

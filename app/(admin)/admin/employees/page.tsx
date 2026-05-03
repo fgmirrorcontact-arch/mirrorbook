@@ -208,7 +208,7 @@ export default function AdminEmployeesPage() {
                     key={c}
                     type="button"
                     onClick={() => setForm((p) => ({ ...p, color: c }))}
-                    className="h-7 w-7 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500"
+                    className="h-7 w-7 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-lime"
                     style={{
                       backgroundColor: c,
                       outline: form.color === c ? `2px solid ${c}` : 'none',

@@ -157,7 +157,7 @@ export default function CalendarClient({ bookings, employees, services, addons }
               {/* New booking button */}
               <button
                 onClick={() => setNewBookingOpen(true)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shrink-0"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-vert hover:bg-vert/90 text-lime text-sm font-medium rounded-lg transition-colors shrink-0"
               >
                 <Plus className="h-4 w-4" />
                 Nouveau RDV

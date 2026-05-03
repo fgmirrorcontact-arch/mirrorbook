@@ -38,7 +38,7 @@ export default async function AdminClientsPage() {
           <input
             type="search"
             placeholder="Rechercher un client…"
-            className="w-64 h-9 rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-64 h-9 rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-lime"
           />
           <NewClientButton />
         </div>
@@ -75,7 +75,7 @@ export default async function AdminClientsPage() {
                 <tr key={profile.id} className="hover:bg-gray-50 transition-colors cursor-pointer">
                   <td className="px-5 py-3">
                     <Link href={`/admin/clients/${profile.id}`} className="block">
-                      <p className="font-medium text-gray-900 hover:text-indigo-600">
+                      <p className="font-medium text-gray-900 hover:text-vert">
                         {profile.full_name ?? '—'}
                       </p>
                       {profile.phone && (
@@ -99,7 +99,7 @@ export default async function AdminClientsPage() {
                   <td className="px-5 py-3 text-right">
                     <Link
                       href={`/admin/clients/${profile.id}`}
-                      className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                      className="text-xs text-vert hover:text-vert/70 font-medium"
                     >
                       Voir la fiche →
                     </Link>

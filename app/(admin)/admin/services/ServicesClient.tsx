@@ -389,7 +389,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
                       <span className="text-xs text-gray-400 font-normal">/mois</span>
                     )}
                     {service.is_subscription && service.tokens_per_renewal && (
-                      <p className="text-xs text-indigo-500 font-normal">
+                      <p className="text-xs text-vert font-normal">
                         {service.tokens_per_renewal} passage{service.tokens_per_renewal > 1 ? 's' : ''}/mois
                       </p>
                     )}
@@ -540,7 +540,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
                 id="svc-desc"
                 rows={3}
                 placeholder="Description visible par le client lors de la réservation…"
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-lime resize-none"
                 {...register('description')}
               />
             </div>
@@ -573,7 +573,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
                   <Label htmlFor="svc-tax">TVA</Label>
                   <select
                     id="svc-tax"
-                    className="w-full h-9 rounded-md border border-gray-300 bg-white px-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full h-9 rounded-md border border-gray-300 bg-white px-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-lime"
                     {...register('tax_rate')}
                   >
                     {TVA_OPTIONS.map((o) => (
@@ -601,7 +601,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
             {!isSubscription && (
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm cursor-pointer font-medium">
-                  <input type="checkbox" {...register('deposit_enabled')} className="h-4 w-4 rounded border-gray-300 text-indigo-600" />
+                  <input type="checkbox" {...register('deposit_enabled')} className="h-4 w-4 rounded border-gray-300 text-vert" />
                   Accepter les acomptes
                 </label>
                 {depositEnabled && (
@@ -644,15 +644,15 @@ export default function AdminServicesClient({ services, addons }: Props) {
 
             <div className="flex flex-wrap gap-x-6 gap-y-3 pt-1">
               <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" {...register('is_active')} className="h-4 w-4 rounded border-gray-300 text-indigo-600" />
+                <input type="checkbox" {...register('is_active')} className="h-4 w-4 rounded border-gray-300 text-vert" />
                 Afficher sur la page de réservation
               </label>
               <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" {...register('hide_duration')} className="h-4 w-4 rounded border-gray-300 text-indigo-600" />
+                <input type="checkbox" {...register('hide_duration')} className="h-4 w-4 rounded border-gray-300 text-vert" />
                 Masquer la durée
               </label>
               <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" {...register('is_subscription')} className="h-4 w-4 rounded border-gray-300 text-indigo-600" />
+                <input type="checkbox" {...register('is_subscription')} className="h-4 w-4 rounded border-gray-300 text-vert" />
                 Abonnement mensuel
               </label>
             </div>
@@ -707,7 +707,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
                             )
                           )
                         }
-                        className="h-8 rounded border border-gray-300 bg-white px-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="h-8 rounded border border-gray-300 bg-white px-2 text-sm focus:outline-none focus:ring-2 focus:ring-lime"
                       >
                         <option value={3}>3 mois</option>
                         <option value={6}>6 mois</option>
@@ -785,7 +785,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
               <Label>Description</Label>
               <textarea
                 rows={2}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-lime resize-none"
                 value={af.description}
                 onChange={(e) => setAf((p) => ({ ...p, description: e.target.value }))}
                 placeholder="Description visible par le client…"
@@ -830,7 +830,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
                     <label key={svc.id} className="flex items-center gap-2 cursor-pointer text-sm">
                       <input
                         type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 accent-indigo-600"
+                        className="h-4 w-4 rounded border-gray-300 text-vert accent-vert"
                         checked={af.applicable_to.includes(svc.id)}
                         onChange={() => toggleApplicable(svc.id)}
                       />
@@ -852,7 +852,7 @@ export default function AdminServicesClient({ services, addons }: Props) {
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input
                 type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                className="h-4 w-4 rounded border-gray-300 text-vert"
                 checked={af.is_active}
                 onChange={(e) => setAf((p) => ({ ...p, is_active: e.target.checked }))}
               />

@@ -37,7 +37,7 @@ export default async function AdminBookingsPage() {
 
         {/* Filters placeholder */}
         <div className="flex items-center gap-2">
-          <select className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <select className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-lime">
             <option value="">Tous les statuts</option>
             <option value="pending">En attente</option>
             <option value="confirmed">Confirmées</option>
@@ -46,7 +46,7 @@ export default async function AdminBookingsPage() {
           </select>
           <input
             type="date"
-            className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-lime"
           />
         </div>
       </div>

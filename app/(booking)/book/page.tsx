@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import BookingWizard from '@/components/booking/BookingWizard'
 import { Button } from '@/components/ui/button'
+import { Car } from 'lucide-react'
 import type { Service, ServiceAddon } from '@/types'
 
 export const metadata = {
@@ -26,11 +27,18 @@ export default async function BookPage() {
     .order('sort_order', { ascending: true })
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-aluminium">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-charbon border-b border-white/10">
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-indigo-600">Mirrorbook</h1>
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-display font-bold italic uppercase text-white text-lg tracking-wide"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            <Car className="h-5 w-5 text-lime" />
+            Mirrorbook
+          </Link>
           {user ? (
             <Link href="/dashboard">
               <Button size="sm" variant="outline">Mon espace</Button>

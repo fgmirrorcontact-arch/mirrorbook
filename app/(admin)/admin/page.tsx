@@ -168,8 +168,8 @@ export default async function AdminOverviewPage() {
       label: 'Réservations ce mois',
       value: String(confirmedThisMonth.length),
       icon: Calendar,
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50',
+      color: 'text-vert',
+      bg: 'bg-vert/10',
     },
     {
       label: "Chiffre d'affaires (mois)",
@@ -247,7 +247,7 @@ export default async function AdminOverviewPage() {
                     </div>
                     <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-indigo-400 rounded-full"
+                        className="h-full bg-lime rounded-full"
                         style={{ width: `${Math.round((s.count / (topServices[0]?.count ?? 1)) * 100)}%` }}
                       />
                     </div>

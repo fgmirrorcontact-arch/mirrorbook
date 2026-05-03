@@ -79,16 +79,16 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
         className={cn(
           'w-full rounded-xl border-2 overflow-hidden transition-all',
           isSelected
-            ? 'border-indigo-600 shadow-md'
-            : 'border-gray-200 bg-white hover:border-indigo-300 hover:shadow-sm'
+            ? 'border-vert shadow-md'
+            : 'border-gray-200 bg-white hover:border-vert/40 hover:shadow-sm'
         )}
       >
         <button
           type="button"
           onClick={() => setService(service)}
           className={cn(
-            'w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500',
-            isSelected ? 'bg-indigo-50' : 'bg-white'
+            'w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-lime',
+            isSelected ? 'bg-vert/5' : 'bg-white'
           )}
         >
           {service.image_url && (
@@ -121,7 +121,7 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
                 {formatDuration(service.duration_minutes)}
               </span>
               {service.is_subscription && service.tokens_per_renewal && (
-                <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 rounded px-1.5 py-0.5">
+                <span className="text-xs font-semibold text-vert bg-vert/10 rounded px-1.5 py-0.5">
                   {service.tokens_per_renewal} passage{service.tokens_per_renewal > 1 ? 's' : ''}/mois
                 </span>
               )}
@@ -133,7 +133,7 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
           const isExpanded = expandedIds.has(service.id)
           const isLong = service.description.length > 100
           return (
-            <div className={cn('px-4 pb-4', isSelected ? 'bg-indigo-50' : 'bg-white')}>
+            <div className={cn('px-4 pb-4', isSelected ? 'bg-vert/5' : 'bg-white')}>
               <p className={cn('text-sm text-gray-500 leading-relaxed whitespace-pre-line', !isExpanded && isLong && 'line-clamp-2')}>
                 {service.description}
               </p>
@@ -141,7 +141,7 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
                 <button
                   type="button"
                   onClick={(e) => toggleExpand(service.id, e)}
-                  className="mt-1 text-xs font-medium text-indigo-600 hover:text-indigo-800"
+                  className="mt-1 text-xs font-medium text-vert hover:text-vert/80"
                 >
                   {isExpanded ? 'Afficher moins' : 'Afficher plus'}
                 </button>
@@ -151,7 +151,7 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
         })()}
 
         {showTiers && (
-          <div className="border-t border-indigo-100 bg-white p-3">
+          <div className="border-t border-vert/10 bg-white p-3">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
               Choisissez votre engagement
             </p>
@@ -164,14 +164,14 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
                     type="button"
                     onClick={() => setTier(isTierSelected ? null : tier)}
                     className={cn(
-                      'w-full flex items-center justify-between rounded-lg border-2 px-3 py-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500',
+                      'w-full flex items-center justify-between rounded-lg border-2 px-3 py-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-lime',
                       isTierSelected
-                        ? 'border-indigo-600 bg-indigo-600 text-white'
-                        : 'border-gray-200 text-gray-700 hover:border-indigo-300'
+                        ? 'border-vert bg-vert text-white'
+                        : 'border-gray-200 text-gray-700 hover:border-vert/40'
                     )}
                   >
                     <span className="text-sm font-semibold">{tier.commitment_months} mois</span>
-                    <span className={cn('text-sm font-medium', isTierSelected ? 'text-indigo-100' : 'text-gray-500')}>
+                    <span className={cn('text-sm font-medium', isTierSelected ? 'text-gray-300' : 'text-gray-500')}>
                       {formatPrice(tier.price_cents)}/mois
                     </span>
                   </button>
@@ -186,8 +186,13 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-1">Choisissez votre prestation</h2>
-      <p className="text-gray-500 mb-6">Sélectionnez le type de lavage souhaité.</p>
+      <h2
+        className="text-2xl font-extrabold italic uppercase text-charbon mb-1"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
+        Choisissez votre prestation
+      </h2>
+      <p className="text-gray-500 mb-6 font-light">Sélectionnez le type de lavage souhaité.</p>
 
       {/* Regular services grouped by category */}
       {[...categoryMap.entries()].map(([category, catServices]) => (
@@ -229,7 +234,7 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
                   key={addon.id}
                   className={cn(
                     'flex items-center justify-between rounded-lg border p-3 transition-colors',
-                    isSelected ? 'border-indigo-300 bg-indigo-50' : 'border-gray-200 bg-white'
+                    isSelected ? 'border-vert/30 bg-vert/5' : 'border-gray-200 bg-white'
                   )}
                 >
                   <div>
@@ -246,9 +251,9 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
                       type="button"
                       onClick={() => toggleAddon(addon)}
                       className={cn(
-                        'h-7 w-7 rounded-full flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
+                        'h-7 w-7 rounded-full flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime',
                         isSelected
-                          ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                          ? 'bg-vert text-lime hover:bg-vert/80'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       )}
                       aria-label={isSelected ? `Retirer ${addon.name}` : `Ajouter ${addon.name}`}

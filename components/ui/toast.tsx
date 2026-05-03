@@ -63,7 +63,7 @@ const ToastAction = React.forwardRef<
     ref={ref}
     className={cn(
       'inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-transparent px-3 text-sm font-medium',
-      'hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500',
+      'hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-lime',
       className
     )}
     {...props}
@@ -80,7 +80,7 @@ const ToastClose = React.forwardRef<
     className={cn(
       'absolute right-2 top-2 rounded-md p-1 opacity-0 transition-opacity',
       'group-hover:opacity-100 hover:bg-gray-100',
-      'focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-500',
+      'focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-lime',
       className
     )}
     toast-close=""

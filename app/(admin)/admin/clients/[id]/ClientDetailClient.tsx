@@ -354,7 +354,7 @@ export default function ClientDetailClient({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Observations, préférences, historique particulier…"
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-lime resize-none"
             />
             <Button size="sm" variant="outline" onClick={saveNotes} disabled={savingNotes}>
               <Save className="h-3.5 w-3.5 mr-1" />
@@ -370,7 +370,7 @@ export default function ClientDetailClient({
                 {promos.map((p) => (
                   <span
                     key={p.id}
-                    className="font-mono text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded cursor-pointer hover:bg-indigo-100"
+                    className="font-mono text-xs bg-vert/10 text-vert px-2 py-0.5 rounded cursor-pointer hover:bg-vert/20"
                     title={p.discount_type === 'percentage' ? `${p.discount_value}%` : formatPrice(p.discount_value)}
                     onClick={() => navigator.clipboard.writeText(p.code)}
                   >
@@ -418,7 +418,7 @@ export default function ClientDetailClient({
                       </div>
                     </div>
                     <p className="text-sm text-gray-600">
-                      <span className="font-semibold text-indigo-600">{tokenCount}</span> crédit(s) disponible(s)
+                      <span className="font-semibold text-vert">{tokenCount}</span> crédit(s) disponible(s)
                       {sub.services?.tokens_per_renewal && (
                         <span className="text-gray-400"> · {sub.services.tokens_per_renewal}/mois</span>
                       )}
@@ -495,7 +495,7 @@ export default function ClientDetailClient({
               {bookings.map((b) => (
                 <tr key={b.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-5 py-3">
-                    <span className="font-mono text-xs text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
+                    <span className="font-mono text-xs text-vert bg-vert/10 px-1.5 py-0.5 rounded">
                       {b.booking_ref}
                     </span>
                   </td>

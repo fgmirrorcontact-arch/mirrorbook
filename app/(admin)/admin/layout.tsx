@@ -53,11 +53,15 @@ export default async function AdminLayout({
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-60 bg-gray-900 text-gray-300 flex flex-col shrink-0">
+      <aside className="w-60 bg-charbon text-gray-300 flex flex-col shrink-0">
         {/* Brand */}
-        <div className="px-5 py-5 border-b border-gray-800">
-          <Link href="/admin" className="flex items-center gap-2 text-white font-bold">
-            <Car className="h-5 w-5 text-indigo-400" />
+        <div className="px-5 py-5 border-b border-white/10">
+          <Link
+            href="/admin"
+            className="flex items-center gap-2 text-white font-display font-bold italic uppercase tracking-wide"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            <Car className="h-5 w-5 text-lime" />
             <span>Mirrorbook</span>
           </Link>
           <p className="text-xs text-gray-500 mt-1">Administration</p>
@@ -69,7 +73,7 @@ export default async function AdminLayout({
             <Link
               key={href}
               href={href}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
             >
               <Icon className="h-4 w-4 shrink-0 text-gray-400" />
               {label}
@@ -82,7 +86,7 @@ export default async function AdminLayout({
           <Link
             href="/book"
             target="_blank"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
           >
             <ExternalLink className="h-4 w-4 shrink-0" />
             Site de réservation
@@ -90,12 +94,12 @@ export default async function AdminLayout({
         </div>
 
         {/* User + logout */}
-        <div className="px-4 py-4 border-t border-gray-800">
+        <div className="px-4 py-4 border-t border-white/10">
           <p className="text-xs text-gray-500 px-1 mb-2 truncate">{profile.full_name ?? user.email}</p>
           <LogoutButton
             redirectTo="/admin-login"
             variant="ghost"
-            className="w-full justify-start text-gray-400 hover:text-white hover:bg-gray-800 text-xs"
+            className="w-full justify-start text-gray-400 hover:text-white hover:bg-white/10 text-xs"
           />
         </div>
       </aside>

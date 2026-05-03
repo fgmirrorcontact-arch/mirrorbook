@@ -12,14 +12,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AlertCircle } from 'lucide-react'
 
-// ── Login schema ──────────────────────────────────────────────────────────────
 const loginSchema = z.object({
   email: z.email({ error: 'Adresse e-mail invalide' }),
   password: z.string().min(1, 'Le mot de passe est requis'),
 })
 type LoginFormValues = z.infer<typeof loginSchema>
 
-// ── Signup schema ─────────────────────────────────────────────────────────────
 const signupSchema = z.object({
   full_name: z.string().min(2, 'Le prénom et nom sont requis'),
   email: z.email({ error: 'Adresse e-mail invalide' }),
@@ -42,12 +40,10 @@ export default function AuthStep() {
     setForgotSent(true)
   }
 
-  // Login form
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
   })
 
-  // Signup form
   const signupForm = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
   })
@@ -88,8 +84,13 @@ export default function AuthStep() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-1">Connexion</h2>
-      <p className="text-gray-500 mb-6">
+      <h2
+        className="text-2xl font-extrabold italic uppercase text-charbon mb-1"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
+        Connexion
+      </h2>
+      <p className="text-gray-500 mb-6 font-light">
         Connectez-vous ou créez un compte pour finaliser votre réservation.
       </p>
 
@@ -140,20 +141,20 @@ export default function AuthStep() {
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full font-bold uppercase tracking-wider" disabled={isLoading}>
               {isLoading ? 'Connexion…' : 'Se connecter'}
             </Button>
           </form>
 
           {forgotSent ? (
-            <p className="mt-4 text-sm text-green-600 text-center">
+            <p className="mt-4 text-sm text-vert text-center">
               E-mail envoyé — vérifiez votre boîte de réception.
             </p>
           ) : (
             <button
               type="button"
               onClick={() => handleForgotPassword(loginForm.getValues('email'))}
-              className="mt-3 w-full text-center text-sm text-gray-400 hover:text-indigo-600 transition-colors"
+              className="mt-3 w-full text-center text-sm text-gray-400 hover:text-vert transition-colors"
             >
               Mot de passe oublié ?
             </button>
@@ -209,7 +210,7 @@ export default function AuthStep() {
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full font-bold uppercase tracking-wider" disabled={isLoading}>
               {isLoading ? 'Création du compte…' : 'Créer mon compte'}
             </Button>
           </form>
@@ -225,7 +226,7 @@ export default function AuthStep() {
         <button
           type="button"
           onClick={() => setStep('payment')}
-          className="text-sm text-gray-500 hover:text-gray-700 underline underline-offset-2"
+          className="text-sm text-gray-500 hover:text-charbon underline underline-offset-2"
         >
           Continuer sans compte
         </button>

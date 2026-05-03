@@ -27,7 +27,7 @@ export default function UpcomingBookings({ bookings }: { bookings: Booking[] }) 
     return (
       <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-500 text-sm">
         Aucune réservation à venir.{' '}
-        <Link href="/book" className="text-indigo-600 hover:underline">
+        <Link href="/book" className="text-vert font-medium hover:underline">
           Réserver maintenant
         </Link>
       </div>
