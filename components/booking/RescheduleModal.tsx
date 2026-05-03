@@ -125,7 +125,15 @@ export default function RescheduleModal({
           <>
             <DialogHeader>
               <DialogTitle>Modifier le créneau</DialogTitle>
-              <DialogDescription>{serviceName} — Réf. {bookingRef}</DialogDescription>
+              <DialogDescription>
+                {serviceName} — Réf. {bookingRef}
+                <span className="block mt-1 text-xs">
+                  Créneau actuel :{' '}
+                  <span className="font-medium text-gray-700 capitalize">
+                    {format(new Date(currentStartAt), "EEEE d MMMM 'à' HH'h'mm", { locale: fr })}
+                  </span>
+                </span>
+              </DialogDescription>
             </DialogHeader>
 
             {/* Calendar */}

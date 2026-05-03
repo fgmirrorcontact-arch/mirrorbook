@@ -62,7 +62,7 @@ export default function ConfirmationStep() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <Link href="/dashboard/bookings">
+        <Link href="/bookings">
           <Button variant="outline">Voir mes réservations</Button>
         </Link>
         <Link href="/book" onClick={reset}>

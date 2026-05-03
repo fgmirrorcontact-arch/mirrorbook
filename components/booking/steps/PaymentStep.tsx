@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useBookingStore } from '@/store/bookingStore'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, Calendar, Tag, CreditCard, Ticket } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Loader2, Calendar, Tag, CreditCard, Ticket, X } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 
@@ -27,12 +28,17 @@ export default function PaymentStep() {
     promoDiscount,
     totalCents,
     setStep,
+    setPromoCode,
   } = useBookingStore()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe')
   const [availableTokens, setAvailableTokens] = useState<AvailableToken[]>([])
   const [tokensLoaded, setTokensLoaded] = useState(false)
+  const [promoInput, setPromoInput] = useState('')
+  const [promoLoading, setPromoLoading] = useState(false)
+  const [appliedPromoId, setAppliedPromoId] = useState<string | null>(null)
+  const promoInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!selectedService) return
@@ -54,6 +60,36 @@ export default function PaymentStep() {
     dt.setHours(h, m, 0, 0)
     return format(dt, "EEEE d MMMM yyyy 'à' HH'h'mm", { locale: fr })
   })()
+
+  async function applyPromo() {
+    const code = promoInput.trim().toUpperCase()
+    if (!code) return
+    setPromoLoading(true)
+    try {
+      const res = await fetch(`/api/promos/validate?code=${encodeURIComponent(code)}`)
+      const data = await res.json()
+      if (!res.ok) {
+        toast({ title: 'Code invalide', description: data.error, variant: 'destructive' })
+        return
+      }
+      const { promo } = data
+      const subtotal = selectedService ? (selectedTier?.price_cents ?? selectedService.price_cents ?? 0) + selectedAddons.reduce((s, a) => s + a.price_cents, 0) : 0
+      const discount = promo.discount_type === 'percentage'
+        ? Math.round(subtotal * promo.discount_value / 100)
+        : promo.discount_value
+      setPromoCode(promo.code, Math.min(discount, subtotal))
+      setAppliedPromoId(promo.id)
+      toast({ title: `Code "${promo.code}" appliqué`, description: `-${promo.discount_type === 'percentage' ? `${promo.discount_value}%` : formatPrice(promo.discount_value)}` })
+    } finally {
+      setPromoLoading(false)
+    }
+  }
+
+  function removePromo() {
+    setPromoCode(null, 0)
+    setAppliedPromoId(null)
+    setPromoInput('')
+  }
 
   async function handleConfirm() {
     if (!selectedService || !selectedDate || !selectedSlot) return
@@ -103,7 +139,7 @@ export default function PaymentStep() {
             service_id: selectedService.id,
             addon_ids: selectedAddons.map((a) => a.id),
             start_at: start.toISOString(),
-            promo_code_id: null,
+            promo_code_id: appliedPromoId ?? null,
             notes: null,
           }),
         })
@@ -171,16 +207,45 @@ export default function PaymentStep() {
             </div>
           )}
 
-          {/* Promo */}
-          {promoCode && promoDiscount > 0 && (
-            <div className="flex items-center justify-between text-sm border-t border-gray-100 pt-4">
-              <span className="flex items-center gap-1.5 text-green-700">
-                <Tag className="h-4 w-4" />
-                Code promo : <span className="font-mono font-semibold">{promoCode}</span>
-              </span>
-              <span className="text-green-700 font-semibold">
-                -{formatPrice(promoDiscount)}
-              </span>
+          {/* Promo input — uniquement pour paiement carte */}
+          {paymentMethod !== 'token' && !selectedService?.is_subscription && (
+            <div className="border-t border-gray-100 pt-4">
+              {promoCode ? (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-1.5 text-green-700">
+                    <Tag className="h-4 w-4" />
+                    Code promo : <span className="font-mono font-semibold">{promoCode}</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-700 font-semibold">-{formatPrice(promoDiscount)}</span>
+                    <button type="button" onClick={removePromo} className="text-gray-400 hover:text-gray-600">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    ref={promoInputRef}
+                    value={promoInput}
+                    onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => e.key === 'Enter' && applyPromo()}
+                    placeholder="Code promo"
+                    className="h-9 text-sm font-mono uppercase"
+                    disabled={promoLoading}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9 shrink-0"
+                    onClick={applyPromo}
+                    disabled={promoLoading || !promoInput.trim()}
+                  >
+                    {promoLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Appliquer'}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 

@@ -93,7 +93,13 @@ export default function SlotStep() {
       >
         Choisissez un créneau
       </h2>
-      <p className="text-gray-500 mb-6 font-light">Sélectionnez une date puis un horaire disponible.</p>
+      <p className="text-gray-500 mb-1 font-light">Sélectionnez une date puis un horaire disponible.</p>
+      {selectedService && (
+        <p className="text-sm text-vert font-medium mb-6">
+          {selectedService.name}
+          {totalDuration > 0 && <span className="text-gray-400 font-normal"> · {totalDuration} min</span>}
+        </p>
+      )}
 
       {/* Calendar */}
       <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
@@ -175,7 +181,16 @@ export default function SlotStep() {
               <span className="text-sm">Chargement des créneaux…</span>
             </div>
           ) : slotsError ? (
-            <p className="text-sm text-red-600">{slotsError}</p>
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-red-600">{slotsError}</p>
+              <button
+                type="button"
+                onClick={() => selectedDate && fetchSlots(selectedDate)}
+                className="text-xs text-vert underline underline-offset-2 hover:opacity-75"
+              >
+                Réessayer
+              </button>
+            </div>
           ) : slots.length === 0 ? (
             <p className="text-sm text-gray-500">
               Aucun créneau disponible pour cette date.

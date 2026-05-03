@@ -60,6 +60,24 @@ export async function POST(request: NextRequest) {
   const startAt = new Date(data.start_at)
   const endAt = new Date(startAt.getTime() + totalDuration * 60 * 1000)
 
+  // Resolve promo discount
+  let discountCents = 0
+  if (data.promo_code_id) {
+    const { data: promo } = await admin
+      .from('promo_codes')
+      .select('discount_type, discount_value')
+      .eq('id', data.promo_code_id)
+      .eq('is_active', true)
+      .single()
+    if (promo) {
+      const subtotal = service.price_cents + addonTotal
+      discountCents = promo.discount_type === 'percentage'
+        ? Math.round(subtotal * promo.discount_value / 100)
+        : promo.discount_value
+      discountCents = Math.min(discountCents, subtotal)
+    }
+  }
+
   const { data: refResult, error: refError } = await admin.rpc('generate_booking_ref')
   if (refError || !refResult) return Response.json({ error: 'Impossible de générer une référence' }, { status: 500 })
 
@@ -74,8 +92,8 @@ export async function POST(request: NextRequest) {
       end_at: endAt.toISOString(),
       status: 'pending',
       payment_method: 'stripe_one_time',
-      total_price_cents: service.price_cents + addonTotal,
-      discount_cents: 0,
+      total_price_cents: service.price_cents + addonTotal - discountCents,
+      discount_cents: discountCents,
       promo_code_id: data.promo_code_id ?? null,
       notes: data.notes ?? null,
     })
@@ -124,6 +142,14 @@ export async function POST(request: NextRequest) {
       },
       quantity: 1 as const,
     })),
+    ...(discountCents > 0 ? [{
+      price_data: {
+        currency: 'eur',
+        unit_amount: -discountCents,
+        product_data: { name: 'Code promo' },
+      },
+      quantity: 1 as const,
+    }] : []),
   ]
 
   const session = await stripe.checkout.sessions.create({
