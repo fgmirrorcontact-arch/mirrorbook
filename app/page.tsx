@@ -248,7 +248,7 @@ export default async function HomePage() {
           {!services?.length ? (
             <p className="text-center text-gray-400">Aucune formule disponible pour le moment.</p>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
               {services.map((service) => (
                 <ServiceCard
                   key={service.id}
