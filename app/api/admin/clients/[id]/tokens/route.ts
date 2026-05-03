@@ -47,3 +47,32 @@ export async function POST(
 
   return Response.json({ tokens: data }, { status: 201 })
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!(await assertAdmin())) return Response.json({ error: 'Accès refusé' }, { status: 403 })
+
+  const { id: clientId } = await params
+  const { subscription_id } = await request.json().catch(() => ({}))
+  if (!subscription_id) return Response.json({ error: 'subscription_id requis' }, { status: 400 })
+
+  const admin = getSupabaseAdminClient()
+
+  const { data: token } = await admin
+    .from('subscription_tokens')
+    .select('id')
+    .eq('subscription_id', subscription_id)
+    .eq('client_id', clientId)
+    .eq('status', 'available')
+    .limit(1)
+    .single()
+
+  if (!token) return Response.json({ error: 'Aucun crédit disponible à supprimer' }, { status: 404 })
+
+  const { error } = await admin.from('subscription_tokens').delete().eq('id', token.id)
+  if (error) return Response.json({ error: error.message }, { status: 400 })
+
+  return new Response(null, { status: 204 })
+}

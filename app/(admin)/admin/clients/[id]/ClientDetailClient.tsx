@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Pencil, Save, X, Plus, RefreshCw, Trash2, KeyRound } from 'lucide-react'
+import { ArrowLeft, Pencil, Save, X, Plus, Minus, RefreshCw, Trash2, KeyRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -156,8 +156,26 @@ export default function ClientDetailClient({
   const [tokenQty, setTokenQty] = useState(1)
   const [tokenExpiry, setTokenExpiry] = useState('')
   const [addingTokens, setAddingTokens] = useState(false)
+  const [removingToken, setRemovingToken] = useState<string | null>(null)
 
   const selectedSub = subscriptions.find((s) => s.id === tokenSubId)
+
+  async function removeToken(subId: string) {
+    setRemovingToken(subId)
+    const res = await fetch(`/api/admin/clients/${clientId}/tokens`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription_id: subId }),
+    })
+    setRemovingToken(null)
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}))
+      toast({ title: 'Erreur', description: d.error ?? 'Erreur', variant: 'destructive' })
+      return
+    }
+    toast({ title: '1 crédit retiré' })
+    router.refresh()
+  }
 
   async function addTokens() {
     if (!tokenSubId || !selectedSub) return
@@ -417,12 +435,26 @@ export default function ClientDetailClient({
                         </select>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600">
-                      <span className="font-semibold text-vert">{tokenCount}</span> crédit(s) disponible(s)
-                      {sub.services?.tokens_per_renewal && (
-                        <span className="text-gray-400"> · {sub.services.tokens_per_renewal}/mois</span>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-gray-600">
+                        <span className="font-semibold text-vert">{tokenCount}</span> crédit(s) disponible(s)
+                        {sub.services?.tokens_per_renewal && (
+                          <span className="text-gray-400"> · {sub.services.tokens_per_renewal}/mois</span>
+                        )}
+                      </p>
+                      {tokenCount > 0 && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 w-6 p-0 text-red-500 hover:text-red-600 hover:border-red-300"
+                          onClick={() => removeToken(sub.id)}
+                          disabled={removingToken === sub.id}
+                          title="Retirer 1 crédit"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
                       )}
-                    </p>
+                    </div>
                   </div>
                 )
               })}
