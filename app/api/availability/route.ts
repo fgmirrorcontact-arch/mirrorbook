@@ -49,15 +49,17 @@ export async function GET(request: NextRequest) {
     .eq('exception_date', dateOnly)
     .single()
 
-  // Fetch existing confirmed/pending bookings for this employee on this date
+  // Fetch existing bookings for this employee on this date.
+  // Pending bookings older than 30 min are considered stale and don't block slots.
   const dayStart = `${dateOnly}T00:00:00Z`
   const dayEnd = `${dateOnly}T23:59:59Z`
+  const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString()
 
   const { data: bookingsData } = await supabase
     .from('bookings')
     .select('start_at, end_at')
     .eq('employee_id', employeeId)
-    .in('status', ['pending', 'confirmed'])
+    .or(`status.eq.confirmed,and(status.eq.pending,created_at.gte.${thirtyMinAgo})`)
     .gte('start_at', dayStart)
     .lte('start_at', dayEnd)
 
