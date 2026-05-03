@@ -12,15 +12,15 @@ async function assertAdmin() {
 }
 
 const patchSchema = z.object({
-  subscription_id: z.string().uuid(),
-  status: z.enum(['active', 'past_due', 'cancelled', 'paused', 'incomplete']),
+  subscription_id: z.string().min(1),
+  status: z.string().min(1),
 })
 
 const createSchema = z.object({
-  service_id: z.string().uuid(),
+  service_id: z.string().min(1),
   current_period_start: z.string().min(1),
   current_period_end: z.string().min(1),
-  status: z.enum(['active', 'past_due', 'cancelled', 'paused', 'incomplete']).default('active'),
+  status: z.string().min(1).default('active'),
 })
 
 export async function PATCH(
