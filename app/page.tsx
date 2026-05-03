@@ -1,8 +1,9 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
-import { ServiceCard } from './(client)/formules/FormulesClient'
+import { ServiceCard, SingleServiceCard } from './(client)/formules/FormulesClient'
 import { fetchGoogleReviews } from '@/lib/google-reviews'
 import type { ServiceCommitmentTier } from '@/types'
 import {
@@ -17,18 +18,16 @@ import {
   ArrowRight,
   CheckCircle2,
   ExternalLink,
-  Timer,
 } from 'lucide-react'
 
 const GOOGLE_REVIEWS_URL = 'https://share.google/IeuPTUHBxH9qhNn6D'
 
 const CONTACT = {
-  address: '12 rue de la Paix, 75000 Paris',
-  phone: '01 23 45 67 89',
+  address: '79 Rue Denis Papin, 84120 Pertuis',
+  phone: '06 95 55 81 07',
   hours: [
-    { days: 'Lundi – Vendredi', time: '8h00 – 19h00' },
-    { days: 'Samedi', time: '9h00 – 17h00' },
-    { days: 'Dimanche', time: 'Fermé' },
+    { days: 'Mardi – Vendredi', time: '9h00 – 18h00' },
+    { days: 'Lundi & Week-end', time: 'Fermé' },
   ],
 }
 
@@ -121,8 +120,16 @@ export default async function HomePage() {
 
       {/* ── Hero ── */}
       <section className="relative bg-charbon text-white overflow-hidden pt-16">
+        <Image
+          src="/hero.jpg"
+          alt=""
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        <div className="absolute inset-0 bg-charbon/75" />
         <div
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0 opacity-20"
           style={{
             backgroundImage:
               'radial-gradient(ellipse 70% 50% at 50% 0%, #203727, transparent)',
@@ -165,10 +172,6 @@ export default async function HomePage() {
             </a>
           </div>
           <div className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-lime" />
-              Sans engagement
-            </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-lime" />
               Produits premium
@@ -248,15 +251,16 @@ export default async function HomePage() {
           {!services?.length ? (
             <p className="text-center text-gray-400">Aucune formule disponible pour le moment.</p>
           ) : (
-            <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <div className="flex flex-wrap justify-center gap-6">
               {services.map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  service={service}
-                  tiers={tiersByService[service.id] ?? []}
-                  isActive={activeServiceIds.has(service.id)}
-                  isAuthenticated={!!user}
-                />
+                <div key={service.id} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] flex">
+                  <ServiceCard
+                    service={service}
+                    tiers={tiersByService[service.id] ?? []}
+                    isActive={activeServiceIds.has(service.id)}
+                    isAuthenticated={!!user}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -280,35 +284,9 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
               {singleServices.map((s) => (
-                <div
-                  key={s.id}
-                  className="bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col hover:border-lime/40 transition-colors"
-                >
-                  <h3 className="text-base font-semibold text-white mb-1">{s.name}</h3>
-                  {s.description && (
-                    <p className="text-sm text-gray-400 mb-4 flex-1 whitespace-pre-line font-light">{s.description}</p>
-                  )}
-                  <div className="flex items-end justify-between mt-auto pt-4 border-t border-white/10">
-                    <div>
-                      <p className="text-2xl font-bold text-lime">
-                        {(s.price_cents / 100).toLocaleString('fr-FR', { minimumFractionDigits: 0 })} €
-                      </p>
-                      {!s.hide_duration && s.duration_minutes > 0 && (
-                        <p className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
-                          <Timer className="h-3 w-3" />
-                          {s.duration_minutes} min
-                        </p>
-                      )}
-                    </div>
-                    <Link href="/book">
-                      <Button size="sm" className="shrink-0">
-                        Réserver
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
+                <SingleServiceCard key={s.id} service={s} />
               ))}
             </div>
           </div>
@@ -336,20 +314,20 @@ export default async function HomePage() {
               {
                 step: '01',
                 icon: CreditCard,
-                title: "Je m'abonne",
-                body: 'Choisissez la formule qui correspond à vos besoins et finalisez votre abonnement en ligne en quelques clics.',
+                title: 'Je choisis ma formule',
+                body: 'Sélectionnez un abonnement mensuel ou une prestation à la séance selon vos besoins, en quelques clics.',
               },
               {
                 step: '02',
                 icon: CalendarCheck,
-                title: 'Je réserve mon créneau',
-                body: 'Chaque mois, utilisez votre séance incluse en choisissant la date et l\'heure qui vous conviennent depuis votre espace client.',
+                title: 'Je réserve',
+                body: 'Choisissez la date et le créneau qui vous conviennent depuis votre espace client, 24h/24.',
               },
               {
                 step: '03',
                 icon: Sparkles,
-                title: 'Je récupère ma voiture impeccable',
-                body: 'Déposez votre véhicule et repassez le chercher propre, brillant et prêt à rouler. Aussi simple que ça.',
+                title: 'Je récupère mon véhicule propre',
+                body: 'Déposez votre voiture et repassez la chercher propre, brillante et prête à rouler.',
               },
             ].map(({ step, icon: Icon, title, body }, i) => (
               <div key={step} className="relative flex flex-col items-center text-center">
