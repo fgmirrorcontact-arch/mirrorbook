@@ -13,8 +13,8 @@ function base(content: string) {
 
         <!-- Header -->
         <tr>
-          <td style="background:#4f46e5;padding:28px 40px;">
-            <a href="${APP_URL}" style="color:#ffffff;text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-.3px;">
+          <td style="background:#203727;padding:28px 40px;">
+            <a href="${APP_URL}" style="color:#E0E704;text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-.3px;">
               🚗 Mirrorbook
             </a>
           </td>
@@ -28,9 +28,9 @@ function base(content: string) {
           <td style="background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;">
             <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.6;">
               Mirrorbook — Nettoyage auto professionnel<br>
-              <a href="${APP_URL}/dashboard" style="color:#6366f1;text-decoration:none;">Mon espace client</a>
+              <a href="${APP_URL}/dashboard" style="color:#203727;text-decoration:none;">Mon espace client</a>
               &nbsp;·&nbsp;
-              <a href="${APP_URL}/book" style="color:#6366f1;text-decoration:none;">Réserver</a>
+              <a href="${APP_URL}/book" style="color:#203727;text-decoration:none;">Réserver</a>
             </p>
           </td>
         </tr>
@@ -43,7 +43,7 @@ function base(content: string) {
 }
 
 function btn(label: string, href: string) {
-  return `<a href="${href}" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:8px;margin-top:24px;">${label}</a>`
+  return `<a href="${href}" style="display:inline-block;background:#203727;color:#E0E704;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:8px;margin-top:24px;">${label}</a>`
 }
 
 function row(label: string, value: string) {
@@ -89,7 +89,7 @@ export function welcomeEmail(firstName: string) {
     </p>
     ${btn('Prendre rendez-vous', `${APP_URL}/book`)}
     <p style="margin:32px 0 0;color:#9ca3af;font-size:13px;">
-      Vous pouvez aussi consulter <a href="${APP_URL}/formules" style="color:#6366f1;">nos formules d'abonnement</a>
+      Vous pouvez aussi consulter <a href="${APP_URL}/formules" style="color:#203727;">nos formules d'abonnement</a>
       pour bénéficier de tarifs préférentiels.
     </p>
   `)
@@ -127,7 +127,7 @@ export function bookingConfirmedEmail(params: {
     ${btn('Voir ma réservation', `${APP_URL}/confirmation/${bookingRef}`)}
     <p style="margin:24px 0 0;color:#9ca3af;font-size:13px;">
       Besoin d'annuler ou de modifier ? Rendez-vous dans
-      <a href="${APP_URL}/dashboard" style="color:#6366f1;">votre espace client</a>.
+      <a href="${APP_URL}/dashboard" style="color:#203727;">votre espace client</a>.
     </p>
   `)
 }
@@ -206,7 +206,7 @@ export function bookingReminderEmail(params: {
     )}
     <p style="margin:24px 0 0;color:#9ca3af;font-size:13px;">
       Besoin de modifier ou d'annuler ? Rendez-vous dans
-      <a href="${APP_URL}/dashboard" style="color:#6366f1;">votre espace client</a>
+      <a href="${APP_URL}/dashboard" style="color:#203727;">votre espace client</a>
       au moins 24h à l'avance.
     </p>
   `)
@@ -237,7 +237,7 @@ export function bookingRescheduledEmail(params: {
     ${btn('Voir ma réservation', `${APP_URL}/dashboard`)}
     <p style="margin:24px 0 0;color:#9ca3af;font-size:13px;">
       Besoin d'annuler ? Rendez-vous dans
-      <a href="${APP_URL}/dashboard" style="color:#6366f1;">votre espace client</a>.
+      <a href="${APP_URL}/dashboard" style="color:#203727;">votre espace client</a>.
     </p>
   `)
 }
