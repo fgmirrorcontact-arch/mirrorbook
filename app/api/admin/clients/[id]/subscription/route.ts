@@ -57,34 +57,42 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await assertAdmin())) return Response.json({ error: 'Accès refusé' }, { status: 403 })
+  try {
+    if (!(await assertAdmin())) return Response.json({ error: 'Accès refusé' }, { status: 403 })
 
-  const { id: clientId } = await params
-  const body = await request.json().catch(() => null)
-  if (!body) return Response.json({ error: 'Corps invalide' }, { status: 400 })
+    const { id: clientId } = await params
+    const body = await request.json().catch(() => null)
+    if (!body) return Response.json({ error: 'Corps invalide' }, { status: 400 })
 
-  const parsed = createSchema.safeParse(body)
-  if (!parsed.success) return Response.json({ error: parsed.error.flatten() }, { status: 422 })
+    const parsed = createSchema.safeParse(body)
+    if (!parsed.success) return Response.json({ error: parsed.error.flatten() }, { status: 422 })
 
-  const { service_id, current_period_start, current_period_end, status } = parsed.data
-  const admin = getSupabaseAdminClient()
+    const { service_id, current_period_start, current_period_end, status } = parsed.data
+    const admin = getSupabaseAdminClient()
 
-  const { data, error } = await admin
-    .from('subscriptions')
-    .insert({
-      client_id: clientId,
-      service_id,
-      current_period_start,
-      current_period_end,
-      status,
-      cancel_at_period_end: false,
-    } as never)
-    .select()
-    .single()
+    const { data, error } = await admin
+      .from('subscriptions')
+      .insert({
+        client_id: clientId,
+        service_id,
+        current_period_start,
+        current_period_end,
+        status,
+        cancel_at_period_end: false,
+      } as never)
+      .select()
+      .single()
 
-  if (error) return Response.json({ error: error.message }, { status: 400 })
+    if (error) {
+      console.error('[POST /subscription] DB error:', error.message, error.code)
+      return Response.json({ error: error.message }, { status: 400 })
+    }
 
-  return Response.json({ subscription: data }, { status: 201 })
+    return Response.json({ subscription: data }, { status: 201 })
+  } catch (err) {
+    console.error('[POST /subscription] Unexpected error:', err)
+    return Response.json({ error: 'Erreur serveur inattendue' }, { status: 500 })
+  }
 }
 
 export async function DELETE(

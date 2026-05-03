@@ -285,7 +285,7 @@ export default function ClientDetailClient({
       }
       toast({ title: 'Abonnement créé' })
       setShowCreateSub(false)
-      router.refresh()
+      window.location.reload()
     } catch {
       toast({ title: 'Erreur réseau', description: 'Impossible de contacter le serveur', variant: 'destructive' })
     } finally {
@@ -313,7 +313,7 @@ export default function ClientDetailClient({
       return
     }
     toast({ title: 'Abonnement supprimé' })
-    router.refresh()
+    window.location.reload()
   }
 
   // ── Booking status ───────────────────────────────────────────────────────────
