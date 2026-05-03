@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Pencil, Save, X, Plus, Minus, RefreshCw, Trash2, KeyRound } from 'lucide-react'
+import { ArrowLeft, Pencil, Save, X, Plus, Minus, RefreshCw, Trash2, KeyRound, CalendarPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -251,9 +251,67 @@ export default function ClientDetailClient({
     router.push('/admin/clients')
   }
 
+  // ── Subscription create ──────────────────────────────────────────────────────
+  const subscriptionServices = services.filter((s) => s.is_subscription)
+  const [showCreateSub, setShowCreateSub] = useState(false)
+  const [newSubServiceId, setNewSubServiceId] = useState(subscriptionServices[0]?.id ?? '')
+  const [newSubStart, setNewSubStart] = useState(() => new Date().toISOString().slice(0, 10))
+  const [newSubEnd, setNewSubEnd] = useState(() => {
+    const d = new Date(); d.setMonth(d.getMonth() + 1); return d.toISOString().slice(0, 10)
+  })
+  const [newSubStatus, setNewSubStatus] = useState<SubStatus>('active')
+  const [creatingSubscription, setCreatingSubscription] = useState(false)
+
+  async function createSubscription() {
+    if (!newSubServiceId) return
+    setCreatingSubscription(true)
+    const res = await fetch(`/api/admin/clients/${clientId}/subscription`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id: newSubServiceId,
+        current_period_start: new Date(newSubStart).toISOString(),
+        current_period_end: new Date(newSubEnd).toISOString(),
+        status: newSubStatus,
+      }),
+    })
+    setCreatingSubscription(false)
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}))
+      toast({ title: 'Erreur', description: d.error ?? 'Erreur inconnue', variant: 'destructive' })
+      return
+    }
+    toast({ title: 'Abonnement créé' })
+    setShowCreateSub(false)
+    router.refresh()
+  }
+
+  // ── Subscription delete ──────────────────────────────────────────────────────
+  const [confirmDeleteSub, setConfirmDeleteSub] = useState<string | null>(null)
+  const [deletingSub, setDeletingSub] = useState<string | null>(null)
+
+  async function deleteSubscription(subId: string) {
+    if (confirmDeleteSub !== subId) { setConfirmDeleteSub(subId); return }
+    setDeletingSub(subId)
+    const res = await fetch(`/api/admin/clients/${clientId}/subscription`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription_id: subId }),
+    })
+    setDeletingSub(null)
+    setConfirmDeleteSub(null)
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}))
+      toast({ title: 'Erreur', description: d.error ?? 'Erreur', variant: 'destructive' })
+      return
+    }
+    toast({ title: 'Abonnement supprimé' })
+    router.refresh()
+  }
+
   // ── Booking status ───────────────────────────────────────────────────────────
   async function changeBookingStatus(bookingId: string, status: BookingStatus) {
-    const res = await fetch(`/api/bookings/${bookingId}`, {
+    const res = await fetch(`/api/admin/bookings/${bookingId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
@@ -403,7 +461,66 @@ export default function ClientDetailClient({
 
         {/* ── Abonnement ── */}
         <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-700">Abonnements & crédits</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-700">Abonnements & crédits</h2>
+            {subscriptionServices.length > 0 && (
+              <Button size="sm" variant="outline" onClick={() => setShowCreateSub((v) => !v)}>
+                <CalendarPlus className="h-3.5 w-3.5 mr-1.5" />
+                Créer un abonnement
+              </Button>
+            )}
+          </div>
+
+          {showCreateSub && (
+            <div className="border border-vert/30 bg-vert/5 rounded-lg p-4 space-y-3">
+              <p className="text-xs font-semibold text-vert uppercase tracking-wide">Nouvel abonnement manuel</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Prestation</Label>
+                  <select
+                    className="w-full h-9 rounded-md border border-gray-300 bg-white px-3 text-sm shadow-sm"
+                    value={newSubServiceId}
+                    onChange={(e) => setNewSubServiceId(e.target.value)}
+                  >
+                    {subscriptionServices.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Statut</Label>
+                  <select
+                    className="w-full h-9 rounded-md border border-gray-300 bg-white px-3 text-sm shadow-sm"
+                    value={newSubStatus}
+                    onChange={(e) => setNewSubStatus(e.target.value as SubStatus)}
+                  >
+                    <option value="active">Actif</option>
+                    <option value="paused">Pausé</option>
+                    <option value="incomplete">Incomplet</option>
+                    <option value="cancelled">Annulé</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Début de période</Label>
+                  <Input type="date" value={newSubStart} onChange={(e) => setNewSubStart(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Fin de période</Label>
+                  <Input type="date" value={newSubEnd} onChange={(e) => setNewSubEnd(e.target.value)} />
+                </div>
+              </div>
+              <div className="flex gap-2 pt-1">
+                <Button size="sm" onClick={createSubscription} disabled={creatingSubscription || !newSubServiceId}>
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  {creatingSubscription ? 'Création…' : 'Créer'}
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setShowCreateSub(false)}>
+                  <X className="h-3.5 w-3.5 mr-1" />
+                  Annuler
+                </Button>
+              </div>
+            </div>
+          )}
 
           {subscriptions.length === 0 ? (
             <p className="text-sm text-gray-400">Aucun abonnement.</p>
@@ -411,16 +528,17 @@ export default function ClientDetailClient({
             <div className="space-y-3">
               {subscriptions.map((sub) => {
                 const tokenCount = tokenCountBySub[sub.id] ?? 0
+                const isConfirmingDelete = confirmDeleteSub === sub.id
                 return (
                   <div key={sub.id} className="border border-gray-100 rounded-lg p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
                         <p className="font-medium text-gray-900 text-sm">{sub.services?.name ?? '—'}</p>
                         <p className="text-xs text-gray-400">
                           {new Date(sub.current_period_start).toLocaleDateString('fr-FR')} → {new Date(sub.current_period_end).toLocaleDateString('fr-FR')}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <Badge variant={SUB_STATUS_VARIANTS[sub.status]}>{SUB_STATUS_LABELS[sub.status]}</Badge>
                         <select
                           className="text-xs border border-gray-200 rounded px-2 py-1 bg-white"
@@ -433,6 +551,37 @@ export default function ClientDetailClient({
                           <option value="cancelled">Annulé</option>
                           <option value="incomplete">Incomplet</option>
                         </select>
+                        {isConfirmingDelete ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="h-7 text-xs px-2"
+                              onClick={() => deleteSubscription(sub.id)}
+                              disabled={deletingSub === sub.id}
+                            >
+                              {deletingSub === sub.id ? '…' : 'Confirmer'}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs px-2"
+                              onClick={() => setConfirmDeleteSub(null)}
+                            >
+                              Non
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 w-7 p-0 text-red-500 hover:text-red-600 hover:border-red-300"
+                            onClick={() => deleteSubscription(sub.id)}
+                            title="Supprimer l'abonnement"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
