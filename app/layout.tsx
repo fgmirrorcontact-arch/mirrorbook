@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Barlow_Condensed, Fira_Sans_Condensed } from 'next/font/google'
+import NextTopLoader from 'nextjs-toploader'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 
@@ -35,6 +36,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full bg-aluminium text-charbon">
+        <NextTopLoader color="#E0E704" showSpinner={false} height={3} />
         {children}
         <Toaster />
       </body>
