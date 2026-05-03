@@ -82,6 +82,7 @@ export default function AuthStep() {
       setAuthError(error.message)
       return
     }
+    void fetch('/api/auth/welcome', { method: 'POST' })
     setStep('payment')
   }
 

@@ -41,6 +41,7 @@ export default function SignupPage() {
       setAuthError(error.message)
       return
     }
+    void fetch('/api/auth/welcome', { method: 'POST' })
     router.push('/dashboard')
   }
 
