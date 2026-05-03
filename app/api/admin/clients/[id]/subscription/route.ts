@@ -18,8 +18,8 @@ const patchSchema = z.object({
 
 const createSchema = z.object({
   service_id: z.string().uuid(),
-  current_period_start: z.string().datetime(),
-  current_period_end: z.string().datetime(),
+  current_period_start: z.string().min(1),
+  current_period_end: z.string().min(1),
   status: z.enum(['active', 'past_due', 'cancelled', 'paused', 'incomplete']).default('active'),
 })
 
@@ -34,7 +34,7 @@ export async function PATCH(
   if (!body) return Response.json({ error: 'Corps invalide' }, { status: 400 })
 
   const parsed = patchSchema.safeParse(body)
-  if (!parsed.success) return Response.json({ error: parsed.error.flatten() }, { status: 422 })
+  if (!parsed.success) return Response.json({ error: 'Données invalides : ' + JSON.stringify(parsed.error.issues) }, { status: 422 })
 
   const { subscription_id, status } = parsed.data
   const admin = getSupabaseAdminClient()
@@ -65,7 +65,7 @@ export async function POST(
     if (!body) return Response.json({ error: 'Corps invalide' }, { status: 400 })
 
     const parsed = createSchema.safeParse(body)
-    if (!parsed.success) return Response.json({ error: parsed.error.flatten() }, { status: 422 })
+    if (!parsed.success) return Response.json({ error: 'Données invalides : ' + JSON.stringify(parsed.error.issues) }, { status: 422 })
 
     const { service_id, current_period_start, current_period_end, status } = parsed.data
     const admin = getSupabaseAdminClient()
