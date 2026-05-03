@@ -71,33 +71,33 @@ export default async function ConfirmationRefPage(props: {
         </div>
 
         <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 mb-8">
-          <div className="px-6 py-4 flex justify-between text-sm">
+          <div className="px-6 py-4 flex flex-wrap justify-between gap-2 text-sm">
             <span className="text-gray-500">Prestation</span>
             <span className="font-semibold text-charbon">
               {booking.services?.name}
             </span>
           </div>
-          <div className="px-6 py-4 flex justify-between text-sm">
+          <div className="px-6 py-4 flex flex-wrap justify-between gap-2 text-sm">
             <span className="text-gray-500">Date</span>
             <span className="font-medium text-charbon capitalize">
               {format(startAt, 'EEEE d MMMM yyyy', { locale: fr })}
             </span>
           </div>
-          <div className="px-6 py-4 flex justify-between text-sm">
+          <div className="px-6 py-4 flex flex-wrap justify-between gap-2 text-sm">
             <span className="text-gray-500">Heure</span>
             <span className="font-medium text-charbon">
               {format(startAt, "HH'h'mm")} – {format(endAt, "HH'h'mm")}
             </span>
           </div>
           {booking.employees?.display_name && (
-            <div className="px-6 py-4 flex justify-between text-sm">
+            <div className="px-6 py-4 flex flex-wrap justify-between gap-2 text-sm">
               <span className="text-gray-500">Technicien</span>
               <span className="font-medium text-charbon">
                 {booking.employees.display_name}
               </span>
             </div>
           )}
-          <div className="px-6 py-4 flex justify-between text-sm">
+          <div className="px-6 py-4 flex flex-wrap justify-between gap-2 text-sm">
             <span className="text-gray-500">Total réglé</span>
             <span className="font-bold text-vert">
               {formatPrice(booking.total_price_cents)}

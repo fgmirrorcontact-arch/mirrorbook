@@ -38,7 +38,7 @@ export default function ConfirmationStep() {
       {/* Summary */}
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-left mb-8 space-y-3">
         {createdBookingRef && (
-          <div className="flex justify-between text-sm">
+          <div className="flex flex-wrap justify-between gap-2 text-sm">
             <span className="text-gray-500">Référence</span>
             <span className="font-mono font-semibold text-gray-900">
               {createdBookingRef}
@@ -46,13 +46,13 @@ export default function ConfirmationStep() {
           </div>
         )}
         {selectedService && (
-          <div className="flex justify-between text-sm">
+          <div className="flex flex-wrap justify-between gap-2 text-sm">
             <span className="text-gray-500">Prestation</span>
             <span className="font-medium text-gray-900">{selectedService.name}</span>
           </div>
         )}
         {dateTimeDisplay && (
-          <div className="flex justify-between text-sm">
+          <div className="flex flex-wrap justify-between gap-2 text-sm">
             <span className="text-gray-500">Date et heure</span>
             <span className="font-medium text-gray-900 capitalize">
               {dateTimeDisplay}
