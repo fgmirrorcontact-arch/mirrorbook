@@ -443,7 +443,7 @@ export default function ClientDetailClient({
           {/* Promos actives */}
           {promos.length > 0 && (
             <div className="pt-2 border-t border-gray-100 space-y-2">
-              <p className="text-xs text-gray-500 font-medium">Codes promo actifs</p>
+              <p className="text-xs text-gray-500 font-medium">Codes promo utilisés</p>
               <div className="flex flex-wrap gap-1.5">
                 {promos.map((p) => (
                   <span

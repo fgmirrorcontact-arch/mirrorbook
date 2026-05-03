@@ -34,10 +34,19 @@ export default async function ClientDetailPage({
       .eq('client_id', id)
       .order('created_at', { ascending: false }),
     admin.from('services').select('id, name, is_subscription').order('sort_order'),
-    admin.from('promo_codes').select('id, code, discount_type, discount_value').eq('is_active', true),
+    admin.from('bookings').select('promo_codes(id, code, discount_type, discount_value)').eq('client_id', id).not('promo_code_id', 'is', null),
   ])
 
   if (profileError || !profile) notFound()
+
+  // Deduplicate promos used by this client
+  const usedPromos = Object.values(
+    ((promos ?? []) as unknown as { promo_codes: { id: string; code: string; discount_type: string; discount_value: number } | null }[])
+      .reduce<Record<string, { id: string; code: string; discount_type: string; discount_value: number }>>((acc, b) => {
+        if (b.promo_codes) acc[b.promo_codes.id] = b.promo_codes
+        return acc
+      }, {})
+  )
 
   const activeSubIds = (subscriptions ?? [])
     .filter((s) => s.status === 'active' || s.status === 'past_due')
@@ -62,7 +71,7 @@ export default async function ClientDetailPage({
       subscriptions={(subscriptions as never) ?? []}
       availableTokens={availableTokens}
       services={(services as never) ?? []}
-      promos={(promos as never) ?? []}
+      promos={usedPromos as never}
     />
   )
 }
