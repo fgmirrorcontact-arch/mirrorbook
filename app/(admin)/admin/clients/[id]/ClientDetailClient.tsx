@@ -267,25 +267,30 @@ export default function ClientDetailClient({
   async function createSubscription() {
     if (!newSubServiceId) return
     setCreatingSubscription(true)
-    const res = await fetch(`/api/admin/clients/${clientId}/subscription`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        service_id: newSubServiceId,
-        current_period_start: new Date(newSubStart).toISOString(),
-        current_period_end: new Date(newSubEnd).toISOString(),
-        status: newSubStatus,
-      }),
-    })
-    setCreatingSubscription(false)
-    if (!res.ok) {
+    try {
+      const res = await fetch(`/api/admin/clients/${clientId}/subscription`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: newSubServiceId,
+          current_period_start: new Date(newSubStart).toISOString(),
+          current_period_end: new Date(newSubEnd).toISOString(),
+          status: newSubStatus,
+        }),
+      })
       const d = await res.json().catch(() => ({}))
-      toast({ title: 'Erreur', description: d.error ?? 'Erreur inconnue', variant: 'destructive' })
-      return
+      if (!res.ok) {
+        toast({ title: 'Erreur', description: d.error ?? 'Erreur inconnue', variant: 'destructive' })
+        return
+      }
+      toast({ title: 'Abonnement créé' })
+      setShowCreateSub(false)
+      router.refresh()
+    } catch {
+      toast({ title: 'Erreur réseau', description: 'Impossible de contacter le serveur', variant: 'destructive' })
+    } finally {
+      setCreatingSubscription(false)
     }
-    toast({ title: 'Abonnement créé' })
-    setShowCreateSub(false)
-    router.refresh()
   }
 
   // ── Subscription delete ──────────────────────────────────────────────────────
