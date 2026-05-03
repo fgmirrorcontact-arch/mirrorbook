@@ -128,13 +128,13 @@ export default async function HomePage() {
               'radial-gradient(ellipse 70% 50% at 50% 0%, #203727, transparent)',
           }}
         />
-        <div className="relative max-w-6xl mx-auto px-6 py-36 lg:py-52 flex flex-col items-center text-center">
+        <div className="relative max-w-6xl mx-auto px-6 py-20 lg:py-52 flex flex-col items-center text-center">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-lime uppercase tracking-widest mb-8 border border-lime/30 rounded-full px-4 py-1.5">
             <Sparkles className="h-3 w-3" />
             Nettoyage auto professionnel
           </span>
           <h1
-            className="text-6xl lg:text-8xl font-extrabold italic uppercase leading-none tracking-tight mb-8"
+            className="text-4xl sm:text-6xl lg:text-8xl font-extrabold italic uppercase leading-none tracking-tight mb-8"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             Votre véhicule mérite{' '}
@@ -148,7 +148,7 @@ export default async function HomePage() {
             <Link href="/book">
               <Button
                 size="lg"
-                className="font-bold uppercase tracking-wider px-10 py-4 text-base h-auto"
+                className="w-full sm:w-auto font-bold uppercase tracking-wider px-10 py-4 text-base h-auto"
               >
                 Réserver maintenant
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -158,13 +158,13 @@ export default async function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white uppercase tracking-wider px-10 py-4 text-base h-auto"
+                className="w-full sm:w-auto border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white uppercase tracking-wider px-10 py-4 text-base h-auto"
               >
                 Voir les formules
               </Button>
             </a>
           </div>
-          <div className="mt-16 flex items-center gap-8 text-sm text-gray-500">
+          <div className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-gray-500">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-lime" />
               Sans engagement
@@ -470,7 +470,7 @@ export default async function HomePage() {
 
       {/* ── Footer ── */}
       <footer className="bg-[#111] text-gray-400 py-14">
-        <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-4 gap-10">
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
 
           {/* Brand */}
           <div className="md:col-span-1">
