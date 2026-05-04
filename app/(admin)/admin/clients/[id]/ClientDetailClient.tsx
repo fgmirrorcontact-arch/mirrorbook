@@ -130,7 +130,7 @@ export default function ClientDetailClient({
     }
     toast({ title: 'Profil mis à jour' })
     setEditMode(false)
-    router.refresh()
+    window.location.reload()
   }
 
   // ── Notes ────────────────────────────────────────────────────────────────────
@@ -175,7 +175,7 @@ export default function ClientDetailClient({
       return
     }
     toast({ title: '1 crédit retiré' })
-    router.refresh()
+    window.location.reload()
   }
 
   async function addTokens() {
@@ -198,7 +198,7 @@ export default function ClientDetailClient({
       return
     }
     toast({ title: `${tokenQty} crédit(s) ajouté(s)` })
-    router.refresh()
+    window.location.reload()
   }
 
   // ── Subscription status ──────────────────────────────────────────────────────
@@ -213,7 +213,7 @@ export default function ClientDetailClient({
       return
     }
     toast({ title: 'Abonnement mis à jour' })
-    router.refresh()
+    window.location.reload()
   }
 
   // ── Reset password ───────────────────────────────────────────────────────────
@@ -328,7 +328,7 @@ export default function ClientDetailClient({
       return
     }
     toast({ title: 'Réservation mise à jour' })
-    router.refresh()
+    window.location.reload()
   }
 
   const activeSubs = subscriptions.filter((s) => s.status === 'active' || s.status === 'past_due' || s.status === 'paused')
