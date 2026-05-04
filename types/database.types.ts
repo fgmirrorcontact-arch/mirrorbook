@@ -354,7 +354,7 @@ export type Database = {
           start_at: string
           end_at: string
           status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show'
-          payment_method: 'stripe_one_time' | 'subscription_token' | 'cash' | 'card_present'
+          payment_method: 'stripe_one_time' | 'subscription_token' | 'cash' | 'card_present' | 'free'
           stripe_payment_intent_id: string | null
           token_id: string | null
           total_price_cents: number
@@ -376,7 +376,7 @@ export type Database = {
           start_at: string
           end_at: string
           status?: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show'
-          payment_method?: 'stripe_one_time' | 'subscription_token' | 'cash' | 'card_present'
+          payment_method?: 'stripe_one_time' | 'subscription_token' | 'cash' | 'card_present' | 'free'
           stripe_payment_intent_id?: string | null
           token_id?: string | null
           total_price_cents: number
@@ -398,7 +398,7 @@ export type Database = {
           start_at?: string
           end_at?: string
           status?: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show'
-          payment_method?: 'stripe_one_time' | 'subscription_token' | 'cash' | 'card_present'
+          payment_method?: 'stripe_one_time' | 'subscription_token' | 'cash' | 'card_present' | 'free'
           stripe_payment_intent_id?: string | null
           token_id?: string | null
           total_price_cents?: number
@@ -671,7 +671,7 @@ export type Database = {
     Enums: {
       user_role: 'client' | 'admin' | 'employee'
       booking_status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show'
-      payment_method: 'stripe_one_time' | 'subscription_token' | 'cash' | 'card_present'
+      payment_method: 'stripe_one_time' | 'subscription_token' | 'cash' | 'card_present' | 'free'
       subscription_status: 'active' | 'past_due' | 'cancelled' | 'paused' | 'incomplete'
       token_status: 'available' | 'used' | 'expired'
       discount_type: 'percentage' | 'fixed_cents'
