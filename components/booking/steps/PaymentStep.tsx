@@ -40,6 +40,8 @@ export default function PaymentStep() {
   const [appliedPromoId, setAppliedPromoId] = useState<string | null>(null)
   const promoInputRef = useRef<HTMLInputElement>(null)
 
+  const hasAddons = selectedAddons.length > 0
+
   useEffect(() => {
     if (!selectedService) return
     fetch(`/api/tokens/available?service_id=${selectedService.id}`)
@@ -47,11 +49,16 @@ export default function PaymentStep() {
       .then((d) => {
         const tokens: AvailableToken[] = d.tokens ?? []
         setAvailableTokens(tokens)
-        if (tokens.length > 0) setPaymentMethod('token')
+        if (tokens.length > 0 && !hasAddons) setPaymentMethod('token')
       })
       .catch(() => {})
       .finally(() => setTokensLoaded(true))
-  }, [selectedService])
+  }, [selectedService]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // If addons are selected, token payment is not allowed (addons must be paid by card)
+  useEffect(() => {
+    if (hasAddons) setPaymentMethod('stripe')
+  }, [hasAddons])
 
   const dateTimeDisplay = (() => {
     if (!selectedDate || !selectedSlot) return null
@@ -263,8 +270,15 @@ export default function PaymentStep() {
         </CardContent>
       </Card>
 
-      {/* Payment method selector — shown only if tokens are available */}
-      {tokensLoaded && availableTokens.length > 0 && (
+      {/* Token non utilisable si compléments sélectionnés */}
+      {tokensLoaded && availableTokens.length > 0 && hasAddons && (
+        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Vous avez un token disponible, mais les compléments de service doivent être réglés par carte.
+        </div>
+      )}
+
+      {/* Payment method selector — shown only if tokens are available and no addons */}
+      {tokensLoaded && availableTokens.length > 0 && !hasAddons && (
         <div className="mb-6 space-y-2">
           <p className="text-sm font-medium text-gray-700">Mode de paiement</p>
           <div className="grid grid-cols-2 gap-3">
