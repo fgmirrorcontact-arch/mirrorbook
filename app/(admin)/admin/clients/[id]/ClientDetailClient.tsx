@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Pencil, Save, X, Plus, Minus, RefreshCw, Trash2, KeyRound, CalendarPlus, Ban, LogIn } from 'lucide-react'
+import { ArrowLeft, Pencil, Save, X, Plus, Minus, RefreshCw, Trash2, KeyRound, CalendarPlus, Ban } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -220,23 +220,6 @@ export default function ClientDetailClient({
     window.location.reload()
   }
 
-  // ── Impersonate ──────────────────────────────────────────────────────────────
-  const [impersonating, setImpersonating] = useState(false)
-
-  async function impersonate() {
-    setImpersonating(true)
-    const res = await fetch(`/api/admin/clients/${clientId}/impersonate`, { method: 'POST' })
-    setImpersonating(false)
-    if (!res.ok) {
-      const d = await res.json().catch(() => ({}))
-      toast({ title: 'Erreur', description: d.error ?? 'Impossible de générer le lien', variant: 'destructive' })
-      return
-    }
-    const { link } = await res.json()
-    window.open(link, '_blank')
-    toast({ title: 'Onglet ouvert', description: 'Pour garder votre session admin, utilisez une fenêtre de navigation privée.' })
-  }
-
   // ── Reset password ───────────────────────────────────────────────────────────
   const [resettingPwd, setResettingPwd] = useState(false)
 
@@ -404,10 +387,6 @@ export default function ClientDetailClient({
             </>
           ) : (
             <>
-              <Button variant="outline" size="sm" onClick={impersonate} disabled={impersonating}>
-                <LogIn className="h-3.5 w-3.5 mr-1.5" />
-                {impersonating ? '…' : 'Voir en tant que client'}
-              </Button>
               {!editMode && (
                 <Button variant="outline" size="sm" onClick={() => setEditMode(true)}>
                   <Pencil className="h-3.5 w-3.5 mr-1.5" />
