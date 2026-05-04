@@ -5,20 +5,23 @@ import { useBookingStore } from '@/store/bookingStore'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import type { Service, ServiceAddon } from '@/types'
 import ServiceStep from './steps/ServiceStep'
+import AddonStep from './steps/AddonStep'
 import SlotStep from './steps/SlotStep'
 import AuthStep from './steps/AuthStep'
 import PaymentStep from './steps/PaymentStep'
 import ConfirmationStep from './steps/ConfirmationStep'
 
 const STEPS = [
-  { key: 'service', label: 'Prestation' },
-  { key: 'slot', label: 'Créneau' },
-  { key: 'auth', label: 'Connexion' },
-  { key: 'payment', label: 'Paiement' },
-  { key: 'confirmation', label: 'Confirmation' },
+  { key: 'service', label: 'Prestation', visible: true },
+  { key: 'addon', label: 'Options', visible: true },
+  { key: 'slot', label: 'Créneau', visible: true },
+  { key: 'auth', label: 'Connexion', visible: false },
+  { key: 'payment', label: 'Paiement', visible: true },
+  { key: 'confirmation', label: 'Confirmation', visible: false },
 ] as const
 
 const STEP_ORDER = STEPS.map((s) => s.key)
+const VISIBLE_STEPS = STEPS.filter((s) => s.visible)
 
 interface BookingWizardProps {
   services: Service[]
@@ -35,7 +38,10 @@ export default function BookingWizard({ services, addons = [], initialServiceId 
     if (!service) return
     reset()
     setService(service)
-    setStep('slot')
+    const applicable = addons.filter(
+      (a) => a.is_active && (a.applicable_to.length === 0 || a.applicable_to.includes(service.id))
+    )
+    setStep(applicable.length > 0 && !service.is_subscription ? 'addon' : 'slot')
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -51,13 +57,14 @@ export default function BookingWizard({ services, addons = [], initialServiceId 
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      {/* Progress indicator */}
+      {/* Progress indicator — only visible steps */}
       <nav className="mb-8" aria-label="Étapes de réservation">
         <ol className="flex items-center gap-0">
-          {STEPS.map((s, index) => {
-            const isCompleted = index < currentIndex
-            const isCurrent = index === currentIndex
-            const isUpcoming = index > currentIndex
+          {VISIBLE_STEPS.map((s, visibleIndex) => {
+            const stepIndex = STEP_ORDER.indexOf(s.key)
+            const isCompleted = stepIndex < currentIndex
+            const isCurrent = stepIndex === currentIndex
+            const isUpcoming = stepIndex > currentIndex
             return (
               <li key={s.key} className="flex items-center flex-1 last:flex-none">
                 <div className="flex flex-col items-center">
@@ -76,7 +83,7 @@ export default function BookingWizard({ services, addons = [], initialServiceId 
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                       </svg>
                     ) : (
-                      index + 1
+                      visibleIndex + 1
                     )}
                   </div>
                   <span
@@ -88,7 +95,7 @@ export default function BookingWizard({ services, addons = [], initialServiceId 
                     {s.label}
                   </span>
                 </div>
-                {index < STEPS.length - 1 && (
+                {visibleIndex < VISIBLE_STEPS.length - 1 && (
                   <div
                     className={[
                       'flex-1 h-0.5 mx-2 mb-5 transition-colors duration-300',
@@ -105,6 +112,7 @@ export default function BookingWizard({ services, addons = [], initialServiceId 
       {/* Active step */}
       <div>
         {step === 'service' && <ServiceStep services={services} addons={addons} />}
+        {step === 'addon' && <AddonStep addons={addons} />}
         {step === 'slot' && <SlotStep />}
         {step === 'auth' && <AuthStep />}
         {step === 'payment' && <PaymentStep />}

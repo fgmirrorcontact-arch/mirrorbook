@@ -215,6 +215,7 @@ export interface PromoCodeUse {
 
 export type BookingStep =
   | 'service'
+  | 'addon'
   | 'slot'
   | 'auth'
   | 'payment'

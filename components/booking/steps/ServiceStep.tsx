@@ -5,7 +5,7 @@ import { useBookingStore } from '@/store/bookingStore'
 import type { Service, ServiceAddon, TierOption } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Clock, Plus, Minus } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { formatPrice, formatDuration, cn } from '@/lib/utils'
 
 interface ServiceStepProps {
@@ -14,7 +14,7 @@ interface ServiceStepProps {
 }
 
 export default function ServiceStep({ services, addons = [] }: ServiceStepProps) {
-  const { selectedService, selectedTier, selectedAddons, setService, setTier, toggleAddon, setStep } =
+  const { selectedService, selectedTier, setService, setTier, setStep } =
     useBookingStore()
 
   const [tiers, setTiers] = useState<TierOption[]>([])
@@ -75,7 +75,11 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
   const canContinue = !!selectedService && !needsTier
 
   function handleContinue() {
-    if (canContinue) setStep('slot')
+    if (!canContinue || !selectedService) return
+    const isTokenBooking = tokenServiceIds.has(selectedService.id)
+    const showAddonStep =
+      applicableAddons.length > 0 && (!selectedService.is_subscription || isTokenBooking)
+    setStep(showAddonStep ? 'addon' : 'slot')
   }
 
   function renderCard(service: Service) {
@@ -235,52 +239,6 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
           )}
           <div className="grid sm:grid-cols-2 gap-4 items-start">
             {subscriptionServices.map((service) => renderCard(service))}
-          </div>
-        </div>
-      )}
-
-      {/* Add-ons */}
-      {selectedService && applicableAddons.length > 0 && (
-        <div className="mb-8">
-          <h3 className="text-base font-semibold text-gray-900 mb-3">Options supplémentaires</h3>
-          <div className="space-y-2">
-            {applicableAddons.map((addon) => {
-              const isSelected = selectedAddons.some((a) => a.id === addon.id)
-              return (
-                <div
-                  key={addon.id}
-                  className={cn(
-                    'flex items-center justify-between rounded-lg border p-3 transition-colors duration-200',
-                    isSelected ? 'border-vert/30 bg-vert/5' : 'border-gray-200 bg-white'
-                  )}
-                >
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{addon.name}</p>
-                    {addon.description && (
-                      <p className="text-xs text-gray-500 mt-0.5 whitespace-pre-line">{addon.description}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0 ml-4">
-                    <span className="text-sm font-semibold text-gray-900">
-                      +{formatPrice(addon.price_cents)}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => toggleAddon(addon)}
-                      className={cn(
-                        'h-7 w-7 rounded-full flex items-center justify-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime',
-                        isSelected
-                          ? 'bg-vert text-lime hover:bg-vert/80'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      )}
-                      aria-label={isSelected ? `Retirer ${addon.name}` : `Ajouter ${addon.name}`}
-                    >
-                      {isSelected ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
           </div>
         </div>
       )}

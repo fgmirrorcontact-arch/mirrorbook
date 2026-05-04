@@ -62,14 +62,14 @@ export async function GET(request: NextRequest) {
   // Pending bookings older than 30 min are considered stale and don't block slots.
   const dayStart = `${dateOnly}T00:00:00Z`
   const dayEnd = `${dateOnly}T23:59:59Z`
-  const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString()
+  const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
 
   const [{ data: bookingsData }, calendarBusy] = await Promise.all([
     supabase
       .from('bookings')
       .select('start_at, end_at')
       .eq('employee_id', employeeId)
-      .or(`status.eq.confirmed,and(status.eq.pending,created_at.gte.${thirtyMinAgo})`)
+      .or(`status.eq.confirmed,and(status.eq.pending,created_at.gte.${fiveMinAgo})`)
       .gte('start_at', dayStart)
       .lte('start_at', dayEnd),
     calendarId ? getCalendarBusyTimes(calendarId, dayStart, dayEnd) : Promise.resolve([]),
