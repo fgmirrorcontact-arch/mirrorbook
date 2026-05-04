@@ -149,7 +149,7 @@ export default async function HomePage() {
           </h1>
           <p className="text-lg lg:text-xl text-gray-400 max-w-2xl mb-12 leading-relaxed font-light">
             Abonnez-vous à nos formules de lavage mensuel, réservez votre créneau en ligne
-            en moins de 2 minutes et récupérez une voiture brillante — à chaque fois.
+            en moins de 2 minutes et récupérez une voiture brillante à chaque fois.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/book">
@@ -196,8 +196,8 @@ export default async function HomePage() {
               Le nettoyage auto réinventé
             </h2>
             <p className="text-gray-600 max-w-xl mx-auto text-base leading-relaxed font-light">
-              Fini les passages improvisés au karcher. Avec Mirrorbook, vous choisissez une
-              formule mensuelle, et votre voiture bénéficie d&apos;un entretien régulier,
+              Fini les nettoyages bâclés à la va-vite. Avec Mirrorbook, vous choisissez une
+              formule mensuelle, et votre voiture bénéficie d&apos;un entretien intérieur régulier,
               suivi et professionnel.
             </p>
           </div>
