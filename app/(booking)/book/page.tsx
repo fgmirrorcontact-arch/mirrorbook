@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import BookingWizard from '@/components/booking/BookingWizard'
 import { Button } from '@/components/ui/button'
@@ -15,10 +14,6 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
   const supabase = await getSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    const returnTo = initialServiceId ? `/book?service=${initialServiceId}` : '/book'
-    redirect(`/login?redirect=${encodeURIComponent(returnTo)}`)
-  }
 
   const { data: services } = await supabase
     .from('services')
