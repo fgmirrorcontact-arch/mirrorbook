@@ -173,16 +173,17 @@ export async function PATCH(
     return Response.json({ error: 'Impossible de mettre à jour la réservation' }, { status: 500 })
   }
 
-  // Email d'annulation (fire and forget)
+  // Email d'annulation — envoyé au client de la réservation (fire and forget)
   if (parsed.data.status === 'cancelled') {
-    const { data: { user: cancelUser } } = await supabase.auth.getUser()
-    if (cancelUser?.email) {
-      const { data: cancelProfile } = await supabase
-        .from('profiles').select('full_name').eq('id', cancelUser.id).single()
-      const firstName = cancelProfile?.full_name?.split(' ')[0] ?? 'vous'
+    const adminClient = getSupabaseAdminClient()
+    const { data: { user: clientUser } } = await adminClient.auth.admin.getUserById(booking.client_id)
+    if (clientUser?.email) {
+      const { data: clientProfile } = await adminClient
+        .from('profiles').select('full_name').eq('id', booking.client_id).single()
+      const firstName = clientProfile?.full_name?.split(' ')[0] ?? 'vous'
       const svcName = (booking as unknown as { services?: { name: string } }).services?.name ?? 'Prestation'
       void sendEmail(
-        cancelUser.email,
+        clientUser.email,
         `Réservation annulée — ${booking.booking_ref}`,
         bookingCancelledEmail({
           firstName,
@@ -202,16 +203,17 @@ export async function PATCH(
     deleteCalendarEvent({ calendarId, eventId: booking.google_calendar_event_id })
   }
 
-  // Email de modification de créneau (fire and forget)
+  // Email de modification de créneau — envoyé au client (fire and forget)
   if (parsed.data.start_at) {
-    const { data: { user: rescheduleUser } } = await supabase.auth.getUser()
-    if (rescheduleUser?.email) {
-      const { data: rescheduleProfile } = await supabase
-        .from('profiles').select('full_name').eq('id', rescheduleUser.id).single()
-      const firstName = rescheduleProfile?.full_name?.split(' ')[0] ?? 'vous'
+    const adminClient = getSupabaseAdminClient()
+    const { data: { user: clientUser } } = await adminClient.auth.admin.getUserById(booking.client_id)
+    if (clientUser?.email) {
+      const { data: clientProfile } = await adminClient
+        .from('profiles').select('full_name').eq('id', booking.client_id).single()
+      const firstName = clientProfile?.full_name?.split(' ')[0] ?? 'vous'
       const svcName = (booking as unknown as { services?: { name: string } }).services?.name ?? 'Prestation'
       void sendEmail(
-        rescheduleUser.email,
+        clientUser.email,
         `Créneau modifié — ${booking.booking_ref}`,
         bookingRescheduledEmail({
           firstName,
@@ -228,7 +230,7 @@ export async function PATCH(
   if (parsed.data.start_at && booking.google_calendar_event_id && calendarId) {
     const svcName = (booking as unknown as { services?: { name: string } }).services?.name ?? 'Réservation'
     const adminClient = getSupabaseAdminClient()
-    const { data: p } = await adminClient.from('profiles').select('full_name').eq('id', user.id).single()
+    const { data: p } = await adminClient.from('profiles').select('full_name').eq('id', booking.client_id).single()
     await updateCalendarEvent({
       calendarId,
       eventId: booking.google_calendar_event_id,

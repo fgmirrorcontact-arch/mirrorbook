@@ -2,6 +2,8 @@ import { type NextRequest } from 'next/server'
 import * as z from 'zod'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
+import { sendEmail } from '@/lib/email'
+import { tokensRenewedEmail } from '@/lib/emails/templates'
 
 const schema = z.object({
   subscription_id: z.string().min(1),
@@ -44,6 +46,30 @@ export async function POST(
 
   const { data, error } = await admin.from('subscription_tokens').insert(rows).select()
   if (error) return Response.json({ error: error.message }, { status: 400 })
+
+  // Email au client (fire and forget)
+  const [
+    { data: { user: clientUser } },
+    { data: service },
+    { data: clientProfile },
+  ] = await Promise.all([
+    admin.auth.admin.getUserById(clientId),
+    admin.from('services').select('name').eq('id', service_id).single(),
+    admin.from('profiles').select('full_name').eq('id', clientId).single(),
+  ])
+  if (clientUser?.email) {
+    const firstName = clientProfile?.full_name?.split(' ')[0] ?? 'vous'
+    void sendEmail(
+      clientUser.email,
+      `${quantity} crédit${quantity > 1 ? 's' : ''} ajouté${quantity > 1 ? 's' : ''} — ${service?.name ?? 'Formule'}`,
+      tokensRenewedEmail({
+        firstName,
+        serviceName: service?.name ?? 'Formule',
+        tokensCount: quantity,
+        periodEnd: expires_at ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      })
+    )
+  }
 
   return Response.json({ tokens: data }, { status: 201 })
 }
