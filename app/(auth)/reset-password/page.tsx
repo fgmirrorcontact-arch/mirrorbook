@@ -19,13 +19,22 @@ export default function ResetPasswordPage() {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get('code')
     const supabase = getSupabaseBrowserClient()
+    const code = new URLSearchParams(window.location.search).get('code')
+
     if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(() => setReady(true))
-    } else {
-      supabase.auth.getSession().then(({ data }) => setReady(!!data.session))
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (!error) setReady(true)
+      })
+      return
     }
+
+    // Hash-based recovery flow (#access_token=...&type=recovery)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') setReady(true)
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
