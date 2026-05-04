@@ -17,20 +17,27 @@ export async function POST(request: NextRequest) {
 
   const admin = getSupabaseAdminClient()
 
+  const redirectTo = `${APP_URL}/reset-password`
   const { data, error } = await admin.auth.admin.generateLink({
     type: 'recovery',
     email: parsed.data.email,
-    options: {
-      redirectTo: `${APP_URL}/reset-password`,
-    },
+    options: { redirectTo },
   })
 
-  if (!error && data.properties?.action_link) {
-    void sendEmail(
+  if (error || !data.properties?.action_link) {
+    console.error('[forgot-password] generateLink error', error?.message, { redirectTo, email: parsed.data.email })
+    return Response.json({ ok: true })
+  }
+
+  try {
+    await sendEmail(
       parsed.data.email,
       'Réinitialisation de votre mot de passe — Mirrorbook',
       resetPasswordEmail({ link: data.properties.action_link })
     )
+    console.log('[forgot-password] email envoyé à', parsed.data.email)
+  } catch (e) {
+    console.error('[forgot-password] sendEmail error', e)
   }
 
   // Always 200 — no email enumeration
