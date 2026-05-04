@@ -22,6 +22,7 @@ interface Profile {
   created_at: string
   admin_notes?: string | null
   is_blocked?: boolean
+  company_name?: string | null
 }
 
 interface Booking {
@@ -110,6 +111,7 @@ export default function ClientDetailClient({
   const [editName, setEditName] = useState(profile.full_name ?? '')
   const [editPhone, setEditPhone] = useState(profile.phone ?? '')
   const [editEmail, setEditEmail] = useState(email ?? '')
+  const [editCompany, setEditCompany] = useState(profile.company_name ?? '')
   const [savingProfile, setSavingProfile] = useState(false)
 
   async function saveProfile() {
@@ -121,6 +123,7 @@ export default function ClientDetailClient({
         full_name: editName,
         phone: editPhone || null,
         email: editEmail !== email ? editEmail : undefined,
+        company_name: editCompany || null,
       }),
     })
     setSavingProfile(false)
@@ -425,6 +428,10 @@ export default function ClientDetailClient({
                 <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
               </div>
               <div className="space-y-1">
+                <Label className="text-xs">Société</Label>
+                <Input value={editCompany} onChange={(e) => setEditCompany(e.target.value)} placeholder="Dupont SAS" />
+              </div>
+              <div className="space-y-1">
                 <Label className="text-xs">Téléphone</Label>
                 <Input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="06 …" />
               </div>
@@ -449,6 +456,12 @@ export default function ClientDetailClient({
                 <dt className="text-xs text-gray-400">Nom</dt>
                 <dd className="font-medium text-gray-900">{profile.full_name ?? '—'}</dd>
               </div>
+              {profile.company_name && (
+                <div>
+                  <dt className="text-xs text-gray-400">Société</dt>
+                  <dd className="font-medium text-gray-900">{profile.company_name}</dd>
+                </div>
+              )}
               <div>
                 <dt className="text-xs text-gray-400">Téléphone</dt>
                 <dd>{profile.phone ?? '—'}</dd>

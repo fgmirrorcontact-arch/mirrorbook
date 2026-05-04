@@ -14,6 +14,7 @@ export type Database = {
           created_at: string
           is_blocked: boolean
           admin_notes: string | null
+          company_name: string | null
         }
         Insert: {
           id: string
@@ -25,6 +26,7 @@ export type Database = {
           created_at?: string
           is_blocked?: boolean
           admin_notes?: string | null
+          company_name?: string | null
         }
         Update: {
           id?: string
@@ -36,6 +38,7 @@ export type Database = {
           created_at?: string
           is_blocked?: boolean
           admin_notes?: string | null
+          company_name?: string | null
         }
         Relationships: []
       }
