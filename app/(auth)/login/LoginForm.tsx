@@ -35,9 +35,10 @@ export default function LoginForm() {
   async function handleForgotPassword() {
     const email = forgotEmail || getValues('email')
     if (!email) return
-    const supabase = getSupabaseBrowserClient()
-    await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/api/auth/callback?next=/reset-password`,
+    await fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
     })
     setForgotSent(true)
   }

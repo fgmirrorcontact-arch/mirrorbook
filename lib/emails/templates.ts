@@ -245,6 +245,20 @@ export function bookingRescheduledEmail(params: {
   `)
 }
 
+export function resetPasswordEmail(params: { link: string }) {
+  return base(`
+    <h1 style="margin:0 0 8px;font-size:24px;color:#111827;">Réinitialisation de votre mot de passe</h1>
+    <p style="margin:0 0 24px;color:#6b7280;font-size:15px;line-height:1.6;">
+      Vous avez demandé la réinitialisation de votre mot de passe Mirrorbook.
+      Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.
+    </p>
+    ${btn('Réinitialiser mon mot de passe', params.link)}
+    <p style="margin:24px 0 0;color:#9ca3af;font-size:13px;line-height:1.6;">
+      Ce lien est valable 1 heure. Si vous n'avez pas fait cette demande, ignorez simplement cet e-mail.
+    </p>
+  `)
+}
+
 export function tokensRenewedEmail(params: {
   firstName: string
   serviceName: string

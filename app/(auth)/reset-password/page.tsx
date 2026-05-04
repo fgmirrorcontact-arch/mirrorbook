@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
@@ -16,6 +16,17 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('code')
+    const supabase = getSupabaseBrowserClient()
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(() => setReady(true))
+    } else {
+      supabase.auth.getSession().then(({ data }) => setReady(!!data.session))
+    }
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -58,7 +69,9 @@ export default function ResetPasswordPage() {
         </div>
 
         <div className="bg-white/5 border border-white/10 rounded-xl p-8">
-          {done ? (
+          {!ready ? (
+            <p className="text-center text-sm text-gray-400 py-4">Vérification en cours…</p>
+          ) : done ? (
             <div className="text-center space-y-3">
               <div className="flex justify-center">
                 <div className="h-14 w-14 bg-vert rounded-full flex items-center justify-center">
