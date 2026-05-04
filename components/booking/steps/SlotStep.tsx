@@ -217,7 +217,11 @@ export default function SlotStep() {
         </div>
       )}
 
-      <div className="flex justify-between">
+      {/* Spacer mobile pour le bouton fixe */}
+      <div className="h-20 sm:hidden" />
+
+      {/* Desktop */}
+      <div className="hidden sm:flex justify-between">
         <Button variant="outline" onClick={() => setStep('service')}>
           Retour
         </Button>
@@ -228,6 +232,23 @@ export default function SlotStep() {
         >
           Continuer
         </Button>
+      </div>
+
+      {/* Mobile : boutons fixes en bas */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur border-t border-gray-200 px-6 py-3 sm:hidden">
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => setStep('service')} className="flex-none">
+            Retour
+          </Button>
+          <Button
+            onClick={() => setStep('auth')}
+            disabled={!selectedDate || !selectedSlot}
+            size="lg"
+            className="flex-1"
+          >
+            Continuer
+          </Button>
+        </div>
       </div>
     </div>
   )

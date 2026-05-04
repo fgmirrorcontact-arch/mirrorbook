@@ -268,8 +268,19 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
         </div>
       )}
 
-      <div className="flex justify-end">
+      {/* Spacer mobile pour le bouton fixe */}
+      <div className="h-20 sm:hidden" />
+
+      {/* Desktop */}
+      <div className="hidden sm:flex justify-end">
         <Button onClick={handleContinue} disabled={!canContinue} size="lg">
+          Continuer
+        </Button>
+      </div>
+
+      {/* Mobile : bouton fixe en bas */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur border-t border-gray-200 px-6 py-3 sm:hidden">
+        <Button onClick={handleContinue} disabled={!canContinue} size="lg" className="w-full">
           Continuer
         </Button>
       </div>
