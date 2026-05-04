@@ -1,14 +1,14 @@
 import { type NextRequest } from 'next/server'
-import { getSupabaseServerClient } from '@/lib/supabase/server'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')?.trim().toUpperCase()
   if (!code) return Response.json({ error: 'Code requis' }, { status: 400 })
 
-  const supabase = await getSupabaseServerClient()
+  const admin = getSupabaseAdminClient()
 
-  const { data: promo } = await supabase
+  const { data: promo } = await admin
     .from('promo_codes')
     .select('id, code, discount_type, discount_value, valid_from, valid_until, max_uses, uses_count')
     .eq('code', code)
