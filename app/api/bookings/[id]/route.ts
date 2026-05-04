@@ -84,7 +84,7 @@ export async function DELETE(
     const employee = (booking as unknown as { employees: { google_calendar_id: string | null } | null }).employees
     const calendarId = employee?.google_calendar_id ?? process.env.GOOGLE_CALENDAR_ID ?? ''
     if (calendarId) {
-      deleteCalendarEvent({ calendarId, eventId: booking.google_calendar_event_id })
+      await deleteCalendarEvent({ calendarId, eventId: booking.google_calendar_event_id })
     }
   }
 
@@ -200,7 +200,7 @@ export async function PATCH(
 
   // Delete Google Calendar event on cancellation
   if (parsed.data.status === 'cancelled' && booking.google_calendar_event_id && calendarId) {
-    deleteCalendarEvent({ calendarId, eventId: booking.google_calendar_event_id })
+    await deleteCalendarEvent({ calendarId, eventId: booking.google_calendar_event_id })
   }
 
   // Email de modification de créneau — envoyé au client (fire and forget)
