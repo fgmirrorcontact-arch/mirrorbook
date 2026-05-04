@@ -134,24 +134,13 @@ export async function PATCH(
     }
     const { data: existing } = await supabase
       .from('bookings')
-      .select('client_id, start_at, service_id, services(duration_minutes, min_lead_hours)')
+      .select('client_id, start_at, service_id')
       .eq('id', id)
       .single()
     if (!existing || existing.client_id !== user.id) {
       return Response.json({ error: 'Accès refusé' }, { status: 403 })
     }
 
-    if (parsed.data.start_at) {
-      const svc = existing.services as unknown as { duration_minutes: number; min_lead_hours: number } | null
-      const minLead = (svc?.min_lead_hours ?? 24) * 60 * 60 * 1000
-      const newStart = new Date(parsed.data.start_at)
-      if (newStart.getTime() - Date.now() < minLead) {
-        return Response.json(
-          { error: `Modification impossible moins de ${svc?.min_lead_hours ?? 24}h avant le rendez-vous` },
-          { status: 422 }
-        )
-      }
-    }
   }
 
   const updates: BookingUpdate = { ...parsed.data } as BookingUpdate
