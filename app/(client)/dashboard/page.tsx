@@ -43,6 +43,12 @@ export default async function DashboardPage() {
     .eq('client_id', user.id)
     .eq('status', 'available')
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', user.id)
+    .single()
+
   return (
     <div className="min-h-screen bg-aluminium">
       <header className="bg-charbon border-b border-white/10">
@@ -54,7 +60,10 @@ export default async function DashboardPage() {
           >
             <img src="/logo.svg" alt="Mirrorbook" className="h-8 w-auto" />
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-400 hidden sm:block">
+              Connecté en tant que <span className="text-white font-medium">{profile?.full_name ?? user.email}</span>
+            </span>
             <Link href="/book">
               <Button size="sm">Réserver</Button>
             </Link>
