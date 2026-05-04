@@ -42,6 +42,14 @@ export async function POST(request: NextRequest) {
             })
             .eq('id', bookingId)
 
+          // Hybrid payment: consume the subscription token after Stripe confirms
+          if (session.metadata.token_id) {
+            await admin
+              .from('subscription_tokens')
+              .update({ status: 'used' })
+              .eq('id', session.metadata.token_id)
+          }
+
           // Create Google Calendar event now that payment is confirmed
           const { data: booking } = await admin
             .from('bookings')

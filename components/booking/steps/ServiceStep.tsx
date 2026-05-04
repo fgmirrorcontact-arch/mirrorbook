@@ -19,6 +19,14 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
 
   const [tiers, setTiers] = useState<TierOption[]>([])
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const [tokenServiceIds, setTokenServiceIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    fetch('/api/tokens/available')
+      .then((r) => (r.ok ? r.json() : { service_ids: [] }))
+      .then((d) => setTokenServiceIds(new Set(d.service_ids ?? [])))
+      .catch(() => {})
+  }, [])
 
   function toggleExpand(id: string, e: React.MouseEvent) {
     e.stopPropagation()
@@ -63,7 +71,7 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
   const totalGroups = categoryMap.size + (subscriptionServices.length > 0 ? 1 : 0)
   const showHeaders = totalGroups > 1
 
-  const needsTier = selectedService?.is_subscription && tiers.length > 0 && !selectedTier
+  const needsTier = selectedService?.is_subscription && tiers.length > 0 && !selectedTier && !tokenServiceIds.has(selectedService?.id ?? '')
   const canContinue = !!selectedService && !needsTier
 
   function handleContinue() {
@@ -72,7 +80,8 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
 
   function renderCard(service: Service) {
     const isSelected = selectedService?.id === service.id
-    const showTiers = isSelected && service.is_subscription && tiers.length > 0
+    const hasToken = tokenServiceIds.has(service.id)
+    const showTiers = isSelected && service.is_subscription && tiers.length > 0 && !hasToken
     return (
       <div
         key={service.id}
@@ -111,20 +120,28 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
               )}
             </div>
             <div className="flex items-center gap-4 text-sm flex-wrap">
-              {!service.is_subscription && (
-                <span className="flex items-center gap-1 font-semibold text-gray-900">
-                  {formatPrice(service.price_cents)}
+              {hasToken ? (
+                <span className="text-xs font-semibold text-green-700 bg-green-50 rounded px-1.5 py-0.5">
+                  Inclus dans votre abonnement
                 </span>
+              ) : (
+                <>
+                  {!service.is_subscription && (
+                    <span className="flex items-center gap-1 font-semibold text-gray-900">
+                      {formatPrice(service.price_cents)}
+                    </span>
+                  )}
+                  {service.is_subscription && service.tokens_per_renewal && (
+                    <span className="text-xs font-semibold text-vert bg-vert/10 rounded px-1.5 py-0.5">
+                      {service.tokens_per_renewal} passage{service.tokens_per_renewal > 1 ? 's' : ''}/mois
+                    </span>
+                  )}
+                </>
               )}
               <span className="flex items-center gap-1 text-gray-500">
                 <Clock className="h-3.5 w-3.5" />
                 {formatDuration(service.duration_minutes)}
               </span>
-              {service.is_subscription && service.tokens_per_renewal && (
-                <span className="text-xs font-semibold text-vert bg-vert/10 rounded px-1.5 py-0.5">
-                  {service.tokens_per_renewal} passage{service.tokens_per_renewal > 1 ? 's' : ''}/mois
-                </span>
-              )}
             </div>
           </div>
         </button>

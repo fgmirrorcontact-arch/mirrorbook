@@ -11,6 +11,7 @@ const schema = z.object({
   service_id: uuidLike,
   addon_ids: z.array(uuidLike).default([]),
   start_at: z.string().min(1),
+  token_id: uuidLike.nullable().optional(),
   promo_code_id: uuidLike.nullable().optional(),
   notes: z.string().nullable().optional(),
 })
@@ -81,6 +82,15 @@ export async function POST(request: NextRequest) {
   const { data: refResult, error: refError } = await admin.rpc('generate_booking_ref')
   if (refError || !refResult) return Response.json({ error: 'Impossible de générer une référence' }, { status: 500 })
 
+  // When a token covers the base service, only add-ons are charged via Stripe
+  const isTokenHybrid = !!data.token_id
+  if (isTokenHybrid && addonRows.length === 0) {
+    return Response.json({ error: 'Un token ne peut pas être utilisé sans complément via ce flux' }, { status: 422 })
+  }
+  const chargedCents = isTokenHybrid
+    ? addonTotal
+    : service.price_cents + addonTotal - discountCents
+
   const { data: booking, error: bookingError } = await admin
     .from('bookings')
     .insert({
@@ -92,9 +102,10 @@ export async function POST(request: NextRequest) {
       end_at: endAt.toISOString(),
       status: 'pending',
       payment_method: 'stripe_one_time',
-      total_price_cents: service.price_cents + addonTotal - discountCents,
-      discount_cents: discountCents,
-      promo_code_id: data.promo_code_id ?? null,
+      token_id: data.token_id ?? null,
+      total_price_cents: chargedCents,
+      discount_cents: isTokenHybrid ? 0 : discountCents,
+      promo_code_id: isTokenHybrid ? null : (data.promo_code_id ?? null),
       notes: data.notes ?? null,
     })
     .select()
@@ -129,14 +140,15 @@ export async function POST(request: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
   const lineItems = [
-    {
+    // Skip service base price when token covers it
+    ...(isTokenHybrid ? [] : [{
       price_data: {
         currency: 'eur',
         unit_amount: service.price_cents,
         product_data: { name: service.name },
       },
-      quantity: 1,
-    },
+      quantity: 1 as const,
+    }]),
     ...addonRows.map((a) => ({
       price_data: {
         currency: 'eur',
@@ -162,7 +174,10 @@ export async function POST(request: NextRequest) {
     invoice_creation: { enabled: true },
     success_url: `${appUrl}/booking/success?ref=${refResult}`,
     cancel_url: `${appUrl}/booking/cancel?ref=${refResult}`,
-    metadata: { booking_id: booking.id },
+    metadata: {
+      booking_id: booking.id,
+      ...(data.token_id ? { token_id: data.token_id } : {}),
+    },
   })
 
   return Response.json({ url: session.url })

@@ -41,6 +41,7 @@ export default function PaymentStep() {
   const promoInputRef = useRef<HTMLInputElement>(null)
 
   const hasAddons = selectedAddons.length > 0
+  const addonsTotalCents = selectedAddons.reduce((s, a) => s + a.price_cents, 0)
 
   useEffect(() => {
     if (!selectedService) return
@@ -49,16 +50,11 @@ export default function PaymentStep() {
       .then((d) => {
         const tokens: AvailableToken[] = d.tokens ?? []
         setAvailableTokens(tokens)
-        if (tokens.length > 0 && !hasAddons) setPaymentMethod('token')
+        if (tokens.length > 0) setPaymentMethod('token')
       })
       .catch(() => {})
       .finally(() => setTokensLoaded(true))
   }, [selectedService]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // If addons are selected, token payment is not allowed (addons must be paid by card)
-  useEffect(() => {
-    if (hasAddons) setPaymentMethod('stripe')
-  }, [hasAddons])
 
   const dateTimeDisplay = (() => {
     if (!selectedDate || !selectedSlot) return null
@@ -109,22 +105,41 @@ export default function PaymentStep() {
     try {
       if (paymentMethod === 'token') {
         const token = availableTokens[0]
-        const res = await fetch('/api/bookings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            employee_id: DEFAULT_EMPLOYEE_ID,
-            service_id: selectedService.id,
-            addon_ids: selectedAddons.map((a) => a.id),
-            start_at: start.toISOString(),
-            payment_method: 'subscription_token',
-            token_id: token.id,
-            notes: null,
-          }),
-        })
-        const data = await res.json()
-        if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Erreur lors de la réservation')
-        window.location.href = `/confirmation/${data.booking.booking_ref}`
+        if (hasAddons) {
+          // Hybrid: token covers the base service, Stripe charges add-ons only
+          const res = await fetch('/api/checkout/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              employee_id: DEFAULT_EMPLOYEE_ID,
+              service_id: selectedService.id,
+              addon_ids: selectedAddons.map((a) => a.id),
+              start_at: start.toISOString(),
+              token_id: token.id,
+              notes: null,
+            }),
+          })
+          const data = await res.json()
+          if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Erreur lors de la réservation')
+          window.location.href = data.url
+        } else {
+          const res = await fetch('/api/bookings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              employee_id: DEFAULT_EMPLOYEE_ID,
+              service_id: selectedService.id,
+              addon_ids: [],
+              start_at: start.toISOString(),
+              payment_method: 'subscription_token',
+              token_id: token.id,
+              notes: null,
+            }),
+          })
+          const data = await res.json()
+          if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Erreur lors de la réservation')
+          window.location.href = `/confirmation/${data.booking.booking_ref}`
+        }
       } else if (selectedService.is_subscription) {
         const res = await fetch('/api/subscriptions/checkout', {
           method: 'POST',
@@ -177,19 +192,25 @@ export default function PaymentStep() {
           <div className="flex items-start justify-between">
             <div>
               <p className="font-semibold text-gray-900">{selectedService?.name}</p>
-              {selectedService?.is_subscription && (
+              {selectedService?.is_subscription && paymentMethod !== 'token' && (
                 <Badge className="mt-1">Abonnement</Badge>
               )}
-              {selectedTier && (
+              {selectedTier && paymentMethod !== 'token' && (
                 <p className="text-sm text-vert mt-1">
                   Engagement {selectedTier.commitment_months} mois
                 </p>
               )}
             </div>
-            <span className="font-semibold text-gray-900 shrink-0 ml-4">
-              {formatPrice(selectedTier?.price_cents ?? selectedService?.price_cents ?? 0)}
-              {selectedService?.is_subscription && (
-                <span className="text-gray-400 font-normal text-sm">/mois</span>
+            <span className="font-semibold shrink-0 ml-4">
+              {paymentMethod === 'token' ? (
+                <span className="text-green-600 text-sm">Inclus</span>
+              ) : (
+                <>
+                  {formatPrice(selectedTier?.price_cents ?? selectedService?.price_cents ?? 0)}
+                  {selectedService?.is_subscription && (
+                    <span className="text-gray-400 font-normal text-sm">/mois</span>
+                  )}
+                </>
               )}
             </span>
           </div>
@@ -261,7 +282,11 @@ export default function PaymentStep() {
             <span className="font-semibold text-gray-900">Total</span>
             <span className="text-xl font-bold text-vert">
               {paymentMethod === 'token' ? (
-                <span className="text-green-600">Inclus dans l'abonnement</span>
+                hasAddons ? (
+                  formatPrice(addonsTotalCents)
+                ) : (
+                  <span className="text-green-600">Inclus dans l'abonnement</span>
+                )
               ) : (
                 formatPrice(totalCents)
               )}
@@ -270,15 +295,8 @@ export default function PaymentStep() {
         </CardContent>
       </Card>
 
-      {/* Token non utilisable si compléments sélectionnés */}
-      {tokensLoaded && availableTokens.length > 0 && hasAddons && (
-        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          Vous avez un token disponible, mais les compléments de service doivent être réglés par carte.
-        </div>
-      )}
-
-      {/* Payment method selector — shown only if tokens are available and no addons */}
-      {tokensLoaded && availableTokens.length > 0 && !hasAddons && (
+      {/* Payment method selector — shown if tokens are available */}
+      {tokensLoaded && availableTokens.length > 0 && (
         <div className="mb-6 space-y-2">
           <p className="text-sm font-medium text-gray-700">Mode de paiement</p>
           <div className="grid grid-cols-2 gap-3">
@@ -297,7 +315,9 @@ export default function PaymentStep() {
                   Token abonnement
                 </p>
                 <p className="text-xs text-gray-500">
-                  {availableTokens.length} disponible{availableTokens.length > 1 ? 's' : ''}
+                  {hasAddons
+                    ? `Prestation incluse · ${formatPrice(addonsTotalCents)} pour les suppléments`
+                    : `${availableTokens.length} disponible${availableTokens.length > 1 ? 's' : ''}`}
                 </p>
               </div>
             </button>
@@ -333,7 +353,7 @@ export default function PaymentStep() {
               <Loader2 className="h-4 w-4 animate-spin" />
               Confirmation en cours…
             </>
-          ) : paymentMethod === 'token' ? (
+          ) : paymentMethod === 'token' && !hasAddons ? (
             'Confirmer la réservation'
           ) : (
             'Procéder au paiement'
