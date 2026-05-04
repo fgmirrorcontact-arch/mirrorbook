@@ -12,6 +12,8 @@ export type Database = {
           stripe_customer_id: string | null
           avatar_url: string | null
           created_at: string
+          is_blocked: boolean
+          admin_notes: string | null
         }
         Insert: {
           id: string
@@ -21,6 +23,8 @@ export type Database = {
           stripe_customer_id?: string | null
           avatar_url?: string | null
           created_at?: string
+          is_blocked?: boolean
+          admin_notes?: string | null
         }
         Update: {
           id?: string
@@ -30,6 +34,8 @@ export type Database = {
           stripe_customer_id?: string | null
           avatar_url?: string | null
           created_at?: string
+          is_blocked?: boolean
+          admin_notes?: string | null
         }
         Relationships: []
       }

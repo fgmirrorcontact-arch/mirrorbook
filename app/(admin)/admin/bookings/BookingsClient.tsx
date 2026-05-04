@@ -8,7 +8,7 @@ import { toast } from '@/components/ui/use-toast'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { formatPrice } from '@/lib/utils'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Download, Mail } from 'lucide-react'
 
 type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show'
 
@@ -39,6 +39,7 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
   const [updating, setUpdating] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [resending, setResending] = useState<string | null>(null)
 
   const filtered = bookings.filter((b) => {
     if (statusFilter && b.status !== statusFilter) return false
@@ -63,6 +64,48 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
     }
     toast({ title: 'Statut mis à jour' })
     router.refresh()
+  }
+
+  const PAYMENT_LABELS: Record<string, string> = {
+    cash: 'Espèces',
+    card_present: 'CB sur place',
+    stripe_one_time: 'Paiement en ligne',
+    subscription_token: 'Abonnement',
+  }
+
+  function downloadCSV() {
+    const headers = ['Référence', 'Client', 'Prestation', 'Employé', 'Date', 'Montant (€)', 'Statut', 'Mode de paiement']
+    const rows = filtered.map((b) => [
+      b.booking_ref,
+      b.profiles?.full_name ?? '',
+      b.services?.name ?? '',
+      b.employees?.display_name ?? '',
+      format(new Date(b.start_at), "dd/MM/yyyy HH'h'mm", { locale: fr }),
+      (b.total_price_cents / 100).toFixed(2).replace('.', ','),
+      STATUS_LABELS[b.status]?.label ?? b.status,
+      PAYMENT_LABELS[b.payment_method] ?? b.payment_method,
+    ])
+    const csv = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(';'))
+      .join('\n')
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `reservations_${format(new Date(), 'yyyy-MM-dd')}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  async function resendEmail(id: string) {
+    setResending(id)
+    const res = await fetch(`/api/admin/bookings/${id}/resend`, { method: 'POST' })
+    setResending(null)
+    if (!res.ok) {
+      toast({ title: 'Erreur', description: "Impossible d'envoyer l'email", variant: 'destructive' })
+      return
+    }
+    toast({ title: 'Email de confirmation renvoyé' })
   }
 
   async function deleteBooking(id: string) {
@@ -113,6 +156,10 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
               Réinitialiser
             </Button>
           )}
+          <Button size="sm" variant="outline" onClick={downloadCSV}>
+            <Download className="h-3.5 w-3.5 mr-1.5" />
+            CSV
+          </Button>
         </div>
       </div>
 
@@ -173,6 +220,17 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
                       </select>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-vert hover:border-vert/40"
+                        onClick={() => resendEmail(booking.id)}
+                        disabled={resending === booking.id}
+                        title="Renvoyer l'email de confirmation"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                      </Button>
                       {isConfirmingDelete ? (
                         <div className="flex items-center gap-1">
                           <Button
@@ -204,6 +262,7 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
+                      </div>
                     </td>
                   </tr>
                 )

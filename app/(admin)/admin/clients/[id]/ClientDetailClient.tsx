@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Pencil, Save, X, Plus, Minus, RefreshCw, Trash2, KeyRound, CalendarPlus } from 'lucide-react'
+import { ArrowLeft, Pencil, Save, X, Plus, Minus, RefreshCw, Trash2, KeyRound, CalendarPlus, Ban } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,6 +21,7 @@ interface Profile {
   role: string
   created_at: string
   admin_notes?: string | null
+  is_blocked?: boolean
 }
 
 interface Booking {
@@ -233,6 +234,26 @@ export default function ClientDetailClient({
     toast({ title: 'Lien copié dans le presse-papier', description: 'Envoyez ce lien au client pour réinitialiser son mot de passe.' })
   }
 
+  // ── Block client ─────────────────────────────────────────────────────────────
+  const [isBlocked, setIsBlocked] = useState(profile.is_blocked ?? false)
+  const [blockingClient, setBlockingClient] = useState(false)
+
+  async function toggleBlock() {
+    setBlockingClient(true)
+    const res = await fetch(`/api/admin/clients/${clientId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_blocked: !isBlocked }),
+    })
+    setBlockingClient(false)
+    if (!res.ok) {
+      toast({ title: 'Erreur', description: 'Impossible de modifier', variant: 'destructive' })
+      return
+    }
+    setIsBlocked(!isBlocked)
+    toast({ title: isBlocked ? 'Client débloqué' : 'Client bloqué' })
+  }
+
   // ── Delete client ────────────────────────────────────────────────────────────
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -372,6 +393,16 @@ export default function ClientDetailClient({
               <Button variant="outline" size="sm" onClick={resetPassword} disabled={resettingPwd}>
                 <KeyRound className="h-3.5 w-3.5 mr-1.5" />
                 {resettingPwd ? '…' : 'Réinitialiser le mdp'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleBlock}
+                disabled={blockingClient}
+                className={isBlocked ? 'text-amber-600 hover:border-amber-300' : 'text-orange-500 hover:border-orange-300'}
+              >
+                <Ban className="h-3.5 w-3.5 mr-1.5" />
+                {blockingClient ? '…' : isBlocked ? 'Débloquer' : 'Bloquer'}
               </Button>
               <Button variant="outline" size="sm" onClick={() => setConfirmDelete(true)} className="text-red-600 hover:text-red-700 hover:border-red-300">
                 <Trash2 className="h-3.5 w-3.5 mr-1.5" />

@@ -8,6 +8,7 @@ const patchSchema = z.object({
   phone: z.string().nullable().optional(),
   email: z.string().email().optional(),
   admin_notes: z.string().nullable().optional(),
+  is_blocked: z.boolean().optional(),
 })
 
 async function assertAdmin() {
@@ -103,12 +104,13 @@ export async function PATCH(
   if (!parsed.success) return Response.json({ error: 'Données invalides' }, { status: 422 })
 
   const admin = getSupabaseAdminClient()
-  const { email, full_name, phone, admin_notes } = parsed.data
+  const { email, full_name, phone, admin_notes, is_blocked } = parsed.data
 
   const profileUpdates: Record<string, unknown> = {}
   if (full_name !== undefined) profileUpdates.full_name = full_name
   if (phone !== undefined) profileUpdates.phone = phone
   if (admin_notes !== undefined) profileUpdates.admin_notes = admin_notes
+  if (is_blocked !== undefined) profileUpdates.is_blocked = is_blocked
 
   if (Object.keys(profileUpdates).length > 0) {
     const { error } = await admin.from('profiles').update(profileUpdates as never).eq('id', id)
