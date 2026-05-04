@@ -1,14 +1,4 @@
-import {
-  parseISO,
-  setHours,
-  setMinutes,
-  setSeconds,
-  addMinutes,
-  isAfter,
-  isBefore,
-  isToday,
-  format,
-} from 'date-fns'
+import { addMinutes, isAfter, isBefore, isToday } from 'date-fns'
 import type { AvailabilitySchedule, AvailabilityException, Booking } from '@/types'
 
 interface GetAvailableSlotsOptions {
@@ -19,15 +9,46 @@ interface GetAvailableSlotsOptions {
   serviceDurationMinutes: number
 }
 
+// Returns Europe/Paris UTC offset in hours (+2 summer, +1 winter)
+function parisOffset(at: Date): number {
+  const utcH = at.getUTCHours()
+  const parisH = parseInt(
+    new Intl.DateTimeFormat('en', { timeZone: 'Europe/Paris', hour: '2-digit', hour12: false }).format(at),
+    10
+  )
+  const diff = parisH - utcH
+  if (diff > 12) return diff - 24
+  if (diff < -12) return diff + 24
+  return diff
+}
+
+// Convert a Paris "HH:mm" schedule time to a UTC Date on the given day
+function toUtcDate(baseDate: Date, hhmm: string, offsetHours: number): Date {
+  const [h, m] = hhmm.split(':').map(Number)
+  const d = new Date(baseDate)
+  d.setUTCHours(h - offsetHours, m, 0, 0)
+  return d
+}
+
+// Format a UTC Date as "HH:mm" in Europe/Paris timezone
+function formatParisSlot(date: Date): string {
+  const parts = new Intl.DateTimeFormat('en', {
+    timeZone: 'Europe/Paris',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(date)
+  const h = parts.find((p) => p.type === 'hour')?.value ?? '00'
+  const m = parts.find((p) => p.type === 'minute')?.value ?? '00'
+  return `${h}:${m}`
+}
+
 /**
- * Returns an array of available time slots ('HH:mm') for a given employee and date.
+ * Returns available time slots ("HH:mm" Paris time) for a given employee and date.
  *
- * Logic:
- * 1. Check for a day-level exception — if is_unavailable, return [].
- * 2. Determine effective start/end from exception custom hours or base schedule.
- * 3. Generate candidate slots spaced by slot_duration_minutes.
- * 4. Remove any slot where the service window [slot, slot + duration] overlaps an existing booking.
- * 5. Remove past slots when the date is today.
+ * Schedule times (start_time / end_time) are treated as Europe/Paris local times.
+ * All overlap checks run in UTC so they match the UTC timestamps stored in the DB
+ * and returned by Google Calendar freebusy.
  */
 export function getAvailableSlots({
   schedule,
@@ -36,57 +57,46 @@ export function getAvailableSlots({
   date,
   serviceDurationMinutes,
 }: GetAvailableSlotsOptions): string[] {
-  // If unavailable today (holiday, etc.)
   if (exception?.is_unavailable) return []
-
-  // No schedule at all
   if (!schedule || !schedule.is_active) return []
 
-  // Determine effective window
-  const effectiveStartStr: string =
-    exception?.custom_start ?? schedule.start_time
-  const effectiveEndStr: string =
-    exception?.custom_end ?? schedule.end_time
+  const effectiveStartStr: string = exception?.custom_start ?? schedule.start_time
+  const effectiveEndStr: string = exception?.custom_end ?? schedule.end_time
 
-  const [startH, startM] = effectiveStartStr.split(':').map(Number)
-  const [endH, endM] = effectiveEndStr.split(':').map(Number)
+  // Compute Paris UTC offset at noon to avoid DST edge cases at midnight
+  const noon = new Date(date)
+  noon.setUTCHours(12, 0, 0, 0)
+  const offset = parisOffset(noon)
 
-  // Build Date objects anchored to the chosen date
-  const windowStart = setSeconds(
-    setMinutes(setHours(new Date(date), startH), startM),
-    0
-  )
-  const windowEnd = setSeconds(
-    setMinutes(setHours(new Date(date), endH), endM),
-    0
-  )
+  // Window bounds as UTC timestamps
+  const windowStart = toUtcDate(date, effectiveStartStr, offset)
+  const windowEnd = toUtcDate(date, effectiveEndStr, offset)
 
   const now = new Date()
   const slots: string[] = []
-  let cursor = windowStart
+  let cursor = new Date(windowStart)
 
   while (isBefore(cursor, windowEnd)) {
     const slotEnd = addMinutes(cursor, serviceDurationMinutes)
 
-    // Slot must fit entirely within the working window
+    // Slot must end at or before the working window
     if (isAfter(slotEnd, windowEnd)) break
 
-    // Skip past slots if today
+    // Skip past slots when the date is today
     if (isToday(date) && !isAfter(cursor, now)) {
       cursor = addMinutes(cursor, schedule.slot_duration_minutes)
       continue
     }
 
-    // Check overlap with existing bookings
+    // Check overlap with existing bookings (DB) and Google Calendar busy times
     const hasConflict = existingBookings.some((booking) => {
-      const bStart = parseISO(booking.start_at)
-      const bEnd = parseISO(booking.end_at)
-      // Overlap: cursor < bEnd AND slotEnd > bStart
+      const bStart = new Date(booking.start_at)
+      const bEnd = new Date(booking.end_at)
       return isBefore(cursor, bEnd) && isAfter(slotEnd, bStart)
     })
 
     if (!hasConflict) {
-      slots.push(format(cursor, 'HH:mm'))
+      slots.push(formatParisSlot(cursor))
     }
 
     cursor = addMinutes(cursor, schedule.slot_duration_minutes)
