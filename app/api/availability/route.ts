@@ -1,6 +1,7 @@
 import { type NextRequest } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import { getAvailableSlots } from '@/lib/availability/slots'
+import { getCalendarBusyTimes } from '@/lib/google-calendar'
 import type { AvailabilitySchedule, AvailabilityException, Booking } from '@/types'
 
 export async function GET(request: NextRequest) {
@@ -49,24 +50,41 @@ export async function GET(request: NextRequest) {
     .eq('exception_date', dateOnly)
     .single()
 
+  // Fetch employee's Google Calendar ID
+  const { data: employeeData } = await supabase
+    .from('employees')
+    .select('google_calendar_id')
+    .eq('id', employeeId)
+    .single()
+  const calendarId = employeeData?.google_calendar_id ?? process.env.GOOGLE_CALENDAR_ID ?? ''
+
   // Fetch existing bookings for this employee on this date.
   // Pending bookings older than 30 min are considered stale and don't block slots.
   const dayStart = `${dateOnly}T00:00:00Z`
   const dayEnd = `${dateOnly}T23:59:59Z`
   const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString()
 
-  const { data: bookingsData } = await supabase
-    .from('bookings')
-    .select('start_at, end_at')
-    .eq('employee_id', employeeId)
-    .or(`status.eq.confirmed,and(status.eq.pending,created_at.gte.${thirtyMinAgo})`)
-    .gte('start_at', dayStart)
-    .lte('start_at', dayEnd)
+  const [{ data: bookingsData }, calendarBusy] = await Promise.all([
+    supabase
+      .from('bookings')
+      .select('start_at, end_at')
+      .eq('employee_id', employeeId)
+      .or(`status.eq.confirmed,and(status.eq.pending,created_at.gte.${thirtyMinAgo})`)
+      .gte('start_at', dayStart)
+      .lte('start_at', dayEnd),
+    calendarId ? getCalendarBusyTimes(calendarId, dayStart, dayEnd) : Promise.resolve([]),
+  ])
+
+  // Merge DB bookings + Google Calendar busy times
+  const allBusy: Pick<Booking, 'start_at' | 'end_at'>[] = [
+    ...((bookingsData as Pick<Booking, 'start_at' | 'end_at'>[]) ?? []),
+    ...calendarBusy.map((b) => ({ start_at: b.start, end_at: b.end })),
+  ]
 
   const slots = getAvailableSlots({
     schedule: (scheduleData as AvailabilitySchedule) ?? null,
     exception: (exceptionData as AvailabilityException) ?? null,
-    existingBookings: (bookingsData as Pick<Booking, 'start_at' | 'end_at'>[]) ?? [],
+    existingBookings: allBusy,
     date,
     serviceDurationMinutes: duration,
   })

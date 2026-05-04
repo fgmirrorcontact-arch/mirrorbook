@@ -72,6 +72,25 @@ export async function updateCalendarEvent({
   }
 }
 
+export async function getCalendarBusyTimes(
+  calendarId: string,
+  timeMin: string,
+  timeMax: string,
+): Promise<{ start: string; end: string }[]> {
+  const calendar = getClient()
+  if (!calendar) return []
+  try {
+    const res = await calendar.freebusy.query({
+      requestBody: { timeMin, timeMax, items: [{ id: calendarId }] },
+    })
+    const busy = res.data.calendars?.[calendarId]?.busy ?? []
+    return busy.filter((b) => b.start && b.end).map((b) => ({ start: b.start!, end: b.end! }))
+  } catch (err) {
+    console.error('[gcal] freebusy error', err)
+    return []
+  }
+}
+
 export async function deleteCalendarEvent({
   calendarId,
   eventId,

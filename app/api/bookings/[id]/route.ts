@@ -3,7 +3,7 @@ import * as z from 'zod'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import type { Database } from '@/types/database.types'
-import { deleteCalendarEvent } from '@/lib/google-calendar'
+import { deleteCalendarEvent, updateCalendarEvent } from '@/lib/google-calendar'
 import { sendEmail } from '@/lib/email'
 import { bookingCancelledEmail, bookingRescheduledEmail } from '@/lib/emails/templates'
 
@@ -238,19 +238,14 @@ export async function PATCH(
   // Update Google Calendar event on reschedule
   if (parsed.data.start_at && booking.google_calendar_event_id && calendarId) {
     const svcName = (booking as unknown as { services?: { name: string } }).services?.name ?? 'Réservation'
-    const admin = getSupabaseAdminClient()
-    admin.from('profiles').select('full_name').eq('id', user.id).single().then(({ data: p }) => {
-      import('@/lib/google-calendar').then(({ updateCalendarEvent }) => {
-        if (typeof updateCalendarEvent === 'function') {
-          updateCalendarEvent({
-            calendarId,
-            eventId: booking.google_calendar_event_id!,
-            summary: `${svcName} — ${p?.full_name ?? 'Client'}`,
-            startAt: booking.start_at,
-            endAt: booking.end_at,
-          })
-        }
-      })
+    const adminClient = getSupabaseAdminClient()
+    const { data: p } = await adminClient.from('profiles').select('full_name').eq('id', user.id).single()
+    await updateCalendarEvent({
+      calendarId,
+      eventId: booking.google_calendar_event_id,
+      summary: `${svcName} — ${p?.full_name ?? 'Client'}`,
+      startAt: booking.start_at,
+      endAt: booking.end_at,
     })
   }
 

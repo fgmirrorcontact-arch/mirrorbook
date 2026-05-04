@@ -1,8 +1,14 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { format } from 'date-fns'
-import { fr } from 'date-fns/locale'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
+
+const TZ = 'Europe/Paris'
+function fmtDate(d: Date) {
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: TZ })
+}
+function fmtTime(d: Date) {
+  return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: TZ })
+}
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Car, CheckCircle2 } from 'lucide-react'
@@ -80,13 +86,13 @@ export default async function ConfirmationRefPage(props: {
           <div className="px-6 py-4 flex flex-wrap justify-between gap-2 text-sm">
             <span className="text-gray-500">Date</span>
             <span className="font-medium text-charbon capitalize">
-              {format(startAt, 'EEEE d MMMM yyyy', { locale: fr })}
+              {fmtDate(startAt)}
             </span>
           </div>
           <div className="px-6 py-4 flex flex-wrap justify-between gap-2 text-sm">
             <span className="text-gray-500">Heure</span>
             <span className="font-medium text-charbon">
-              {format(startAt, "HH'h'mm")} – {format(endAt, "HH'h'mm")}
+              {fmtTime(startAt)} – {fmtTime(endAt)}
             </span>
           </div>
           {booking.employees?.display_name && (
