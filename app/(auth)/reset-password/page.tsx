@@ -20,8 +20,9 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient()
-    const code = new URLSearchParams(window.location.search).get('code')
 
+    // PKCE flow: ?code=xxx
+    const code = new URLSearchParams(window.location.search).get('code')
     if (code) {
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
         if (!error) setReady(true)
@@ -29,12 +30,22 @@ export default function ResetPasswordPage() {
       return
     }
 
-    // Hash-based recovery flow (#access_token=...&type=recovery)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') setReady(true)
-    })
+    // Implicit flow: #access_token=xxx&type=recovery
+    const hash = new URLSearchParams(window.location.hash.slice(1))
+    const accessToken = hash.get('access_token')
+    const refreshToken = hash.get('refresh_token')
+    const type = hash.get('type')
 
-    return () => subscription.unsubscribe()
+    if (accessToken && type === 'recovery') {
+      supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken ?? '' })
+        .then(({ error }) => { if (!error) setReady(true) })
+      return
+    }
+
+    // Fallback: session déjà active
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setReady(true)
+    })
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
