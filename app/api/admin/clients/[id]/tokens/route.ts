@@ -20,6 +20,22 @@ async function assertAdmin() {
   return data?.role === 'admin'
 }
 
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!(await assertAdmin())) return Response.json({ error: 'Accès refusé' }, { status: 403 })
+  const { id: clientId } = await params
+  const admin = getSupabaseAdminClient()
+  const { data } = await admin
+    .from('subscription_tokens')
+    .select('id, service_id, services(name), subscriptions(id)')
+    .eq('client_id', clientId)
+    .eq('status', 'available')
+    .order('created_at')
+  return Response.json({ tokens: data ?? [] })
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

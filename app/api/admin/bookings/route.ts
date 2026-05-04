@@ -21,8 +21,9 @@ const createBookingSchema = z
     addon_ids: z.array(uuidLike).default([]),
     start_at: z.string().min(1),
     payment_method: z
-      .enum(['cash', 'card_present', 'stripe_one_time', 'subscription_token'])
+      .enum(['cash', 'card_present', 'stripe_one_time', 'subscription_token', 'free'])
       .default('cash'),
+    token_id: uuidLike.optional(),
     notes: z.string().nullable().optional(),
     internal_notes: z.string().nullable().optional(),
     status: z.enum(['pending', 'confirmed']).default('confirmed'),
@@ -126,6 +127,19 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Impossible de générer une référence' }, { status: 500 })
   }
 
+  // Validate token if subscription_token payment
+  if (data.payment_method === 'subscription_token') {
+    if (!data.token_id) return Response.json({ error: 'token_id requis pour ce mode de paiement' }, { status: 400 })
+    const { data: token } = await admin
+      .from('subscription_tokens')
+      .select('id, client_id, status')
+      .eq('id', data.token_id)
+      .single()
+    if (!token || token.status !== 'available' || token.client_id !== clientId) {
+      return Response.json({ error: 'Crédit invalide ou indisponible' }, { status: 400 })
+    }
+  }
+
   const { data: booking, error: bookingError } = await admin
     .from('bookings')
     .insert({
@@ -137,6 +151,7 @@ export async function POST(request: NextRequest) {
       end_at: endAt.toISOString(),
       status: data.status,
       payment_method: data.payment_method,
+      token_id: data.token_id ?? null,
       total_price_cents: service.price_cents + addonTotal,
       discount_cents: 0,
       notes: data.notes ?? null,
@@ -148,6 +163,14 @@ export async function POST(request: NextRequest) {
   if (bookingError || !booking) {
     console.error('admin booking insert error', bookingError)
     return Response.json({ error: 'Erreur lors de la création' }, { status: 500 })
+  }
+
+  // Mark token as used
+  if (data.token_id) {
+    await admin
+      .from('subscription_tokens')
+      .update({ status: 'used', used_at: new Date().toISOString(), booking_id: booking.id })
+      .eq('id', data.token_id)
   }
 
   if (addonRows.length > 0) {

@@ -12,6 +12,7 @@ type Client = { id: string; full_name: string | null; phone: string | null; emai
 type Service = { id: string; name: string; price_cents: number; duration_minutes: number }
 type Addon = { id: string; name: string; price_cents: number; duration_minutes: number }
 type Employee = { id: string; display_name: string; color: string }
+type Token = { id: string; service_id: string; services: { name: string } | null }
 
 interface Props {
   open: boolean
@@ -27,6 +28,7 @@ const PAYMENT_METHODS = [
   { value: 'card_present', label: 'CB sur place' },
   { value: 'stripe_one_time', label: 'Paiement en ligne' },
   { value: 'subscription_token', label: 'Token abonnement' },
+  { value: 'free', label: 'Gratuit' },
 ]
 
 function fmt(cents: number) {
@@ -52,6 +54,9 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
   const [employeeId, setEmployeeId] = useState(employees[0]?.id ?? '')
   const [paymentMethod, setPaymentMethod] = useState('cash')
   const [notes, setNotes] = useState('')
+
+  const [clientTokens, setClientTokens] = useState<Token[]>([])
+  const [selectedTokenId, setSelectedTokenId] = useState('')
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -86,6 +91,17 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
+  useEffect(() => {
+    if (paymentMethod !== 'subscription_token' || !selectedClient) {
+      setClientTokens([])
+      setSelectedTokenId('')
+      return
+    }
+    fetch(`/api/admin/clients/${selectedClient.id}/tokens`)
+      .then((r) => r.json())
+      .then((d) => setClientTokens(d.tokens ?? []))
+  }, [paymentMethod, selectedClient])
+
   function toggleAddon(id: string) {
     setSelectedAddons((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]))
   }
@@ -105,6 +121,8 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
     setTime('')
     setEmployeeId(employees[0]?.id ?? '')
     setPaymentMethod('cash')
+    setClientTokens([])
+    setSelectedTokenId('')
     setNotes('')
     setError('')
   }
@@ -126,6 +144,7 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
       return
     }
     if (!serviceId) { setError('Choisissez une prestation'); return }
+    if (paymentMethod === 'subscription_token' && !selectedTokenId) { setError('Sélectionnez un crédit abonnement'); return }
     if (!date) { setError('Choisissez une date'); return }
     if (!time) { setError('Choisissez une heure'); return }
     if (!employeeId) { setError('Choisissez un employé'); return }
@@ -140,6 +159,7 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
       addon_ids: selectedAddons,
       start_at: startAt,
       payment_method: paymentMethod,
+      token_id: paymentMethod === 'subscription_token' ? selectedTokenId : undefined,
       notes: notes.trim() || null,
       status: 'confirmed',
     }
@@ -356,6 +376,38 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
               ))}
             </div>
           </div>
+
+          {/* ── Sélection token abonnement ── */}
+          {paymentMethod === 'subscription_token' && (
+            <div>
+              <Label className="mb-2 block">Crédit à utiliser</Label>
+              {clientTokens.length === 0 ? (
+                <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                  {selectedClient ? 'Aucun crédit disponible pour ce client.' : 'Sélectionnez d\'abord un client.'}
+                </p>
+              ) : (
+                <Select value={selectedTokenId} onValueChange={setSelectedTokenId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choisir un crédit..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clientTokens
+                      .filter((t) => !serviceId || t.service_id === serviceId)
+                      .map((t) => (
+                        <SelectItem key={t.id} value={t.id}>
+                          {t.services?.name ?? 'Formule'}
+                        </SelectItem>
+                      ))}
+                    {clientTokens.filter((t) => !serviceId || t.service_id === serviceId).length === 0 && (
+                      <SelectItem value="__none" disabled>
+                        Aucun crédit pour cette prestation
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          )}
 
           {/* ── Notes ── */}
           <div>
