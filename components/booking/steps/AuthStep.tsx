@@ -217,21 +217,6 @@ export default function AuthStep() {
         </TabsContent>
       </Tabs>
 
-      <div className="mt-6 flex flex-col items-center gap-3">
-        <div className="flex items-center gap-3 w-full">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-xs text-gray-400">ou</span>
-          <div className="flex-1 h-px bg-gray-200" />
-        </div>
-        <button
-          type="button"
-          onClick={() => setStep('payment')}
-          className="text-sm text-gray-500 hover:text-charbon underline underline-offset-2"
-        >
-          Continuer sans compte
-        </button>
-      </div>
-
       <div className="mt-6 flex justify-start">
         <Button variant="outline" onClick={() => setStep('slot')}>
           Retour
