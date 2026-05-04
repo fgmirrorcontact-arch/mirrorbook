@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     { data: profile },
   ] = await Promise.all([
     supabase.from('services').select('name, price_cents, duration_minutes').eq('id', data.service_id).single(),
-    supabase.from('profiles').select('full_name, stripe_customer_id').eq('id', user.id).single(),
+    supabase.from('profiles').select('full_name, company_name, stripe_customer_id').eq('id', user.id).single(),
   ])
 
   if (serviceError || !service) return Response.json({ error: 'Prestation introuvable' }, { status: 404 })
@@ -112,15 +112,18 @@ export async function POST(request: NextRequest) {
   }
 
   // Get or create Stripe customer
+  const customerName = (profile as { company_name?: string | null } & typeof profile)?.company_name ?? profile?.full_name ?? undefined
   let customerId = profile?.stripe_customer_id ?? null
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: user.email,
-      name: profile?.full_name ?? undefined,
+      name: customerName,
       metadata: { supabase_user_id: user.id },
     })
     customerId = customer.id
     await admin.from('profiles').update({ stripe_customer_id: customerId }).eq('id', user.id)
+  } else if (customerName) {
+    void stripe.customers.update(customerId, { name: customerName })
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
@@ -156,6 +159,7 @@ export async function POST(request: NextRequest) {
     mode: 'payment',
     customer: customerId,
     line_items: lineItems,
+    invoice_creation: { enabled: true },
     success_url: `${appUrl}/booking/success?ref=${refResult}`,
     cancel_url: `${appUrl}/booking/cancel?ref=${refResult}`,
     metadata: { booking_id: booking.id },

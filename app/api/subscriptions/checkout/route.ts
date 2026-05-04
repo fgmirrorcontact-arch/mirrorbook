@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, stripe_customer_id')
+    .select('full_name, company_name, stripe_customer_id')
     .eq('id', user.id)
     .single()
 
@@ -67,15 +67,18 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Vous avez déjà un abonnement actif pour cette formule' }, { status: 409 })
   }
 
+  const customerName = (profile as { company_name?: string | null } & typeof profile)?.company_name ?? profile?.full_name ?? undefined
   let customerId = profile?.stripe_customer_id ?? null
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: user.email,
-      name: profile?.full_name ?? undefined,
+      name: customerName,
       metadata: { supabase_user_id: user.id },
     })
     customerId = customer.id
     await admin.from('profiles').update({ stripe_customer_id: customerId }).eq('id', user.id)
+  } else if (customerName) {
+    void stripe.customers.update(customerId, { name: customerName })
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
