@@ -10,7 +10,6 @@ const scheduleSchema = z.object({
     is_active: z.boolean(),
     start_time: z.string(),
     end_time: z.string(),
-    slot_duration_minutes: z.number().int().min(15),
     break_minutes: z.number().int().min(0),
   })),
 })
@@ -47,7 +46,7 @@ export async function POST(request: Request) {
   const { data: inserted, error } = await admin
     .from('availability_schedules')
     .insert(rows)
-    .select('employee_id, day_of_week, is_active, start_time, end_time, slot_duration_minutes, break_minutes')
+    .select('employee_id, day_of_week, is_active, start_time, end_time, break_minutes')
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
   return NextResponse.json({ schedules: inserted })

@@ -93,7 +93,6 @@ export interface AvailabilitySchedule {
   day_of_week: number // 0 = Sunday, 6 = Saturday
   start_time: string // 'HH:mm:ss'
   end_time: string // 'HH:mm:ss'
-  slot_duration_minutes: number
   break_minutes: number
   is_active: boolean
 }

@@ -19,8 +19,6 @@ const DAYS = [
   { value: 0, label: 'Dimanche' },
 ]
 
-const SLOT_DURATIONS = [15, 30, 45, 60, 90, 120]
-
 type Employee = { id: string; display_name: string; color: string; is_active: boolean }
 
 type DaySchedule = {
@@ -29,7 +27,6 @@ type DaySchedule = {
   is_active: boolean
   start_time: string
   end_time: string
-  slot_duration_minutes: number
   break_minutes: number
 }
 
@@ -57,7 +54,6 @@ function buildDays(saved: DaySchedule[]): DaySchedule[] {
       is_active: d.value >= 1 && d.value <= 5,
       start_time: '09:00',
       end_time: '18:00',
-      slot_duration_minutes: 60,
       break_minutes: 0,
     }
   })
@@ -346,14 +342,6 @@ export default function AvailabilityClient({ employees: initialEmployees, allSch
                         <Input type="time" value={day.start_time} onChange={(e) => updateDay(i, { start_time: e.target.value })} className="w-28 h-8 text-sm" />
                         <span className="text-gray-400 text-sm">→</span>
                         <Input type="time" value={day.end_time} onChange={(e) => updateDay(i, { end_time: e.target.value })} className="w-28 h-8 text-sm" />
-                      </div>
-                      <div className="flex items-center gap-1.5 text-sm">
-                        <span className="text-gray-500 shrink-0">Créneaux</span>
-                        <select value={day.slot_duration_minutes} onChange={(e) => updateDay(i, { slot_duration_minutes: Number(e.target.value) })} className="h-8 rounded-md border border-gray-300 bg-white px-2 text-sm focus:outline-none focus:ring-2 focus:ring-lime">
-                          {SLOT_DURATIONS.map((d) => (
-                            <option key={d} value={d}>{d >= 60 ? `${d / 60}h` : `${d} min`}</option>
-                          ))}
-                        </select>
                       </div>
                       <div className="flex items-center gap-1.5 text-sm">
                         <span className="text-gray-500 shrink-0">Pause</span>

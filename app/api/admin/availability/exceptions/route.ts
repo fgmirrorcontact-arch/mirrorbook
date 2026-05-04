@@ -6,7 +6,7 @@ const schema = z.object({
   employee_id: z.string().min(1),
   exception_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   is_unavailable: z.boolean().default(true),
-  reason: z.string().optional(),
+  reason: z.string().nullish(),
 })
 
 async function assertAdmin(supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>) {

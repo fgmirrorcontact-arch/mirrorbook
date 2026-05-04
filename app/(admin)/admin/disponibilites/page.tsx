@@ -13,7 +13,7 @@ export default async function AdminDisponibilitesPage() {
 
   const { data: schedules } = await supabase
     .from('availability_schedules')
-    .select('employee_id, day_of_week, is_active, start_time, end_time, slot_duration_minutes, break_minutes')
+    .select('employee_id, day_of_week, is_active, start_time, end_time, break_minutes')
 
   const today = new Date().toISOString().split('T')[0]
   const { data: exceptions } = await supabase

@@ -84,7 +84,7 @@ export function getAvailableSlots({
 
     // Skip past slots when the date is today
     if (isToday(date) && !isAfter(cursor, now)) {
-      cursor = addMinutes(cursor, schedule.slot_duration_minutes)
+      cursor = addMinutes(cursor, serviceDurationMinutes)
       continue
     }
 
@@ -99,7 +99,7 @@ export function getAvailableSlots({
       slots.push(formatParisSlot(cursor))
     }
 
-    cursor = addMinutes(cursor, schedule.slot_duration_minutes)
+    cursor = addMinutes(cursor, serviceDurationMinutes)
   }
 
   return slots
