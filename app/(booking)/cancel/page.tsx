@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Car, XCircle } from 'lucide-react'
+import { XCircle } from 'lucide-react'
 
 export default function BookingCancelPage() {
   return (
@@ -16,8 +16,7 @@ export default function BookingCancelPage() {
           className="flex items-center justify-center gap-2 font-display font-bold italic uppercase text-white text-lg tracking-wide mb-4"
           style={{ fontFamily: 'var(--font-display)' }}
         >
-          <Car className="h-5 w-5 text-lime" />
-          Mirrorbook
+          <img src="/logo.svg" alt="Mirrorbook" className="h-8 w-auto" />
         </Link>
         <h1
           className="text-2xl font-extrabold italic uppercase text-white mb-2"

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
 import { formatPrice } from '@/lib/utils'
 import RescheduleModal from '@/components/booking/RescheduleModal'
-import { Car } from 'lucide-react'
+
 import LogoutButton from '@/components/LogoutButton'
 
 type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show'
@@ -76,8 +76,7 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
             className="flex items-center gap-2 font-display font-bold italic uppercase text-white text-lg tracking-wide"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <Car className="h-5 w-5 text-lime" />
-            Mirrorbook
+            <img src="/logo.svg" alt="Mirrorbook" className="h-8 w-auto" />
           </Link>
           <div className="flex items-center gap-2">
             <Link href="/book">

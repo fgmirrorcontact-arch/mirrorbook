@@ -7,7 +7,6 @@ import { ServiceCard, SingleServiceCard } from './(client)/formules/FormulesClie
 import { fetchGoogleReviews } from '@/lib/google-reviews'
 import type { ServiceCommitmentTier } from '@/types'
 import {
-  Car,
   CalendarCheck,
   Sparkles,
   CreditCard,
@@ -85,8 +84,7 @@ export default async function HomePage() {
       <header className="fixed top-0 inset-x-0 z-50 bg-charbon/95 backdrop-blur border-b border-white/5">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-display font-bold italic text-white text-xl tracking-wide uppercase">
-            <Car className="h-5 w-5 text-lime" />
-            Mirrorbook
+            <img src="/logo.svg" alt="Mirrorbook" className="h-8 w-auto" />
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400">
             <a href="#concept" className="hover:text-white transition-colors duration-200">Le concept</a>
@@ -455,8 +453,7 @@ export default async function HomePage() {
               className="flex items-center gap-2 text-white font-bold italic uppercase text-lg mb-3"
               style={{ fontFamily: 'var(--font-display)' }}
             >
-              <Car className="h-5 w-5 text-lime" />
-              Mirrorbook
+              <img src="/logo.svg" alt="Mirrorbook" className="h-8 w-auto" />
             </div>
             <p className="text-sm leading-relaxed font-light">
               Le nettoyage auto par abonnement. Simple, régulier, professionnel.

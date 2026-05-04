@@ -14,8 +14,8 @@ function base(content: string) {
         <!-- Header -->
         <tr>
           <td style="background:#203727;padding:28px 40px;">
-            <a href="${APP_URL}" style="color:#E0E704;text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-.3px;">
-              🚗 Mirrorbook
+            <a href="${APP_URL}" style="text-decoration:none;display:inline-block;">
+              <img src="${APP_URL}/logo.svg" alt="Mirrorbook" height="36" style="display:block;max-height:36px;width:auto;" />
             </a>
           </td>
         </tr>

@@ -11,7 +11,7 @@ function fmtTime(d: Date) {
 }
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Car, CheckCircle2 } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 
 const STATUS_LABELS: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'destructive' | 'secondary' | 'outline' }> = {
@@ -54,8 +54,7 @@ export default async function ConfirmationRefPage(props: {
             className="flex items-center gap-2 font-display font-bold italic uppercase text-white text-lg tracking-wide"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <Car className="h-5 w-5 text-lime" />
-            Mirrorbook
+            <img src="/logo.svg" alt="Mirrorbook" className="h-8 w-auto" />
           </Link>
         </div>
       </header>

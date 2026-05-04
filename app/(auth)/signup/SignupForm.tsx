@@ -10,7 +10,7 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { AlertCircle, Car } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 
 const schema = z.object({
   full_name: z.string().min(2, 'Le nom est requis'),
@@ -56,8 +56,7 @@ export default function SignupForm() {
             className="flex items-center gap-2 font-display font-bold italic uppercase text-white text-2xl tracking-wide"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <Car className="h-6 w-6 text-lime" />
-            Mirrorbook
+            <img src="/logo.svg" alt="Mirrorbook" className="h-8 w-auto" />
           </Link>
         </div>
 

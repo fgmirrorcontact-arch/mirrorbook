@@ -4,7 +4,7 @@ import { getSupabaseServerClient } from '@/lib/supabase/server'
 import LogoutButton from '@/components/LogoutButton'
 import AdminMobileNav from '@/components/admin/AdminMobileNav'
 import { NAV_ITEMS } from '@/components/admin/nav-items'
-import { Car, ExternalLink } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 
 export default async function AdminLayout({
   children,
@@ -42,8 +42,7 @@ export default async function AdminLayout({
             className="flex items-center gap-2 text-white font-display font-bold italic uppercase tracking-wide"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <Car className="h-5 w-5 text-lime" />
-            <span>Mirrorbook</span>
+            <img src="/logo.svg" alt="Mirrorbook" className="h-7 w-auto" />
           </Link>
           <p className="text-xs text-gray-500 mt-1">Administration</p>
         </div>

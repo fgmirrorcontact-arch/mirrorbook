@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import BookingWizard from '@/components/booking/BookingWizard'
 import { Button } from '@/components/ui/button'
-import { Car } from 'lucide-react'
 import type { Service, ServiceAddon } from '@/types'
 
 export const metadata = {
@@ -37,8 +36,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
             className="flex items-center gap-2 font-display font-bold italic uppercase text-white text-lg tracking-wide"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <Car className="h-5 w-5 text-lime" />
-            Mirrorbook
+            <img src="/logo.svg" alt="Mirrorbook" className="h-8 w-auto" />
           </Link>
           {user ? (
             <Link href="/dashboard">

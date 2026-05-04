@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { Calendar, Car, Package, Ticket } from 'lucide-react'
+import { Calendar, Package, Ticket } from 'lucide-react'
 import LogoutButton from '@/components/LogoutButton'
 import UpcomingBookings from '@/components/dashboard/UpcomingBookings'
 
@@ -52,8 +52,7 @@ export default async function DashboardPage() {
             className="flex items-center gap-2 font-display font-bold italic uppercase text-white text-lg tracking-wide"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <Car className="h-5 w-5 text-lime" />
-            Mirrorbook
+            <img src="/logo.svg" alt="Mirrorbook" className="h-8 w-auto" />
           </Link>
           <div className="flex items-center gap-2">
             <Link href="/book">

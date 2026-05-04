@@ -62,8 +62,8 @@ export default function AdminLoginPage() {
             className="flex items-center gap-2 text-white font-display font-bold italic uppercase text-xl tracking-wide"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <ShieldCheck className="h-6 w-6 text-lime" />
-            Mirrorbook Admin
+            <img src="/logo.svg" alt="Mirrorbook" className="h-8 w-auto" />
+            <span className="text-lime text-sm font-semibold tracking-widest uppercase">Admin</span>
           </div>
         </div>
 

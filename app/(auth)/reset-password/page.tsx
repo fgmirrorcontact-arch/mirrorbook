@@ -7,7 +7,7 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Car, CheckCircle2, AlertCircle } from 'lucide-react'
+import { CheckCircle2, AlertCircle } from 'lucide-react'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -53,8 +53,7 @@ export default function ResetPasswordPage() {
             className="flex items-center gap-2 font-display font-bold italic uppercase text-white text-2xl tracking-wide"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <Car className="h-6 w-6 text-lime" />
-            Mirrorbook
+            <img src="/logo.svg" alt="Mirrorbook" className="h-8 w-auto" />
           </Link>
         </div>
 

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Car, CheckCircle2 } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 
@@ -17,8 +17,7 @@ export default async function SubscriptionSuccessPage() {
           className="flex items-center justify-center gap-2 font-display font-bold italic uppercase text-white text-lg tracking-wide mb-6"
           style={{ fontFamily: 'var(--font-display)' }}
         >
-          <Car className="h-5 w-5 text-lime" />
-          Mirrorbook
+          <img src="/logo.svg" alt="Mirrorbook" className="h-8 w-auto" />
         </Link>
         <div className="flex justify-center mb-4">
           <div className="h-16 w-16 bg-vert rounded-full flex items-center justify-center">

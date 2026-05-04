@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, Car } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { NAV_ITEMS } from './nav-items'
 
 interface Props {
@@ -22,8 +22,7 @@ export default function AdminMobileNav({ userName }: Props) {
           className="flex items-center gap-2 text-white font-bold italic uppercase tracking-wide text-base"
           style={{ fontFamily: 'var(--font-display)' }}
         >
-          <Car className="h-4 w-4 text-lime" />
-          Mirrorbook
+          <img src="/logo.svg" alt="Mirrorbook" className="h-7 w-auto" />
         </Link>
         <button
           onClick={() => setOpen((v) => !v)}
