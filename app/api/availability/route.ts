@@ -58,8 +58,15 @@ export async function GET(request: NextRequest) {
     .single()
   const calendarId = employeeData?.google_calendar_id ?? process.env.GOOGLE_CALENDAR_ID ?? ''
 
-  // Fetch existing bookings for this employee on this date.
-  // Pending bookings older than 30 min are considered stale and don't block slots.
+  if (!scheduleData) {
+    console.warn(`[availability] pas de schedule pour employee=${employeeId} day=${dayOfWeek} (${dateOnly})`)
+    return Response.json({ slots: [] })
+  }
+
+  if (!calendarId) {
+    console.warn(`[availability] calendarId manquant pour employee=${employeeId}`)
+  }
+
   const dayStart = `${dateOnly}T00:00:00Z`
   const dayEnd = `${dateOnly}T23:59:59Z`
   const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
@@ -75,19 +82,22 @@ export async function GET(request: NextRequest) {
     calendarId ? getCalendarBusyTimes(calendarId, dayStart, dayEnd) : Promise.resolve([]),
   ])
 
-  // Merge DB bookings + Google Calendar busy times
+  console.log(`[availability] ${dateOnly} employee=${employeeId} schedule=${scheduleData.start_time}-${scheduleData.end_time} bookings=${bookingsData?.length ?? 0} gcal_busy=${calendarBusy.length} calendarId=${calendarId || 'VIDE'}`, calendarBusy)
+
   const allBusy: Pick<Booking, 'start_at' | 'end_at'>[] = [
     ...((bookingsData as Pick<Booking, 'start_at' | 'end_at'>[]) ?? []),
     ...calendarBusy.map((b) => ({ start_at: b.start, end_at: b.end })),
   ]
 
   const slots = getAvailableSlots({
-    schedule: (scheduleData as AvailabilitySchedule) ?? null,
+    schedule: scheduleData as AvailabilitySchedule,
     exception: (exceptionData as AvailabilityException) ?? null,
     existingBookings: allBusy,
     date,
     serviceDurationMinutes: duration,
   })
+
+  console.log(`[availability] ${dateOnly} => ${slots.length} créneaux : ${slots.join(', ') || 'aucun'}`)
 
   return Response.json({ slots })
 }
