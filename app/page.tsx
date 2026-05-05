@@ -56,12 +56,12 @@ export default async function HomePage() {
 
   const activeServiceIds = new Set<string>()
   if (user) {
-    const { data: subs } = await supabase
+    const { data: subs } = await admin
       .from('subscriptions')
       .select('service_id')
       .eq('client_id', user.id)
       .eq('status', 'active')
-    subs?.forEach((s) => activeServiceIds.add(s.service_id))
+    subs?.forEach((s) => { if (s.service_id) activeServiceIds.add(s.service_id) })
   }
 
   let tiersByService: Record<string, ServiceCommitmentTier[]> = {}
