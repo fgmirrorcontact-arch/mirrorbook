@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
 
   const supabase = await getSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return Response.json(serviceId ? { tokens: [] } : { service_ids: [] })
+  if (!user) return Response.json(serviceId ? { tokens: [] } : { service_ids: [], subscribed_service_ids: [] })
 
   if (serviceId) {
     const { data: tokens, error } = await supabase

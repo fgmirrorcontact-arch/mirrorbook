@@ -21,6 +21,7 @@ type Booking = {
   end_at: string
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show'
   notes: string | null
+  internal_notes: string | null
   total_price_cents: number
   client: { full_name: string | null } | null
   service: { name: string } | null
@@ -73,6 +74,8 @@ export default function CalendarClient({ bookings, employees, services, addons }
   const [newBookingOpen, setNewBookingOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [editingNotes, setEditingNotes] = useState<string | null>(null)
+  const [savingNotes, setSavingNotes] = useState(false)
 
   function toggleEmployee(id: string) {
     setHidden((prev) => {
@@ -98,6 +101,7 @@ export default function CalendarClient({ bookings, employees, services, addons }
 
   function handleEventClick(arg: EventClickArg) {
     setSelected(arg.event.extendedProps.booking as Booking)
+    setEditingNotes(null)
   }
 
   function handleBookingCreated() {
@@ -113,6 +117,22 @@ export default function CalendarClient({ bookings, employees, services, addons }
     setSelected(null)
     setConfirmDelete(false)
     router.refresh()
+  }
+
+  async function handleSaveNotes(id: string) {
+    const newNotes = editingNotes || null
+    setSavingNotes(true)
+    const res = await fetch(`/api/admin/bookings/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ internal_notes: newNotes }),
+    })
+    setSavingNotes(false)
+    if (res.ok) {
+      setSelected((prev) => prev?.id === id ? { ...prev, internal_notes: newNotes } : prev)
+      setEditingNotes(null)
+      router.refresh()
+    }
   }
 
   return (
@@ -288,10 +308,56 @@ export default function CalendarClient({ bookings, employees, services, addons }
                 </div>
                 {selected.notes && (
                   <div>
-                    <dt className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Notes</dt>
+                    <dt className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Notes client</dt>
                     <dd className="text-gray-700 leading-relaxed">{selected.notes}</dd>
                   </div>
                 )}
+                <div>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <dt className="text-xs text-gray-500 uppercase tracking-wide">Notes internes</dt>
+                    {editingNotes === null && (
+                      <button
+                        type="button"
+                        onClick={() => setEditingNotes(selected.internal_notes ?? '')}
+                        className="text-xs text-vert hover:text-vert/80 font-medium"
+                      >
+                        Modifier
+                      </button>
+                    )}
+                  </div>
+                  {editingNotes !== null ? (
+                    <dd className="space-y-2">
+                      <textarea
+                        value={editingNotes}
+                        onChange={(e) => setEditingNotes(e.target.value)}
+                        className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-vert/40"
+                        rows={3}
+                        placeholder="Notes visibles uniquement par l'équipe"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSaveNotes(selected.id)}
+                          disabled={savingNotes}
+                          className="text-xs bg-vert text-lime px-3 py-1.5 rounded-lg font-medium hover:bg-vert/90 disabled:opacity-50 transition-colors"
+                        >
+                          {savingNotes ? '…' : 'Enregistrer'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingNotes(null)}
+                          className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 transition-colors"
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    </dd>
+                  ) : (
+                    <dd className="text-sm text-gray-700 leading-relaxed">
+                      {selected.internal_notes ?? <span className="text-gray-400 italic">Aucune</span>}
+                    </dd>
+                  )}
+                </div>
               </dl>
             </div>
           </div>

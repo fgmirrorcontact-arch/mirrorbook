@@ -9,6 +9,7 @@ import {
   subscriptionActivatedEmail,
   tokensRenewedEmail,
   adminNewBookingEmail,
+  paymentFailedEmail,
 } from '@/lib/emails/templates'
 
 export async function POST(request: NextRequest) {
@@ -369,10 +370,33 @@ export async function POST(request: NextRequest) {
         const invoice = event.data.object as Stripe.Invoice
         const subId = (invoice.parent?.subscription_details?.subscription ?? null) as string | null
         if (!subId) break
+
+        const { data: failedSub } = await admin
+          .from('subscriptions')
+          .select('client_id, services(name)')
+          .eq('stripe_subscription_id', subId)
+          .single()
+
         await admin
           .from('subscriptions')
           .update({ status: 'past_due' })
           .eq('stripe_subscription_id', subId)
+
+        if (failedSub) {
+          const svcName = (failedSub.services as unknown as { name: string } | null)?.name ?? 'votre formule'
+          const { data: { user: failedUser } } = await admin.auth.admin.getUserById(failedSub.client_id)
+          if (failedUser?.email) {
+            const { data: failedProfile } = await admin
+              .from('profiles').select('full_name').eq('id', failedSub.client_id).single()
+            const firstName = failedProfile?.full_name?.split(' ')[0] ?? 'vous'
+            const invoiceUrl = (invoice as unknown as { hosted_invoice_url?: string }).hosted_invoice_url ?? undefined
+            void sendEmail(
+              failedUser.email,
+              `Échec de paiement — ${svcName}`,
+              paymentFailedEmail({ firstName, serviceName: svcName, invoiceUrl })
+            ).catch((err) => console.error('[webhook] email payment failed error', err))
+          }
+        }
         break
       }
 

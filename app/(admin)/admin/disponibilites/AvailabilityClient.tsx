@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/components/ui/use-toast'
-import { Trash2, Plus, UserPlus } from 'lucide-react'
+import { Trash2, Plus, UserPlus, Pencil, Check, X } from 'lucide-react'
 
 const DAYS = [
   { value: 1, label: 'Lundi' },
@@ -193,6 +193,8 @@ export default function AvailabilityClient({ employees: initialEmployees, allSch
   const [newDate, setNewDate] = useState('')
   const [newReason, setNewReason] = useState('')
   const [excSaving, setExcSaving] = useState(false)
+  const [editingExcId, setEditingExcId] = useState<string | null>(null)
+  const [editingExcReason, setEditingExcReason] = useState('')
 
   async function addException() {
     if (!selected || !newDate) return
@@ -221,6 +223,20 @@ export default function AvailabilityClient({ employees: initialEmployees, allSch
     if (res.ok) {
       setExceptions((prev) => prev.filter((e) => e.id !== id))
       toast({ title: 'Date débloquée' })
+    }
+  }
+
+  async function saveExcReason(id: string) {
+    const res = await fetch(`/api/admin/availability/exceptions/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason: editingExcReason }),
+    })
+    if (res.ok) {
+      const updated = await res.json()
+      setExceptions((prev) => prev.map((e) => e.id === id ? { ...e, reason: updated.reason } : e))
+      setEditingExcId(null)
+      toast({ title: 'Motif mis à jour' })
     }
   }
 
@@ -387,14 +403,40 @@ export default function AvailabilityClient({ employees: initialEmployees, allSch
         {exceptions.length > 0 ? (
           <ul className="divide-y divide-gray-50 border border-gray-100 rounded-lg overflow-hidden">
             {exceptions.sort((a, b) => a.exception_date.localeCompare(b.exception_date)).map((exc) => (
-              <li key={exc.id} className="flex items-center justify-between px-4 py-3 bg-white">
-                <div>
+              <li key={exc.id} className="flex items-center justify-between px-4 py-3 bg-white gap-3">
+                <div className="flex-1 min-w-0">
                   <span className="text-sm font-medium text-gray-900">
                     {new Date(exc.exception_date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                   </span>
-                  {exc.reason && <span className="ml-2 text-xs text-gray-400">— {exc.reason}</span>}
+                  {editingExcId === exc.id ? (
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <Input
+                        value={editingExcReason}
+                        onChange={(e) => setEditingExcReason(e.target.value)}
+                        placeholder="Motif…"
+                        className="h-7 text-xs flex-1"
+                        onKeyDown={(e) => { if (e.key === 'Enter') saveExcReason(exc.id); if (e.key === 'Escape') setEditingExcId(null) }}
+                        autoFocus
+                      />
+                      <button onClick={() => saveExcReason(exc.id)} className="text-green-600 hover:text-green-700 transition-colors">
+                        <Check className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => setEditingExcId(null)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => { setEditingExcId(exc.id); setEditingExcReason(exc.reason ?? '') }}
+                      className="group flex items-center gap-1 mt-0.5"
+                    >
+                      <span className="text-xs text-gray-400">{exc.reason || 'Ajouter un motif'}</span>
+                      <Pencil className="h-3 w-3 text-gray-300 group-hover:text-gray-500 transition-colors" />
+                    </button>
+                  )}
                 </div>
-                <button onClick={() => removeException(exc.id)} className="text-gray-400 hover:text-red-500 transition-colors">
+                <button onClick={() => removeException(exc.id)} className="text-gray-400 hover:text-red-500 transition-colors shrink-0">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </li>

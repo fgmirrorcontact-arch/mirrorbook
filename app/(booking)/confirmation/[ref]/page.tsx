@@ -11,7 +11,7 @@ function fmtTime(d: Date) {
 }
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Clock } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 
 const STATUS_LABELS: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'destructive' | 'secondary' | 'outline' }> = {
@@ -62,9 +62,15 @@ export default async function ConfirmationRefPage(props: {
       <main className="max-w-2xl mx-auto px-6 py-12">
         <div className="text-center mb-10">
           <div className="flex justify-center mb-4">
-            <div className="h-16 w-16 bg-vert rounded-full flex items-center justify-center">
-              <CheckCircle2 className="h-8 w-8 text-lime" />
-            </div>
+            {booking.status === 'pending' ? (
+              <div className="h-16 w-16 bg-amber-100 rounded-full flex items-center justify-center">
+                <Clock className="h-8 w-8 text-amber-500" />
+              </div>
+            ) : (
+              <div className="h-16 w-16 bg-vert rounded-full flex items-center justify-center">
+                <CheckCircle2 className="h-8 w-8 text-lime" />
+              </div>
+            )}
           </div>
           <h1
             className="text-3xl font-extrabold italic uppercase text-charbon mb-2"
@@ -73,6 +79,11 @@ export default async function ConfirmationRefPage(props: {
             Réservation {booking.booking_ref}
           </h1>
           <Badge variant={status.variant}>{status.label}</Badge>
+          {booking.status === 'pending' && (
+            <p className="mt-3 text-sm text-gray-500">
+              Votre paiement est en cours de traitement. Vous recevrez un email de confirmation dans quelques instants.
+            </p>
+          )}
         </div>
 
         <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 mb-8">

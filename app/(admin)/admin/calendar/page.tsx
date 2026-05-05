@@ -15,7 +15,7 @@ export default async function AdminCalendarPage() {
     supabase
       .from('bookings')
       .select(`
-        id, booking_ref, employee_id, start_at, end_at, status, notes, total_price_cents,
+        id, booking_ref, employee_id, start_at, end_at, status, notes, internal_notes, total_price_cents,
         client:profiles ( full_name ),
         service:services ( name ),
         employee:employees ( display_name, color ),

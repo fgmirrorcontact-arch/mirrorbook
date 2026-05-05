@@ -8,6 +8,29 @@ async function assertAdmin(supabase: Awaited<ReturnType<typeof getSupabaseServer
   return data?.role === 'admin'
 }
 
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const supabase = await getSupabaseServerClient()
+  if (!(await assertAdmin(supabase))) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const { id } = await params
+  const body = await request.json().catch(() => ({}))
+  const reason = typeof body.reason === 'string' ? body.reason.trim() || null : null
+
+  const { data, error } = await supabase
+    .from('availability_exceptions')
+    .update({ reason })
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  return NextResponse.json(data)
+}
+
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }

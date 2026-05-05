@@ -3,8 +3,8 @@
 import { useBookingStore } from '@/store/bookingStore'
 import type { ServiceAddon } from '@/types'
 import { Button } from '@/components/ui/button'
-import { Plus, Minus } from 'lucide-react'
-import { formatPrice, cn } from '@/lib/utils'
+import { Plus, Minus, Clock } from 'lucide-react'
+import { formatPrice, formatDuration, cn } from '@/lib/utils'
 
 interface AddonStepProps {
   addons: ServiceAddon[]
@@ -51,9 +51,17 @@ export default function AddonStep({ addons }: AddonStepProps) {
                 )}
               </div>
               <div className="flex items-center gap-3 shrink-0 ml-4">
-                <span className="text-sm font-semibold text-gray-900">
-                  +{formatPrice(addon.price_cents)}
-                </span>
+                <div className="text-right">
+                  {addon.duration_minutes > 0 && (
+                    <p className="flex items-center justify-end gap-1 text-xs text-gray-400 mb-0.5">
+                      <Clock className="h-3 w-3" />
+                      +{formatDuration(addon.duration_minutes)}
+                    </p>
+                  )}
+                  <span className="text-sm font-semibold text-gray-900">
+                    +{formatPrice(addon.price_cents)}
+                  </span>
+                </div>
                 <button
                   type="button"
                   onClick={() => toggleAddon(addon)}

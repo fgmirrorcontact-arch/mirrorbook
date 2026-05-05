@@ -256,8 +256,8 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
         </div>
       )}
 
-      {/* Spacer mobile pour le bouton fixe */}
-      <div className="h-20 sm:hidden" />
+      {/* Spacer mobile pour le bouton fixe + safe area iOS */}
+      <div className="h-28 sm:hidden" />
 
       {/* Desktop */}
       <div className="hidden sm:flex justify-end">
@@ -267,7 +267,10 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
       </div>
 
       {/* Mobile : bouton fixe en bas */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur border-t border-gray-200 px-6 py-3 sm:hidden">
+      <div
+        className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur border-t border-gray-200 px-6 pt-3 sm:hidden"
+        style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
+      >
         <Button onClick={handleContinue} disabled={!canContinue} size="lg" className="w-full">
           Continuer
         </Button>

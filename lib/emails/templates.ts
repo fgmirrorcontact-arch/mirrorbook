@@ -293,6 +293,29 @@ export function adminNewBookingEmail(params: {
   `)
 }
 
+export function paymentFailedEmail(params: {
+  firstName: string
+  serviceName: string
+  invoiceUrl?: string
+}) {
+  const { firstName, serviceName, invoiceUrl } = params
+  return base(`
+    <div style="display:inline-block;background:#fee2e2;color:#b91c1c;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;margin-bottom:16px;">
+      Échec de paiement
+    </div>
+    <h1 style="margin:0 0 8px;font-size:24px;color:#111827;">Votre paiement a échoué</h1>
+    <p style="margin:0 0 24px;color:#6b7280;font-size:15px;line-height:1.6;">
+      Bonjour ${firstName}, le renouvellement de votre abonnement <strong>${serviceName}</strong>
+      n'a pas pu être traité. Pour conserver l'accès à vos crédits, veuillez mettre à jour
+      votre moyen de paiement.
+    </p>
+    ${invoiceUrl ? btn('Régler ma facture', invoiceUrl) : btn('Mon espace client', `${APP_URL}/dashboard`)}
+    <p style="margin:24px 0 0;color:#9ca3af;font-size:13px;line-height:1.6;">
+      Si le problème persiste, contactez-nous depuis votre espace client.
+    </p>
+  `)
+}
+
 export function tokensRenewedEmail(params: {
   firstName: string
   serviceName: string

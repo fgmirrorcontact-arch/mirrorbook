@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -13,17 +14,40 @@ export default async function SubscriptionSuccessPage(props: { searchParams: Pro
   if (!user) redirect('/login')
 
   let bookingDisplay: { ref: string; dateLabel: string } | null = null
+  let subDisplay: { serviceName: string; tokensCount: number; periodEnd: string | null } | null = null
+
   if (booking_ref) {
     const { data: booking } = await supabase
       .from('bookings')
-      .select('booking_ref, start_at')
+      .select('booking_ref, start_at, service_id, client_id')
       .eq('booking_ref', booking_ref)
       .single()
+
     if (booking) {
       const dt = new Date(booking.start_at)
       bookingDisplay = {
         ref: booking.booking_ref,
         dateLabel: format(dt, "EEEE d MMMM 'à' HH'h'mm", { locale: fr }),
+      }
+
+      const admin = getSupabaseAdminClient()
+      const { data: sub } = await admin
+        .from('subscriptions')
+        .select('current_period_end, services(name, tokens_per_renewal)')
+        .eq('client_id', booking.client_id)
+        .eq('service_id', booking.service_id)
+        .in('status', ['active', 'incomplete'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (sub) {
+        const svcInfo = sub.services as unknown as { name: string; tokens_per_renewal: number | null } | null
+        subDisplay = {
+          serviceName: svcInfo?.name ?? '',
+          tokensCount: svcInfo?.tokens_per_renewal ?? 0,
+          periodEnd: sub.current_period_end,
+        }
       }
     }
   }
@@ -57,6 +81,35 @@ export default async function SubscriptionSuccessPage(props: { searchParams: Pro
             {bookingDisplay.dateLabel}
           </p>
         )}
+
+        {subDisplay && (
+          <div className="bg-white/10 rounded-lg px-4 py-3 mb-6 text-left space-y-2 mt-4">
+            <p className="text-white/50 text-xs uppercase tracking-wide mb-1">Votre abonnement</p>
+            {subDisplay.serviceName && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Formule</span>
+                <span className="text-white font-medium">{subDisplay.serviceName}</span>
+              </div>
+            )}
+            {subDisplay.tokensCount > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Crédits</span>
+                <span className="text-white font-medium">
+                  {subDisplay.tokensCount} séance{subDisplay.tokensCount > 1 ? 's' : ''}/mois
+                </span>
+              </div>
+            )}
+            {subDisplay.periodEnd && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Prochain renouvellement</span>
+                <span className="text-white font-medium capitalize">
+                  {format(new Date(subDisplay.periodEnd), 'd MMMM yyyy', { locale: fr })}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
         <p className="text-gray-500 mb-6 text-xs">
           Vous recevrez un email de confirmation dans quelques instants.
         </p>
