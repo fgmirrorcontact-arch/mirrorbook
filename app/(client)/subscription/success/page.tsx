@@ -3,12 +3,30 @@ import { redirect } from 'next/navigation'
 import { CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
-export default async function SubscriptionSuccessPage(props: { searchParams: Promise<{ service_id?: string }> }) {
-  const { service_id } = await props.searchParams
+export default async function SubscriptionSuccessPage(props: { searchParams: Promise<{ booking_ref?: string }> }) {
+  const { booking_ref } = await props.searchParams
   const supabase = await getSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  let bookingDisplay: { ref: string; dateLabel: string } | null = null
+  if (booking_ref) {
+    const { data: booking } = await supabase
+      .from('bookings')
+      .select('booking_ref, start_at')
+      .eq('booking_ref', booking_ref)
+      .single()
+    if (booking) {
+      const dt = new Date(booking.start_at)
+      bookingDisplay = {
+        ref: booking.booking_ref,
+        dateLabel: format(dt, "EEEE d MMMM 'à' HH'h'mm", { locale: fr }),
+      }
+    }
+  }
 
   return (
     <div className="min-h-screen bg-charbon flex items-center justify-center px-4">
@@ -32,18 +50,25 @@ export default async function SubscriptionSuccessPage(props: { searchParams: Pro
           Abonnement activé !
         </h1>
         <p className="text-gray-400 mb-2 text-sm font-light">
-          Votre abonnement est maintenant actif. Réservez votre première séance dès maintenant et ajoutez vos options.
+          Votre abonnement est maintenant actif et votre première séance est réservée.
         </p>
+        {bookingDisplay && (
+          <p className="text-gray-300 mb-2 text-sm font-medium capitalize">
+            {bookingDisplay.dateLabel}
+          </p>
+        )}
         <p className="text-gray-500 mb-6 text-xs">
-          Vos crédits seront disponibles dans quelques instants.
+          Vous recevrez un email de confirmation dans quelques instants.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/dashboard">
             <Button variant="outline">Mon espace</Button>
           </Link>
-          <Link href={service_id ? `/book?service=${service_id}` : '/book'}>
-            <Button className="font-bold uppercase tracking-wider">Réserver ma première séance</Button>
-          </Link>
+          {bookingDisplay && (
+            <Link href={`/confirmation/${bookingDisplay.ref}`}>
+              <Button className="font-bold uppercase tracking-wider">Voir ma réservation</Button>
+            </Link>
+          )}
         </div>
       </div>
     </div>

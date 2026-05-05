@@ -29,9 +29,151 @@ export async function POST(request: NextRequest) {
 
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
-        if (session.mode === 'subscription' && session.subscription) {
-          const sub = await stripe.subscriptions.retrieve(session.subscription as string)
-          await upsertSubscription(admin, sub)
+
+        if (session.metadata?.type === 'subscription_initial') {
+          // Single payment covering first month + add-ons, then subscription created via API
+          const { booking_id, stripe_price_id, service_id, stripe_coupon_id } = session.metadata
+
+          // Confirm the booking
+          await admin
+            .from('bookings')
+            .update({
+              status: 'confirmed',
+              stripe_payment_intent_id: (session.payment_intent as string | null) ?? null,
+            })
+            .eq('id', booking_id)
+
+          // Fetch booking details for email + calendar
+          const { data: booking } = await admin
+            .from('bookings')
+            .select('booking_ref, start_at, end_at, notes, client_id, services(name), employees(google_calendar_id)')
+            .eq('id', booking_id)
+            .single()
+
+          if (!booking) break
+
+          // Get the saved payment method from the PaymentIntent
+          let paymentMethodId: string | undefined
+          if (session.payment_intent) {
+            const pi = await stripe.paymentIntents.retrieve(session.payment_intent as string)
+            const pm = pi.payment_method
+            paymentMethodId = typeof pm === 'string' ? pm : pm?.id
+          }
+
+          // Create Stripe subscription — trial_end = 30 days so first auto-charge is next month
+          const trialEnd = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60
+          const stripeSub = await stripe.subscriptions.create({
+            customer: session.customer as string,
+            items: [{ price: stripe_price_id }],
+            ...(paymentMethodId ? { default_payment_method: paymentMethodId } : {}),
+            trial_end: trialEnd,
+            // Apply promo coupon to all future invoices
+            ...(stripe_coupon_id ? { discounts: [{ coupon: stripe_coupon_id }] } : {}),
+            metadata: {
+              supabase_user_id: booking.client_id,
+              supabase_service_id: service_id,
+            },
+          } as Parameters<typeof stripe.subscriptions.create>[0])
+
+          await upsertSubscription(admin, stripeSub)
+
+          // Issue tokens for month 1 — first one marked used (for the booking just created)
+          const { data: localSub } = await admin
+            .from('subscriptions')
+            .select('id, services(name, tokens_per_renewal)')
+            .eq('stripe_subscription_id', stripeSub.id)
+            .single()
+
+          if (localSub) {
+            const svcInfo = localSub.services as unknown as { name: string; tokens_per_renewal: number | null } | null
+            const tokensPerRenewal = svcInfo?.tokens_per_renewal ?? 0
+            const serviceName = svcInfo?.name ?? 'Formule'
+
+            if (tokensPerRenewal > 0) {
+              const tokenRows = Array.from({ length: tokensPerRenewal }, (_, i) => ({
+                subscription_id: localSub.id,
+                client_id: booking.client_id,
+                service_id,
+                stripe_invoice_id: session.invoice as string | null ?? null,
+                status: i === 0 ? 'used' as const : 'available' as const,
+              }))
+              const { data: createdTokens } = await admin
+                .from('subscription_tokens')
+                .insert(tokenRows)
+                .select('id')
+              // Link first token to the booking
+              if (createdTokens?.[0]) {
+                await admin
+                  .from('bookings')
+                  .update({ token_id: createdTokens[0].id })
+                  .eq('id', booking_id)
+              }
+            }
+
+            // Send Stripe invoice
+            if (session.invoice) {
+              void stripe.invoices.sendInvoice(session.invoice as string).catch((err) =>
+                console.error('[webhook] invoice send error', err)
+              )
+            }
+
+            // Emails
+            const { data: { user: clientUser } } = await admin.auth.admin.getUserById(booking.client_id)
+            if (clientUser?.email) {
+              const { data: profile } = await admin
+                .from('profiles').select('full_name').eq('id', booking.client_id).single()
+              const firstName = profile?.full_name?.split(' ')[0] ?? 'vous'
+              const svcName = (booking.services as unknown as { name: string } | null)?.name ?? serviceName
+
+              void sendEmail(
+                clientUser.email,
+                `Réservation confirmée — ${booking.booking_ref}`,
+                bookingConfirmedEmail({
+                  firstName,
+                  bookingRef: booking.booking_ref,
+                  serviceName: svcName,
+                  startAt: booking.start_at,
+                  endAt: booking.end_at,
+                  totalCents: 0,
+                  paymentMethod: 'stripe_one_time',
+                })
+              )
+              void sendEmail(
+                clientUser.email,
+                `Votre abonnement ${serviceName} est actif !`,
+                subscriptionActivatedEmail({
+                  firstName,
+                  serviceName,
+                  tokensCount: tokensPerRenewal,
+                  periodEnd: new Date(trialEnd * 1000).toISOString(),
+                })
+              )
+            }
+
+            // Google Calendar event
+            const calendarId =
+              (booking.employees as unknown as { google_calendar_id: string | null } | null)?.google_calendar_id
+              ?? process.env.GOOGLE_CALENDAR_ID
+              ?? ''
+            const calServiceName = (booking.services as unknown as { name: string } | null)?.name ?? 'Réservation'
+            const { data: calProfile } = await admin
+              .from('profiles').select('full_name').eq('id', booking.client_id).single()
+
+            if (calendarId) {
+              createCalendarEvent({
+                calendarId,
+                summary: `${calServiceName} — ${calProfile?.full_name ?? 'Client'}`,
+                description: `Réf : ${booking.booking_ref}${booking.notes ? `\n${booking.notes}` : ''}`,
+                startAt: booking.start_at,
+                endAt: booking.end_at,
+              }).then((eventId) => {
+                if (eventId) {
+                  admin.from('bookings').update({ google_calendar_event_id: eventId }).eq('id', booking_id)
+                }
+              })
+            }
+          }
+
         } else if (session.mode === 'payment' && session.metadata?.booking_id) {
           const bookingId = session.metadata.booking_id
           await admin
@@ -42,7 +184,6 @@ export async function POST(request: NextRequest) {
             })
             .eq('id', bookingId)
 
-          // Hybrid payment: consume the subscription token after Stripe confirms
           if (session.metadata.token_id) {
             await admin
               .from('subscription_tokens')
@@ -50,14 +191,12 @@ export async function POST(request: NextRequest) {
               .eq('id', session.metadata.token_id)
           }
 
-          // Send Stripe invoice if one was created
           if (session.invoice) {
             void stripe.invoices.sendInvoice(session.invoice as string).catch((err) =>
               console.error('[webhook] invoice send error', err)
             )
           }
 
-          // Create Google Calendar event now that payment is confirmed
           const { data: booking } = await admin
             .from('bookings')
             .select('booking_ref, start_at, end_at, notes, client_id, services(name), employees(google_calendar_id)')
@@ -71,7 +210,6 @@ export async function POST(request: NextRequest) {
               .eq('id', booking.client_id)
               .single()
 
-            // Email confirmation réservation (paiement Stripe)
             const { data: { user: clientUser } } = await admin.auth.admin.getUserById(booking.client_id)
             if (clientUser?.email) {
               const firstName = clientProfile?.full_name?.split(' ')[0] ?? 'vous'
@@ -133,6 +271,9 @@ export async function POST(request: NextRequest) {
 
       case 'invoice.paid': {
         const invoice = event.data.object as Stripe.Invoice
+        // Skip $0 trial invoices — tokens for month 1 are issued in checkout.session.completed
+        if ((invoice.amount_paid ?? 0) === 0) break
+
         const subId = (invoice.parent?.subscription_details?.subscription ?? null) as string | null
         if (!subId) break
 
@@ -165,33 +306,22 @@ export async function POST(request: NextRequest) {
           .update({ status: 'active' })
           .eq('stripe_subscription_id', subId)
 
-        // Send Stripe invoice
         void stripe.invoices.sendInvoice(invoice.id).catch((err) =>
           console.error('[webhook] invoice send error', err)
         )
 
-        // Email abonnement activé ou renouvellement
         const { data: { user: subUser } } = await admin.auth.admin.getUserById(localSub.client_id)
         if (subUser?.email) {
           const { data: subProfile } = await admin
             .from('profiles').select('full_name').eq('id', localSub.client_id).single()
           const firstName = subProfile?.full_name?.split(' ')[0] ?? 'vous'
           const periodEnd = localSub.current_period_end ?? new Date().toISOString()
-          const billingReason = (invoice as unknown as { billing_reason?: string }).billing_reason
 
-          if (billingReason === 'subscription_create') {
-            void sendEmail(
-              subUser.email,
-              `Votre abonnement ${serviceName} est actif !`,
-              subscriptionActivatedEmail({ firstName, serviceName, tokensCount: tokensPerRenewal, periodEnd })
-            )
-          } else {
-            void sendEmail(
-              subUser.email,
-              `Vos crédits ont été renouvelés — ${serviceName}`,
-              tokensRenewedEmail({ firstName, serviceName, tokensCount: tokensPerRenewal, periodEnd })
-            )
-          }
+          void sendEmail(
+            subUser.email,
+            `Vos crédits ont été renouvelés — ${serviceName}`,
+            tokensRenewedEmail({ firstName, serviceName, tokensCount: tokensPerRenewal, periodEnd })
+          )
         }
 
         break
@@ -249,9 +379,30 @@ async function upsertSubscription(
   }
 
   const priceId = sub.items.data[0]?.price?.id
-  const { data: service } = priceId
-    ? await admin.from('services').select('id').eq('stripe_price_id', priceId).single()
-    : { data: null }
+
+  // Prefer metadata service ID (handles tier price IDs that don't map directly to services)
+  const serviceIdFromMeta = (sub.metadata as Record<string, string> | null)?.supabase_service_id
+  let serviceId: string | null = serviceIdFromMeta ?? null
+
+  if (!serviceId && priceId) {
+    // Try direct service match
+    const { data: service } = await admin
+      .from('services')
+      .select('id')
+      .eq('stripe_price_id', priceId)
+      .single()
+    if (service) {
+      serviceId = service.id
+    } else {
+      // Try via commitment tier
+      const { data: tier } = await admin
+        .from('service_commitment_tiers')
+        .select('service_id')
+        .eq('stripe_price_id', priceId)
+        .single()
+      if (tier) serviceId = tier.service_id
+    }
+  }
 
   const statusMap: Record<string, string> = {
     active: 'active',
@@ -264,7 +415,6 @@ async function upsertSubscription(
     unpaid: 'past_due',
   }
 
-  // current_period_start/end sont dans sub.items.data[0] en API récente
   const item = sub.items.data[0]
   const periodStart = (item as unknown as { current_period_start?: number })?.current_period_start
     ?? (sub as unknown as { current_period_start: number }).current_period_start
@@ -274,7 +424,7 @@ async function upsertSubscription(
   await admin.from('subscriptions').upsert(
     {
       client_id: profile.id,
-      service_id: (service?.id ?? null) as string,
+      service_id: serviceId as string,
       stripe_subscription_id: sub.id,
       status: (statusMap[sub.status] ?? 'incomplete') as never,
       current_period_start: new Date(periodStart * 1000).toISOString(),

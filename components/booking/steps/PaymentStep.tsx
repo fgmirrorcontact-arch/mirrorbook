@@ -147,8 +147,10 @@ export default function PaymentStep() {
           body: JSON.stringify({
             service_id: selectedService.id,
             ...(selectedTier ? { tier_id: selectedTier.id } : {}),
-            ...(selectedAddons.length > 0 ? { addon_ids: selectedAddons.map((a) => a.id) } : {}),
             ...(appliedPromoId ? { promo_code_id: appliedPromoId } : {}),
+            addon_ids: selectedAddons.map((a) => a.id),
+            employee_id: DEFAULT_EMPLOYEE_ID,
+            start_at: start.toISOString(),
           }),
         })
         const data = await res.json()

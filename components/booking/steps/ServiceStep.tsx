@@ -76,9 +76,7 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
 
   function handleContinue() {
     if (!canContinue) return
-    const hasToken = tokenServiceIds.has(selectedService?.id ?? '')
-    const showAddons = applicableAddons.length > 0 && (!selectedService?.is_subscription || hasToken)
-    setStep(showAddons ? 'addon' : 'slot')
+    setStep(applicableAddons.length > 0 ? 'addon' : 'slot')
   }
 
   function renderCard(service: Service) {
