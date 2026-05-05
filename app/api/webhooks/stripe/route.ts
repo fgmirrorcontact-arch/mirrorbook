@@ -1,6 +1,6 @@
 import { type NextRequest } from 'next/server'
 import type Stripe from 'stripe'
-import { stripe } from '@/lib/stripe'
+import { stripe, stripeWebhookSecret } from '@/lib/stripe'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createCalendarEvent } from '@/lib/google-calendar'
 import { sendEmail } from '@/lib/email'
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = stripe.webhooks.constructEvent(rawBody, sig, stripeWebhookSecret)
   } catch (err) {
     console.error('[webhook] signature invalide', err)
     return Response.json({ error: 'Signature invalide' }, { status: 400 })
