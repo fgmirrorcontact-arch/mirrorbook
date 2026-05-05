@@ -40,7 +40,7 @@ export function ServiceCard({ service, tiers, isActive }: ServiceCardProps) {
           </div>
         )}
 
-        {hasTiers && (
+        {hasTiers && !isActive && (
           <div>
             <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
               Durée d&apos;engagement
@@ -61,34 +61,46 @@ export function ServiceCard({ service, tiers, isActive }: ServiceCardProps) {
       </div>
 
       <div className="pt-4 border-t border-gray-100 mt-4">
-        <div className="text-3xl font-bold text-vert mb-1">
-          {formatPrice(displayedPrice)}
-          <span className="text-base font-normal text-gray-500">/mois</span>
-        </div>
-        {service.tokens_per_renewal && (
-          <p className="text-sm text-gray-500 mb-2">
-            {service.tokens_per_renewal} séance{service.tokens_per_renewal > 1 ? 's' : ''} par mois
-          </p>
-        )}
-        {service.duration_minutes > 0 && (
-          <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-            <Check className="h-4 w-4 text-lime bg-vert rounded-full p-0.5 shrink-0" />
-            <span>Séances de {service.duration_minutes} min</span>
-          </div>
-        )}
-        <div className="mt-4">
-          {isActive ? (
-            <Button variant="outline" size="lg" className="w-full" disabled>
-              Abonnement actif
-            </Button>
-          ) : (
-            <Link href={`/book?service=${service.id}`} className="block">
-              <Button size="lg" className="w-full font-bold uppercase tracking-wider">
-                Réserver
+        {isActive ? (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold">
+                <Check className="h-3.5 w-3.5" />
+                Abonnement actif
+              </span>
+            </div>
+            <Link href="/dashboard" className="block">
+              <Button variant="outline" size="lg" className="w-full">
+                Gérer mon abonnement
               </Button>
             </Link>
-          )}
-        </div>
+          </div>
+        ) : (
+          <>
+            <div className="text-3xl font-bold text-vert mb-1">
+              {formatPrice(displayedPrice)}
+              <span className="text-base font-normal text-gray-500">/mois</span>
+            </div>
+            {service.tokens_per_renewal && (
+              <p className="text-sm text-gray-500 mb-2">
+                {service.tokens_per_renewal} séance{service.tokens_per_renewal > 1 ? 's' : ''} par mois
+              </p>
+            )}
+            {service.duration_minutes > 0 && (
+              <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                <Check className="h-4 w-4 text-lime bg-vert rounded-full p-0.5 shrink-0" />
+                <span>Séances de {service.duration_minutes} min</span>
+              </div>
+            )}
+            <div className="mt-4">
+              <Link href={`/book?service=${service.id}`} className="block">
+                <Button size="lg" className="w-full font-bold uppercase tracking-wider">
+                  Réserver
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
