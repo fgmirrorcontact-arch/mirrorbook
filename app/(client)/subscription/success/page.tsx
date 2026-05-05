@@ -4,7 +4,8 @@ import { CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 
-export default async function SubscriptionSuccessPage() {
+export default async function SubscriptionSuccessPage(props: { searchParams: Promise<{ service_id?: string }> }) {
+  const { service_id } = await props.searchParams
   const supabase = await getSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -30,15 +31,18 @@ export default async function SubscriptionSuccessPage() {
         >
           Abonnement activé !
         </h1>
-        <p className="text-gray-400 mb-6 text-sm font-light">
-          Votre abonnement est maintenant actif. Vos crédits de séances seront disponibles dans quelques instants.
+        <p className="text-gray-400 mb-2 text-sm font-light">
+          Votre abonnement est maintenant actif. Réservez votre première séance dès maintenant et ajoutez vos options.
+        </p>
+        <p className="text-gray-500 mb-6 text-xs">
+          Vos crédits seront disponibles dans quelques instants.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/dashboard">
             <Button variant="outline">Mon espace</Button>
           </Link>
-          <Link href="/book">
-            <Button className="font-bold uppercase tracking-wider">Réserver une séance</Button>
+          <Link href={service_id ? `/book?service=${service_id}` : '/book'}>
+            <Button className="font-bold uppercase tracking-wider">Réserver ma première séance</Button>
           </Link>
         </div>
       </div>

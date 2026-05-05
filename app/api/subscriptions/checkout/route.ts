@@ -9,7 +9,6 @@ const uuidLike = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]
 const schema = z.object({
   service_id: uuidLike,
   tier_id: uuidLike.optional(),
-  addon_ids: z.array(uuidLike).default([]),
   promo_code_id: uuidLike.nullable().optional(),
 })
 
@@ -49,16 +48,6 @@ export async function POST(request: NextRequest) {
   }
 
   if (!stripePriceId) return Response.json({ error: 'Formule non configurée dans Stripe (stripe_price_id manquant)' }, { status: 400 })
-
-  // Fetch add-ons if provided
-  let addonRows: { name: string; price_cents: number }[] = []
-  if (parsed.data.addon_ids.length > 0) {
-    const { data: addons } = await admin
-      .from('service_addons')
-      .select('name, price_cents')
-      .in('id', parsed.data.addon_ids)
-    if (addons) addonRows = addons
-  }
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -126,17 +115,7 @@ export async function POST(request: NextRequest) {
       customer: customerId,
       line_items: [{ price: stripePriceId, quantity: 1 }],
       ...(stripeCouponId ? { discounts: [{ coupon: stripeCouponId }] } : {}),
-      ...(addonRows.length > 0 ? {
-        add_invoice_items: addonRows.map((a) => ({
-          price_data: {
-            currency: 'eur',
-            unit_amount: a.price_cents,
-            product_data: { name: a.name },
-          },
-          quantity: 1,
-        })),
-      } : {}),
-      success_url: `${appUrl}/subscription/success`,
+      success_url: `${appUrl}/subscription/success?service_id=${service.id}`,
       cancel_url: `${appUrl}/formules`,
       metadata: { service_id: service.id },
     }
