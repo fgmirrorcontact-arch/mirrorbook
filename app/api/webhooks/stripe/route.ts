@@ -50,6 +50,13 @@ export async function POST(request: NextRequest) {
               .eq('id', session.metadata.token_id)
           }
 
+          // Send Stripe invoice if one was created
+          if (session.invoice) {
+            void stripe.invoices.sendInvoice(session.invoice as string).catch((err) =>
+              console.error('[webhook] invoice send error', err)
+            )
+          }
+
           // Create Google Calendar event now that payment is confirmed
           const { data: booking } = await admin
             .from('bookings')
