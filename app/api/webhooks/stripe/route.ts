@@ -3,11 +3,12 @@ import type Stripe from 'stripe'
 import { stripe, stripeWebhookSecret } from '@/lib/stripe'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createCalendarEvent } from '@/lib/google-calendar'
-import { sendEmail } from '@/lib/email'
+import { sendEmail, ADMIN_EMAIL } from '@/lib/email'
 import {
   bookingConfirmedEmail,
   subscriptionActivatedEmail,
   tokensRenewedEmail,
+  adminNewBookingEmail,
 } from '@/lib/emails/templates'
 
 export async function POST(request: NextRequest) {
@@ -119,12 +120,12 @@ export async function POST(request: NextRequest) {
 
             // Emails
             const { data: { user: clientUser } } = await admin.auth.admin.getUserById(booking.client_id)
-            if (clientUser?.email) {
-              const { data: profile } = await admin
-                .from('profiles').select('full_name').eq('id', booking.client_id).single()
-              const firstName = profile?.full_name?.split(' ')[0] ?? 'vous'
-              const svcName = (booking.services as unknown as { name: string } | null)?.name ?? serviceName
+            const { data: profile } = await admin
+              .from('profiles').select('full_name').eq('id', booking.client_id).single()
+            const firstName = profile?.full_name?.split(' ')[0] ?? 'vous'
+            const svcName = (booking.services as unknown as { name: string } | null)?.name ?? serviceName
 
+            if (clientUser?.email) {
               void sendEmail(
                 clientUser.email,
                 `Réservation confirmée — ${booking.booking_ref}`,
@@ -148,6 +149,25 @@ export async function POST(request: NextRequest) {
                   periodEnd: new Date(trialEnd * 1000).toISOString(),
                 })
               ).catch((err) => console.error('[webhook] email subscription activated error', err))
+            }
+
+            if (ADMIN_EMAIL) {
+              const addonNames = (booking.booking_addons ?? [])
+                .map((ba) => (ba.addon as unknown as { name: string } | null)?.name)
+                .filter(Boolean) as string[]
+              void sendEmail(
+                ADMIN_EMAIL,
+                `Nouvelle réservation — ${booking.booking_ref}`,
+                adminNewBookingEmail({
+                  clientName: profile?.full_name ?? 'Client',
+                  bookingRef: booking.booking_ref,
+                  serviceName: svcName,
+                  addonNames,
+                  startAt: booking.start_at,
+                  endAt: booking.end_at,
+                  totalCents: 0,
+                })
+              ).catch((err) => console.error('[webhook] email admin notification error', err))
             }
 
             // Google Calendar event
@@ -211,9 +231,9 @@ export async function POST(request: NextRequest) {
               .single()
 
             const { data: { user: clientUser } } = await admin.auth.admin.getUserById(booking.client_id)
+            const svcName = (booking.services as unknown as { name: string } | null)?.name ?? 'Prestation'
             if (clientUser?.email) {
               const firstName = clientProfile?.full_name?.split(' ')[0] ?? 'vous'
-              const svcName = (booking.services as unknown as { name: string } | null)?.name ?? 'Prestation'
               void sendEmail(
                 clientUser.email,
                 `Réservation confirmée — ${booking.booking_ref}`,
@@ -227,6 +247,25 @@ export async function POST(request: NextRequest) {
                   paymentMethod: 'stripe_one_time',
                 })
               )
+            }
+
+            if (ADMIN_EMAIL) {
+              const addonNames = (booking.booking_addons ?? [])
+                .map((ba) => (ba.addon as unknown as { name: string } | null)?.name)
+                .filter(Boolean) as string[]
+              void sendEmail(
+                ADMIN_EMAIL,
+                `Nouvelle réservation — ${booking.booking_ref}`,
+                adminNewBookingEmail({
+                  clientName: clientProfile?.full_name ?? 'Client',
+                  bookingRef: booking.booking_ref,
+                  serviceName: svcName,
+                  addonNames,
+                  startAt: booking.start_at,
+                  endAt: booking.end_at,
+                  totalCents: 0,
+                })
+              ).catch((err) => console.error('[webhook] email admin notification error', err))
             }
 
             const calendarId =

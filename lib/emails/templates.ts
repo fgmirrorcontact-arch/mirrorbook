@@ -259,6 +259,40 @@ export function resetPasswordEmail(params: { link: string }) {
   `)
 }
 
+export function adminNewBookingEmail(params: {
+  clientName: string
+  bookingRef: string
+  serviceName: string
+  addonNames: string[]
+  startAt: string
+  endAt: string
+  totalCents: number
+}) {
+  const { clientName, bookingRef, serviceName, addonNames, startAt, endAt, totalCents } = params
+  const addonsRow = addonNames.length
+    ? row('Options', addonNames.join(', '))
+    : ''
+  return base(`
+    <div style="display:inline-block;background:#dcfce7;color:#15803d;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;margin-bottom:16px;">
+      Nouvelle réservation
+    </div>
+    <h1 style="margin:0 0 8px;font-size:24px;color:#111827;">Nouvelle réservation confirmée</h1>
+    <p style="margin:0 0 24px;color:#6b7280;font-size:15px;line-height:1.6;">
+      Un client vient de réserver une prestation.
+    </p>
+    ${detailTable(
+      row('Client', clientName) +
+      row('Référence', bookingRef) +
+      row('Prestation', serviceName) +
+      addonsRow +
+      row('Date', fmtDate(startAt)) +
+      row('Horaire', `${fmtTime(startAt)} – ${fmtTime(endAt)}`) +
+      row('Montant', fmtPrice(totalCents))
+    )}
+    ${btn('Voir dans le calendrier', `${APP_URL}/admin/calendar`)}
+  `)
+}
+
 export function tokensRenewedEmail(params: {
   firstName: string
   serviceName: string
