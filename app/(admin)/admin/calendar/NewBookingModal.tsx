@@ -56,6 +56,7 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
   const [notes, setNotes] = useState('')
 
   const [clientTokens, setClientTokens] = useState<Token[]>([])
+  const [tokensLoading, setTokensLoading] = useState(false)
   const [selectedTokenId, setSelectedTokenId] = useState('')
 
   const [loading, setLoading] = useState(false)
@@ -97,9 +98,15 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
       setSelectedTokenId('')
       return
     }
+    setTokensLoading(true)
     fetch(`/api/admin/clients/${selectedClient.id}/tokens`)
-      .then((r) => r.json())
-      .then((d) => setClientTokens(d.tokens ?? []))
+      .then(async (r) => {
+        const d = await r.json()
+        console.log('[tokens] status', r.status, 'data', d)
+        setClientTokens(d.tokens ?? [])
+      })
+      .catch((e) => console.error('[tokens] fetch error', e))
+      .finally(() => setTokensLoading(false))
   }, [paymentMethod, selectedClient])
 
   function toggleAddon(id: string) {
@@ -122,6 +129,7 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
     setEmployeeId(employees[0]?.id ?? '')
     setPaymentMethod('cash')
     setClientTokens([])
+    setTokensLoading(false)
     setSelectedTokenId('')
     setNotes('')
     setError('')
@@ -385,6 +393,8 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
                 <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
                   Sélectionnez d&apos;abord un client.
                 </p>
+              ) : tokensLoading ? (
+                <p className="text-sm text-gray-400 px-1">Chargement des crédits…</p>
               ) : clientTokens.length === 0 ? (
                 <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
                   Aucun crédit disponible pour ce client.
