@@ -142,22 +142,6 @@ export default function PaymentStep() {
           if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Erreur lors de la réservation')
           window.location.href = `/confirmation/${data.booking.booking_ref}`
         }
-      } else if (selectedService.is_subscription) {
-        const res = await fetch('/api/subscriptions/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            service_id: selectedService.id,
-            ...(selectedTier ? { tier_id: selectedTier.id } : {}),
-            ...(appliedPromoId ? { promo_code_id: appliedPromoId } : {}),
-            addon_ids: selectedAddons.map((a) => a.id),
-            employee_id: DEFAULT_EMPLOYEE_ID,
-            start_at: start.toISOString(),
-          }),
-        })
-        const data = await res.json()
-        if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Erreur lors de la souscription')
-        window.location.href = data.url
       } else if (totalCents === 0) {
         const res = await fetch('/api/bookings', {
           method: 'POST',
@@ -175,6 +159,22 @@ export default function PaymentStep() {
         const data = await res.json()
         if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Erreur lors de la réservation')
         window.location.href = `/confirmation/${data.booking.booking_ref}`
+      } else if (selectedService.is_subscription) {
+        const res = await fetch('/api/subscriptions/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id: selectedService.id,
+            ...(selectedTier ? { tier_id: selectedTier.id } : {}),
+            ...(appliedPromoId ? { promo_code_id: appliedPromoId } : {}),
+            addon_ids: selectedAddons.map((a) => a.id),
+            employee_id: DEFAULT_EMPLOYEE_ID,
+            start_at: start.toISOString(),
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Erreur lors de la souscription')
+        window.location.href = data.url
       } else {
         const res = await fetch('/api/checkout/session', {
           method: 'POST',

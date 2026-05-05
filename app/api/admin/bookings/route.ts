@@ -104,12 +104,12 @@ export async function POST(request: NextRequest) {
   // Fetch addons
   let addonTotal = 0
   let addonDuration = 0
-  const addonRows: { id: string; price_cents: number; duration_minutes: number }[] = []
+  const addonRows: { id: string; name: string; price_cents: number; duration_minutes: number }[] = []
 
   if (data.addon_ids.length > 0) {
     const { data: addons } = await admin
       .from('service_addons')
-      .select('id, price_cents, duration_minutes')
+      .select('id, name, price_cents, duration_minutes')
       .in('id', data.addon_ids)
 
     if (addons) {
@@ -183,20 +183,19 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // Create Google Calendar event (fire and forget)
+  // Create Google Calendar event — awaited so the event ID is saved before responding
   const calendarId = employee?.google_calendar_id ?? process.env.GOOGLE_CALENDAR_ID ?? ''
   if (calendarId) {
-    createCalendarEvent({
+    const eventId = await createCalendarEvent({
       calendarId,
-      summary: `${service.name} — ${clientName ?? 'Client'}`,
+      summary: `${service.name}${addonRows.length > 0 ? ' + ' + addonRows.map(a => a.name).join(' + ') : ''} — ${clientName ?? 'Client'}`,
       description: `Réf : ${refResult}${data.notes ? `\n${data.notes}` : ''}`,
       startAt: startAt.toISOString(),
       endAt: endAt.toISOString(),
-    }).then((eventId) => {
-      if (eventId) {
-        admin.from('bookings').update({ google_calendar_event_id: eventId }).eq('id', booking.id)
-      }
     })
+    if (eventId) {
+      await admin.from('bookings').update({ google_calendar_event_id: eventId }).eq('id', booking.id)
+    }
   }
 
   return Response.json({ booking }, { status: 201 })

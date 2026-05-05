@@ -61,12 +61,12 @@ export async function POST(request: NextRequest) {
   // Fetch addons
   let addonTotal = 0
   let addonDuration = 0
-  const addonRows: { id: string; price_cents: number; duration_minutes: number }[] = []
+  const addonRows: { id: string; name: string; price_cents: number; duration_minutes: number }[] = []
 
   if (data.addon_ids.length > 0) {
     const { data: addons } = await supabase
       .from('service_addons')
-      .select('id, price_cents, duration_minutes')
+      .select('id, name, price_cents, duration_minutes')
       .in('id', data.addon_ids)
 
     if (addons) {
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
   if (calendarId) {
     const eventId = await createCalendarEvent({
       calendarId,
-      summary: `${service.name} — ${profile?.full_name ?? 'Client'}`,
+      summary: `${service.name}${addonRows.length > 0 ? ' + ' + addonRows.map(a => a.name).join(' + ') : ''} — ${profile?.full_name ?? 'Client'}`,
       description: `Réf : ${refResult}${data.notes ? `\n${data.notes}` : ''}`,
       startAt: startAt.toISOString(),
       endAt: endAt.toISOString(),
