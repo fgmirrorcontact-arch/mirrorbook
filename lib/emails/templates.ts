@@ -105,10 +105,10 @@ export function bookingConfirmedEmail(params: {
   startAt: string
   endAt: string
   totalCents: number
-  paymentMethod: 'stripe_one_time' | 'subscription_token'
+  paymentMethod: 'stripe_one_time' | 'subscription_token' | 'free'
 }) {
   const { firstName, bookingRef, serviceName, startAt, endAt, totalCents, paymentMethod } = params
-  const priceDisplay = paymentMethod === 'subscription_token'
+  const priceDisplay = paymentMethod === 'subscription_token' || paymentMethod === 'free'
     ? 'Inclus dans votre abonnement'
     : fmtPrice(totalCents)
 

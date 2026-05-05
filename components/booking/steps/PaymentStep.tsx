@@ -158,6 +158,23 @@ export default function PaymentStep() {
         const data = await res.json()
         if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Erreur lors de la souscription')
         window.location.href = data.url
+      } else if (totalCents === 0) {
+        const res = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            employee_id: DEFAULT_EMPLOYEE_ID,
+            service_id: selectedService.id,
+            addon_ids: selectedAddons.map((a) => a.id),
+            start_at: start.toISOString(),
+            payment_method: 'free',
+            promo_code_id: appliedPromoId ?? null,
+            notes: null,
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Erreur lors de la réservation')
+        window.location.href = `/confirmation/${data.booking.booking_ref}`
       } else {
         const res = await fetch('/api/checkout/session', {
           method: 'POST',

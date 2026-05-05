@@ -38,7 +38,6 @@ export default async function AdminCalendarPage() {
       .from('services')
       .select('id, name, price_cents, duration_minutes')
       .eq('is_active', true)
-      .eq('is_subscription', false)
       .order('sort_order'),
     supabase
       .from('service_addons')

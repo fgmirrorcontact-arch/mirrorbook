@@ -12,7 +12,7 @@ const createBookingSchema = z.object({
   service_id: z.string().min(1),
   addon_ids: z.array(z.string().min(1)).default([]),
   start_at: z.string().min(1),
-  payment_method: z.enum(['stripe_one_time', 'subscription_token']).default('stripe_one_time'),
+  payment_method: z.enum(['stripe_one_time', 'subscription_token', 'free']).default('stripe_one_time'),
   token_id: z.string().min(1).optional(),
   promo_code_id: z.string().min(1).nullable().optional(),
   notes: z.string().nullable().optional(),
@@ -169,20 +169,19 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // Create Google Calendar event (fire and forget — never blocks the response)
+  // Create Google Calendar event — awaited so the event ID is saved before responding
   const calendarId = employee?.google_calendar_id ?? process.env.GOOGLE_CALENDAR_ID ?? ''
   if (calendarId) {
-    createCalendarEvent({
+    const eventId = await createCalendarEvent({
       calendarId,
       summary: `${service.name} — ${profile?.full_name ?? 'Client'}`,
       description: `Réf : ${refResult}${data.notes ? `\n${data.notes}` : ''}`,
       startAt: startAt.toISOString(),
       endAt: endAt.toISOString(),
-    }).then((eventId) => {
-      if (eventId) {
-        admin.from('bookings').update({ google_calendar_event_id: eventId }).eq('id', booking.id)
-      }
     })
+    if (eventId) {
+      await admin.from('bookings').update({ google_calendar_event_id: eventId }).eq('id', booking.id)
+    }
   }
 
   return Response.json({ booking }, { status: 201 })
