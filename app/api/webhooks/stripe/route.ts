@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
                   totalCents: 0,
                   paymentMethod: 'stripe_one_time',
                 })
-              )
+              ).catch((err) => console.error('[webhook] email booking confirmed error', err))
               void sendEmail(
                 clientUser.email,
                 `Votre abonnement ${serviceName} est actif !`,
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
                   tokensCount: tokensPerRenewal,
                   periodEnd: new Date(trialEnd * 1000).toISOString(),
                 })
-              )
+              ).catch((err) => console.error('[webhook] email subscription activated error', err))
             }
 
             // Google Calendar event
