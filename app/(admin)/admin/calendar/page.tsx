@@ -20,6 +20,7 @@ export default async function AdminCalendarPage() {
         service:services ( name ),
         employee:employees ( display_name, color )
       `)
+      .neq('status', 'pending')
       .gte('start_at', from.toISOString())
       .lte('start_at', to.toISOString())
       .order('start_at'),
