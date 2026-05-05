@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
           // Fetch booking details for email + calendar
           const { data: booking } = await admin
             .from('bookings')
-            .select('booking_ref, start_at, end_at, notes, client_id, services(name), employees(google_calendar_id)')
+            .select('booking_ref, start_at, end_at, notes, client_id, services(name), employees(google_calendar_id), booking_addons(addon:service_addons(name))')
             .eq('id', booking_id)
             .single()
 
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
               createCalendarEvent({
                 calendarId,
                 summary: `${calServiceName} — ${calProfile?.full_name ?? 'Client'}`,
-                description: `Réf : ${booking.booking_ref}${booking.notes ? `\n${booking.notes}` : ''}`,
+                description: buildCalDescription(booking),
                 startAt: booking.start_at,
                 endAt: booking.end_at,
               }).then((eventId) => {
@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
 
           const { data: booking } = await admin
             .from('bookings')
-            .select('booking_ref, start_at, end_at, notes, client_id, services(name), employees(google_calendar_id)')
+            .select('booking_ref, start_at, end_at, notes, client_id, services(name), employees(google_calendar_id), booking_addons(addon:service_addons(name))')
             .eq('id', bookingId)
             .single()
 
@@ -239,7 +239,7 @@ export async function POST(request: NextRequest) {
               createCalendarEvent({
                 calendarId,
                 summary: `${serviceName} — ${clientProfile?.full_name ?? 'Client'}`,
-                description: `Réf : ${booking.booking_ref}${booking.notes ? `\n${booking.notes}` : ''}`,
+                description: buildCalDescription(booking),
                 startAt: booking.start_at,
                 endAt: booking.end_at,
               }).then((eventId) => {
@@ -359,6 +359,20 @@ export async function POST(request: NextRequest) {
   }
 
   return Response.json({ received: true })
+}
+
+function buildCalDescription(booking: {
+  booking_ref: string
+  notes: string | null
+  booking_addons?: { addon: { name: string } | null }[]
+}): string {
+  const parts = [`Réf : ${booking.booking_ref}`]
+  const addonNames = booking.booking_addons
+    ?.map((ba) => ba.addon?.name)
+    .filter(Boolean) as string[] | undefined
+  if (addonNames?.length) parts.push(`Options : ${addonNames.join(', ')}`)
+  if (booking.notes) parts.push(booking.notes)
+  return parts.join('\n')
 }
 
 async function upsertSubscription(
