@@ -26,7 +26,7 @@ export default async function DashboardPage() {
     .from('bookings')
     .select('*, services(name, duration_minutes)')
     .eq('client_id', user.id)
-    .in('status', ['pending', 'confirmed'])
+    .eq('status', 'confirmed')
     .gte('start_at', new Date().toISOString())
     .order('start_at', { ascending: true })
     .limit(5)

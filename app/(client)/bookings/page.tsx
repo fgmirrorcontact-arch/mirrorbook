@@ -15,6 +15,7 @@ export default async function BookingsPage() {
     .from('bookings')
     .select('id, booking_ref, start_at, end_at, status, total_price_cents, services(name, duration_minutes)')
     .eq('client_id', user.id)
+    .neq('status', 'pending')
     .order('start_at', { ascending: false })
 
   return <BookingsClient bookings={(bookings as never) ?? []} />

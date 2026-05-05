@@ -117,8 +117,8 @@ export default async function ConfirmationRefPage(props: {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/bookings">
-            <Button variant="outline">Toutes mes réservations</Button>
+          <Link href="/dashboard">
+            <Button variant="outline">Mon espace</Button>
           </Link>
           <Link href="/book">
             <Button>Nouvelle réservation</Button>
