@@ -73,12 +73,18 @@ export async function DELETE(
 
   const { data: booking } = await admin
     .from('bookings')
-    .select('google_calendar_event_id, employees(google_calendar_id)')
+    .select('google_calendar_event_id, token_id, employees(google_calendar_id)')
     .eq('id', id)
     .single()
 
   const { error } = await admin.from('bookings').delete().eq('id', id)
   if (error) return Response.json({ error: error.message }, { status: 400 })
+
+  // Restore token if booking used one
+  if ((booking as unknown as { token_id: string | null } | null)?.token_id) {
+    const tokenId = (booking as unknown as { token_id: string }).token_id
+    await admin.from('subscription_tokens').update({ status: 'available' }).eq('id', tokenId)
+  }
 
   if (booking?.google_calendar_event_id) {
     const employee = (booking as unknown as { employees: { google_calendar_id: string | null } | null }).employees
@@ -147,6 +153,19 @@ export async function PATCH(
 
   if (parsed.data.status === 'cancelled') {
     updates.cancelled_at = new Date().toISOString()
+    // Restore token so the client doesn't lose a session
+    const adminClient = getSupabaseAdminClient()
+    const { data: existing } = await adminClient
+      .from('bookings')
+      .select('token_id')
+      .eq('id', id)
+      .single()
+    if (existing?.token_id) {
+      await adminClient
+        .from('subscription_tokens')
+        .update({ status: 'available' })
+        .eq('id', existing.token_id)
+    }
   }
 
   if (parsed.data.start_at) {

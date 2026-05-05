@@ -62,14 +62,17 @@ export async function POST(request: NextRequest) {
 
   const { data: existingSub } = await supabase
     .from('subscriptions')
-    .select('id')
+    .select('id, status')
     .eq('client_id', user.id)
     .eq('service_id', service.id)
-    .eq('status', 'active')
+    .in('status', ['active', 'past_due', 'incomplete'])
     .maybeSingle()
 
   if (existingSub) {
-    return Response.json({ error: 'Vous avez déjà un abonnement actif pour cette formule' }, { status: 409 })
+    const msg = existingSub.status === 'past_due'
+      ? 'Vous avez un abonnement en retard de paiement pour cette formule. Réglez la facture en attente avant de souscrire à nouveau.'
+      : 'Vous avez déjà un abonnement actif pour cette formule.'
+    return Response.json({ error: msg }, { status: 409 })
   }
 
   // Fetch add-ons

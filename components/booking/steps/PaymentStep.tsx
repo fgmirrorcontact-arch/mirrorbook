@@ -69,14 +69,16 @@ export default function PaymentStep() {
     if (!code) return
     setPromoLoading(true)
     try {
-      const res = await fetch(`/api/promos/validate?code=${encodeURIComponent(code)}`)
+      const subtotal = selectedService
+        ? (selectedTier?.price_cents ?? selectedService.price_cents ?? 0) + selectedAddons.reduce((s, a) => s + a.price_cents, 0)
+        : 0
+      const res = await fetch(`/api/promos/validate?code=${encodeURIComponent(code)}&subtotal=${subtotal}`)
       const data = await res.json()
       if (!res.ok) {
         toast({ title: 'Code invalide', description: data.error, variant: 'destructive' })
         return
       }
       const { promo } = data
-      const subtotal = selectedService ? (selectedTier?.price_cents ?? selectedService.price_cents ?? 0) + selectedAddons.reduce((s, a) => s + a.price_cents, 0) : 0
       const discount = promo.discount_type === 'percentage'
         ? Math.round(subtotal * promo.discount_value / 100)
         : promo.discount_value
