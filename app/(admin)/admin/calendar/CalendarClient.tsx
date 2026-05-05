@@ -25,6 +25,7 @@ type Booking = {
   client: { full_name: string | null } | null
   service: { name: string } | null
   employee: { display_name: string; color: string } | null
+  booking_addons: { addon: { name: string; price_cents: number } | null }[]
 }
 
 type Employee = { id: string; display_name: string; color: string; is_active: boolean }
@@ -268,6 +269,19 @@ export default function CalendarClient({ bookings, employees, services, addons }
                     jusqu'à {format(new Date(selected.end_at), 'HH:mm', { locale: fr })}
                   </dd>
                 </div>
+                {selected.booking_addons?.length > 0 && (
+                  <div>
+                    <dt className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Options</dt>
+                    <dd className="space-y-0.5">
+                      {selected.booking_addons.map((ba, i) => ba.addon && (
+                        <div key={i} className="flex justify-between text-sm">
+                          <span className="text-gray-700">{ba.addon.name}</span>
+                          <span className="text-gray-500">{centsToEuros(ba.addon.price_cents)}</span>
+                        </div>
+                      ))}
+                    </dd>
+                  </div>
+                )}
                 <div>
                   <dt className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Montant</dt>
                   <dd className="font-medium text-gray-900">{centsToEuros(selected.total_price_cents)}</dd>

@@ -18,7 +18,8 @@ export default async function AdminCalendarPage() {
         id, booking_ref, employee_id, start_at, end_at, status, notes, total_price_cents,
         client:profiles ( full_name ),
         service:services ( name ),
-        employee:employees ( display_name, color )
+        employee:employees ( display_name, color ),
+        booking_addons ( addon:service_addons ( name, price_cents ) )
       `)
       .neq('status', 'pending')
       .gte('start_at', from.toISOString())
