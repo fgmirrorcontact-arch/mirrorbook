@@ -179,6 +179,7 @@ export async function POST(request: NextRequest) {
       customer: customerId,
       line_items: lineItems,
       invoice_creation: { enabled: true },
+      payment_intent_data: { receipt_email: user.email ?? undefined },
       success_url: `${appUrl}/success?ref=${refResult}`,
       cancel_url: `${appUrl}/cancel?ref=${refResult}`,
       metadata: {
