@@ -179,8 +179,8 @@ export async function POST(request: NextRequest) {
       customer: customerId,
       line_items: lineItems,
       invoice_creation: { enabled: true },
-      success_url: `${appUrl}/booking/success?ref=${refResult}`,
-      cancel_url: `${appUrl}/booking/cancel?ref=${refResult}`,
+      success_url: `${appUrl}/success?ref=${refResult}`,
+      cancel_url: `${appUrl}/cancel?ref=${refResult}`,
       metadata: {
         booking_id: booking.id,
         ...(data.token_id ? { token_id: data.token_id } : {}),
