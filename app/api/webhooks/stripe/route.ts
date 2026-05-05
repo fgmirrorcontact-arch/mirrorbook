@@ -180,17 +180,16 @@ export async function POST(request: NextRequest) {
               .from('profiles').select('full_name').eq('id', booking.client_id).single()
 
             if (calendarId) {
-              createCalendarEvent({
+              const eventId = await createCalendarEvent({
                 calendarId,
                 summary: `${calServiceName} — ${calProfile?.full_name ?? 'Client'}`,
                 description: buildCalDescription(booking),
                 startAt: booking.start_at,
                 endAt: booking.end_at,
-              }).then((eventId) => {
-                if (eventId) {
-                  admin.from('bookings').update({ google_calendar_event_id: eventId }).eq('id', booking_id)
-                }
               })
+              if (eventId) {
+                await admin.from('bookings').update({ google_calendar_event_id: eventId }).eq('id', booking_id)
+              }
             }
           }
 
@@ -275,17 +274,16 @@ export async function POST(request: NextRequest) {
             const serviceName = (booking.services as unknown as { name: string } | null)?.name ?? 'Réservation'
 
             if (calendarId) {
-              createCalendarEvent({
+              const eventId = await createCalendarEvent({
                 calendarId,
                 summary: `${serviceName} — ${clientProfile?.full_name ?? 'Client'}`,
                 description: buildCalDescription(booking),
                 startAt: booking.start_at,
                 endAt: booking.end_at,
-              }).then((eventId) => {
-                if (eventId) {
-                  admin.from('bookings').update({ google_calendar_event_id: eventId }).eq('id', bookingId)
-                }
               })
+              if (eventId) {
+                await admin.from('bookings').update({ google_calendar_event_id: eventId }).eq('id', bookingId)
+              }
             }
           }
         }
