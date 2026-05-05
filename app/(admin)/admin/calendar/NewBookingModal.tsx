@@ -381,9 +381,13 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
           {paymentMethod === 'subscription_token' && (
             <div>
               <Label className="mb-2 block">Crédit à utiliser</Label>
-              {clientTokens.length === 0 ? (
+              {!selectedClient ? (
                 <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
-                  {selectedClient ? 'Aucun crédit disponible pour ce client.' : 'Sélectionnez d\'abord un client.'}
+                  Sélectionnez d&apos;abord un client.
+                </p>
+              ) : clientTokens.length === 0 ? (
+                <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                  Aucun crédit disponible pour ce client.
                 </p>
               ) : (
                 <Select value={selectedTokenId} onValueChange={setSelectedTokenId}>
@@ -391,18 +395,11 @@ export default function NewBookingModal({ open, onClose, onCreated, services, ad
                     <SelectValue placeholder="Choisir un crédit..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {clientTokens
-                      .filter((t) => !serviceId || t.service_id === serviceId)
-                      .map((t) => (
-                        <SelectItem key={t.id} value={t.id}>
-                          {t.services?.name ?? 'Formule'}
-                        </SelectItem>
-                      ))}
-                    {clientTokens.filter((t) => !serviceId || t.service_id === serviceId).length === 0 && (
-                      <SelectItem value="__none" disabled>
-                        Aucun crédit pour cette prestation
+                    {clientTokens.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.services?.name ?? 'Formule'}
                       </SelectItem>
-                    )}
+                    ))}
                   </SelectContent>
                 </Select>
               )}
