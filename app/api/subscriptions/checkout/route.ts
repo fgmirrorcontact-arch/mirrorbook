@@ -100,8 +100,8 @@ export async function POST(request: NextRequest) {
     if (promo) {
       const coupon = await stripe.coupons.create(
         promo.discount_type === 'percentage'
-          ? { percent_off: promo.discount_value, duration: 'once', name: promo.code }
-          : { amount_off: promo.discount_value, currency: 'eur', duration: 'once', name: promo.code }
+          ? { percent_off: promo.discount_value, duration: 'forever', name: promo.code }
+          : { amount_off: promo.discount_value, currency: 'eur', duration: 'forever', name: promo.code }
       ).catch(() => null)
       if (coupon) stripeCouponId = coupon.id
     }
