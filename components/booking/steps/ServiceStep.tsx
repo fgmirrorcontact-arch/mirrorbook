@@ -20,11 +20,15 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
   const [tiers, setTiers] = useState<TierOption[]>([])
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [tokenServiceIds, setTokenServiceIds] = useState<Set<string>>(new Set())
+  const [subscribedServiceIds, setSubscribedServiceIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     fetch('/api/tokens/available')
-      .then((r) => (r.ok ? r.json() : { service_ids: [] }))
-      .then((d) => setTokenServiceIds(new Set(d.service_ids ?? [])))
+      .then((r) => (r.ok ? r.json() : { service_ids: [], subscribed_service_ids: [] }))
+      .then((d) => {
+        setTokenServiceIds(new Set(d.service_ids ?? []))
+        setSubscribedServiceIds(new Set(d.subscribed_service_ids ?? []))
+      })
       .catch(() => {})
   }, [])
 
@@ -71,7 +75,7 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
   const totalGroups = categoryMap.size + (subscriptionServices.length > 0 ? 1 : 0)
   const showHeaders = totalGroups > 1
 
-  const needsTier = selectedService?.is_subscription && tiers.length > 0 && !selectedTier && !tokenServiceIds.has(selectedService?.id ?? '')
+  const needsTier = selectedService?.is_subscription && tiers.length > 0 && !selectedTier && !tokenServiceIds.has(selectedService?.id ?? '') && !subscribedServiceIds.has(selectedService?.id ?? '')
   const canContinue = !!selectedService && !needsTier
 
   function handleContinue() {
@@ -82,7 +86,8 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
   function renderCard(service: Service) {
     const isSelected = selectedService?.id === service.id
     const hasToken = tokenServiceIds.has(service.id)
-    const showTiers = isSelected && service.is_subscription && tiers.length > 0 && !hasToken
+    const isSubscribed = subscribedServiceIds.has(service.id)
+    const showTiers = isSelected && service.is_subscription && tiers.length > 0 && !hasToken && !isSubscribed
     return (
       <div
         key={service.id}
@@ -124,6 +129,10 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
               {hasToken ? (
                 <span className="text-xs font-semibold text-green-700 bg-green-50 rounded px-1.5 py-0.5">
                   Inclus dans votre abonnement
+                </span>
+              ) : isSubscribed ? (
+                <span className="text-xs font-semibold text-green-700 bg-green-50 rounded px-1.5 py-0.5">
+                  Abonnement actif
                 </span>
               ) : (
                 <>

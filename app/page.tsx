@@ -55,17 +55,14 @@ export default async function HomePage() {
   ])
 
   const activeServiceIds = new Set<string>()
-  console.log('[homepage] user:', user?.id ?? 'null')
   if (user) {
-    const { data: subs, error: subsError } = await admin
+    const { data: subs } = await admin
       .from('subscriptions')
       .select('service_id')
       .eq('client_id', user.id)
       .eq('status', 'active')
-    console.log('[homepage] subs:', JSON.stringify(subs), 'error:', subsError?.message)
     subs?.forEach((s) => { if (s.service_id) activeServiceIds.add(s.service_id) })
   }
-  console.log('[homepage] activeServiceIds:', [...activeServiceIds])
 
   let tiersByService: Record<string, ServiceCommitmentTier[]> = {}
   if (services && services.length > 0) {
