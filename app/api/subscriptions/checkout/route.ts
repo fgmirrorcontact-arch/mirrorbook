@@ -121,8 +121,8 @@ export async function POST(request: NextRequest) {
 
   let session: Awaited<ReturnType<typeof stripe.checkout.sessions.create>>
   try {
-    session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
+    const sessionParams = {
+      mode: 'subscription' as const,
       customer: customerId,
       line_items: [{ price: stripePriceId, quantity: 1 }],
       ...(stripeCouponId ? { discounts: [{ coupon: stripeCouponId }] } : {}),
@@ -136,12 +136,14 @@ export async function POST(request: NextRequest) {
             },
             quantity: 1,
           })),
-        } as unknown as import('stripe').Stripe.Checkout.SessionCreateParams.SubscriptionData,
+        },
       } : {}),
       success_url: `${appUrl}/subscription/success`,
       cancel_url: `${appUrl}/formules`,
       metadata: { service_id: service.id },
-    })
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    session = await stripe.checkout.sessions.create(sessionParams as any)
   } catch (err) {
     console.error('[subscriptions/checkout] stripe error', err)
     return Response.json({ error: 'Erreur Stripe : ' + (err instanceof Error ? err.message : String(err)) }, { status: 502 })
