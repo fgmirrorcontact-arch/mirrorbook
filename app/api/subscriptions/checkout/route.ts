@@ -127,16 +127,14 @@ export async function POST(request: NextRequest) {
       line_items: [{ price: stripePriceId, quantity: 1 }],
       ...(stripeCouponId ? { discounts: [{ coupon: stripeCouponId }] } : {}),
       ...(addonRows.length > 0 ? {
-        subscription_data: {
-          add_invoice_items: addonRows.map((a) => ({
-            price_data: {
-              currency: 'eur',
-              unit_amount: a.price_cents,
-              product_data: { name: a.name },
-            },
-            quantity: 1,
-          })),
-        },
+        add_invoice_items: addonRows.map((a) => ({
+          price_data: {
+            currency: 'eur',
+            unit_amount: a.price_cents,
+            product_data: { name: a.name },
+          },
+          quantity: 1,
+        })),
       } : {}),
       success_url: `${appUrl}/subscription/success`,
       cancel_url: `${appUrl}/formules`,
