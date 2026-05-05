@@ -27,12 +27,13 @@ export async function GET(
   if (!(await assertAdmin())) return Response.json({ error: 'Accès refusé' }, { status: 403 })
   const { id: clientId } = await params
   const admin = getSupabaseAdminClient()
-  const { data } = await admin
+  const { data, error } = await admin
     .from('subscription_tokens')
-    .select('id, service_id, services(name), subscriptions(id)')
+    .select('id, service_id, services(name)')
     .eq('client_id', clientId)
     .eq('status', 'available')
-    .order('created_at')
+    .order('issued_at')
+  if (error) console.error('[tokens GET]', error.message)
   return Response.json({ tokens: data ?? [] })
 }
 
