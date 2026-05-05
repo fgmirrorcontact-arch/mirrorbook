@@ -147,6 +147,7 @@ export default function PaymentStep() {
           body: JSON.stringify({
             service_id: selectedService.id,
             ...(selectedTier ? { tier_id: selectedTier.id } : {}),
+            ...(appliedPromoId ? { promo_code_id: appliedPromoId } : {}),
           }),
         })
         const data = await res.json()
@@ -235,8 +236,8 @@ export default function PaymentStep() {
             </div>
           )}
 
-          {/* Promo input — uniquement pour paiement carte */}
-          {paymentMethod !== 'token' && !selectedService?.is_subscription && (
+          {/* Promo input — paiement carte (one-shot ou abonnement) */}
+          {paymentMethod !== 'token' && (
             <div className="border-t border-gray-100 pt-4">
               {promoCode ? (
                 <div className="flex items-center justify-between text-sm">

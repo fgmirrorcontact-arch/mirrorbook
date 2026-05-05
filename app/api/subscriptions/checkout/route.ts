@@ -9,6 +9,7 @@ const uuidLike = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]
 const schema = z.object({
   service_id: uuidLike,
   tier_id: uuidLike.optional(),
+  promo_code_id: uuidLike.nullable().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -87,12 +88,32 @@ export async function POST(request: NextRequest) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
+  // Build Stripe coupon from promo code if provided
+  let stripeCouponId: string | undefined
+  if (parsed.data.promo_code_id) {
+    const { data: promo } = await admin
+      .from('promo_codes')
+      .select('discount_type, discount_value, code')
+      .eq('id', parsed.data.promo_code_id)
+      .eq('is_active', true)
+      .single()
+    if (promo) {
+      const coupon = await stripe.coupons.create(
+        promo.discount_type === 'percentage'
+          ? { percent_off: promo.discount_value, duration: 'once', name: promo.code }
+          : { amount_off: promo.discount_value, currency: 'eur', duration: 'once', name: promo.code }
+      ).catch(() => null)
+      if (coupon) stripeCouponId = coupon.id
+    }
+  }
+
   let session: Awaited<ReturnType<typeof stripe.checkout.sessions.create>>
   try {
     session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,
       line_items: [{ price: stripePriceId, quantity: 1 }],
+      ...(stripeCouponId ? { discounts: [{ coupon: stripeCouponId }] } : {}),
       success_url: `${appUrl}/subscription/success`,
       cancel_url: `${appUrl}/formules`,
       metadata: { service_id: service.id },
