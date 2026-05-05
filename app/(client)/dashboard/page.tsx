@@ -24,7 +24,7 @@ export default async function DashboardPage() {
 
   const { data: upcomingBookings } = await supabase
     .from('bookings')
-    .select('*, services(name, duration_minutes)')
+    .select('*, services(name, duration_minutes), booking_addons(addon:service_addons(name, duration_minutes))')
     .eq('client_id', user.id)
     .eq('status', 'confirmed')
     .gte('start_at', new Date().toISOString())
