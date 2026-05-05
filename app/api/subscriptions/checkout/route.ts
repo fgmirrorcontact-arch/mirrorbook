@@ -102,7 +102,8 @@ export async function POST(request: NextRequest) {
         promo.discount_type === 'percentage'
           ? { percent_off: promo.discount_value, duration: 'forever', name: promo.code }
           : { amount_off: Math.round(promo.discount_value), currency: 'eur', duration: 'forever', name: promo.code }
-      ).catch(() => null)
+      ).catch((err) => { console.error('[subscriptions/checkout] coupon error', err); return null })
+      console.log('[subscriptions/checkout] coupon', coupon?.id, 'promo', promo.code, promo.discount_type, promo.discount_value)
       if (coupon) stripeCouponId = coupon.id
     }
   }
