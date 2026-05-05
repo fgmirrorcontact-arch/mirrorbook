@@ -76,7 +76,8 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
   const showHeaders = totalGroups > 1
 
   const needsTier = selectedService?.is_subscription && tiers.length > 0 && !selectedTier && !tokenServiceIds.has(selectedService?.id ?? '') && !subscribedServiceIds.has(selectedService?.id ?? '')
-  const canContinue = !!selectedService && !needsTier
+  const subscribedNoToken = !!selectedService?.is_subscription && subscribedServiceIds.has(selectedService?.id ?? '') && !tokenServiceIds.has(selectedService?.id ?? '')
+  const canContinue = !!selectedService && !needsTier && !subscribedNoToken
 
   function handleContinue() {
     if (!canContinue) return
@@ -131,8 +132,8 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
                   Inclus dans votre abonnement
                 </span>
               ) : isSubscribed ? (
-                <span className="text-xs font-semibold text-green-700 bg-green-50 rounded px-1.5 py-0.5">
-                  Abonnement actif
+                <span className="text-xs font-semibold text-amber-700 bg-amber-50 rounded px-1.5 py-0.5">
+                  Plus de crédits ce mois-ci
                 </span>
               ) : (
                 <>
@@ -246,6 +247,12 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
           <div className="grid sm:grid-cols-2 gap-4 items-start">
             {subscriptionServices.map((service) => renderCard(service))}
           </div>
+        </div>
+      )}
+
+      {subscribedNoToken && (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Vous avez utilisé tous vos crédits ce mois-ci. Vos crédits seront renouvelés automatiquement à la prochaine échéance de votre abonnement.
         </div>
       )}
 
