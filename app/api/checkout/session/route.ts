@@ -63,10 +63,11 @@ export async function POST(request: NextRequest) {
 
   // Resolve promo discount
   let discountCents = 0
+  let promoForCoupon: { code: string; discount_type: string; discount_value: number } | null = null
   if (data.promo_code_id) {
     const { data: promo } = await admin
       .from('promo_codes')
-      .select('discount_type, discount_value')
+      .select('code, discount_type, discount_value')
       .eq('id', data.promo_code_id)
       .eq('is_active', true)
       .single()
@@ -76,6 +77,7 @@ export async function POST(request: NextRequest) {
         ? Math.round(subtotal * promo.discount_value / 100)
         : promo.discount_value
       discountCents = Math.min(discountCents, subtotal)
+      promoForCoupon = promo
     }
   }
 
@@ -162,15 +164,18 @@ export async function POST(request: NextRequest) {
       },
       quantity: 1 as const,
     })),
-    ...(discountCents > 0 ? [{
-      price_data: {
-        currency: 'eur',
-        unit_amount: -discountCents,
-        product_data: { name: 'Code promo' },
-      },
-      quantity: 1 as const,
-    }] : []),
   ]
+
+  // Create Stripe coupon for promo discount
+  let stripeCouponId: string | undefined
+  if (promoForCoupon && discountCents > 0) {
+    const coupon = await stripe.coupons.create(
+      promoForCoupon.discount_type === 'percentage'
+        ? { percent_off: promoForCoupon.discount_value, duration: 'once', name: promoForCoupon.code }
+        : { amount_off: Math.round(discountCents), currency: 'eur', duration: 'once', name: promoForCoupon.code }
+    ).catch((err) => { console.error('[checkout/session] coupon error', err); return null })
+    if (coupon) stripeCouponId = coupon.id
+  }
 
   let session: Awaited<ReturnType<typeof stripe.checkout.sessions.create>>
   try {
@@ -178,6 +183,7 @@ export async function POST(request: NextRequest) {
       mode: 'payment',
       customer: customerId,
       line_items: lineItems,
+      ...(stripeCouponId ? { discounts: [{ coupon: stripeCouponId }] } : {}),
       invoice_creation: { enabled: true },
       payment_intent_data: { receipt_email: user.email ?? undefined },
       success_url: `${appUrl}/success?ref=${refResult}`,
