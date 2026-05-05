@@ -30,6 +30,8 @@ const CONTACT = {
   ],
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const supabase = await getSupabaseServerClient()
   const admin = getSupabaseAdminClient()
