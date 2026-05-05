@@ -91,6 +91,36 @@ export async function getCalendarBusyTimes(
   }
 }
 
+export async function listCalendarEvents(
+  calendarId: string,
+  timeMin: string,
+  timeMax: string,
+): Promise<{ id: string; title: string; start: string; end: string }[]> {
+  const calendar = getClient()
+  if (!calendar) return []
+  try {
+    const res = await calendar.events.list({
+      calendarId,
+      timeMin,
+      timeMax,
+      singleEvents: true,
+      orderBy: 'startTime',
+      maxResults: 500,
+    })
+    return (res.data.items ?? [])
+      .filter((e) => e.start?.dateTime && e.end?.dateTime)
+      .map((e) => ({
+        id: e.id ?? '',
+        title: e.summary ?? '(Sans titre)',
+        start: e.start!.dateTime!,
+        end: e.end!.dateTime!,
+      }))
+  } catch (err) {
+    console.error('[gcal] listEvents error', err)
+    return []
+  }
+}
+
 export async function deleteCalendarEvent({
   calendarId,
   eventId,

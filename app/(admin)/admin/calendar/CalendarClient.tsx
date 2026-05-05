@@ -32,12 +32,14 @@ type Booking = {
 type Employee = { id: string; display_name: string; color: string; is_active: boolean }
 type Service = { id: string; name: string; price_cents: number; duration_minutes: number }
 type Addon = { id: string; name: string; price_cents: number; duration_minutes: number }
+type ExternalEvent = { id: string; title: string; start: string; end: string }
 
 interface Props {
   bookings: Booking[]
   employees: Employee[]
   services: Service[]
   addons: Addon[]
+  externalEvents?: ExternalEvent[]
 }
 
 const STATUS_LABEL: Record<Booking['status'], string> = {
@@ -67,7 +69,7 @@ function centsToEuros(cents: number) {
   return (cents / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })
 }
 
-export default function CalendarClient({ bookings, employees, services, addons }: Props) {
+export default function CalendarClient({ bookings, employees, services, addons, externalEvents = [] }: Props) {
   const router = useRouter()
   const [selected, setSelected] = useState<Booking | null>(null)
   const [hidden, setHidden] = useState<Set<string>>(new Set())
@@ -86,20 +88,33 @@ export default function CalendarClient({ bookings, employees, services, addons }
     })
   }
 
-  const events: EventInput[] = bookings
-    .filter((b) => !hidden.has(b.employee_id))
-    .map((b) => ({
-      id: b.id,
-      title: b.service?.name ?? 'Réservation',
-      start: b.start_at,
-      end: b.end_at,
-      backgroundColor: eventColor(b),
-      borderColor: 'transparent',
-      textColor: b.status === 'cancelled' ? '#6b7280' : '#fff',
-      extendedProps: { booking: b },
-    }))
+  const events: EventInput[] = [
+    ...bookings
+      .filter((b) => !hidden.has(b.employee_id))
+      .map((b) => ({
+        id: b.id,
+        title: b.service?.name ?? 'Réservation',
+        start: b.start_at,
+        end: b.end_at,
+        backgroundColor: eventColor(b),
+        borderColor: 'transparent',
+        textColor: b.status === 'cancelled' ? '#6b7280' : '#fff',
+        extendedProps: { booking: b },
+      })),
+    ...externalEvents.map((e) => ({
+      id: `gcal-${e.id}`,
+      title: e.title,
+      start: e.start,
+      end: e.end,
+      backgroundColor: '#e2e8f0',
+      borderColor: '#cbd5e1',
+      textColor: '#475569',
+      extendedProps: { isExternal: true },
+    })),
+  ]
 
   function handleEventClick(arg: EventClickArg) {
+    if (arg.event.extendedProps.isExternal) return
     setSelected(arg.event.extendedProps.booking as Booking)
     setEditingNotes(null)
   }
