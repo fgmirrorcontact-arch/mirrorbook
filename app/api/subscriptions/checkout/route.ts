@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
             },
             quantity: 1,
           })),
-        },
+        } as unknown as import('stripe').Stripe.Checkout.SessionCreateParams.SubscriptionData,
       } : {}),
       success_url: `${appUrl}/subscription/success`,
       cancel_url: `${appUrl}/formules`,
