@@ -167,18 +167,24 @@ export async function POST(request: NextRequest) {
     }] : []),
   ]
 
-  const session = await stripe.checkout.sessions.create({
-    mode: 'payment',
-    customer: customerId,
-    line_items: lineItems,
-    invoice_creation: { enabled: true },
-    success_url: `${appUrl}/booking/success?ref=${refResult}`,
-    cancel_url: `${appUrl}/booking/cancel?ref=${refResult}`,
-    metadata: {
-      booking_id: booking.id,
-      ...(data.token_id ? { token_id: data.token_id } : {}),
-    },
-  })
+  let session: Awaited<ReturnType<typeof stripe.checkout.sessions.create>>
+  try {
+    session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      customer: customerId,
+      line_items: lineItems,
+      invoice_creation: { enabled: true },
+      success_url: `${appUrl}/booking/success?ref=${refResult}`,
+      cancel_url: `${appUrl}/booking/cancel?ref=${refResult}`,
+      metadata: {
+        booking_id: booking.id,
+        ...(data.token_id ? { token_id: data.token_id } : {}),
+      },
+    })
+  } catch (err) {
+    console.error('[checkout/session] stripe error', err)
+    return Response.json({ error: 'Erreur Stripe : ' + (err instanceof Error ? err.message : String(err)) }, { status: 502 })
+  }
 
   return Response.json({ url: session.url })
 }

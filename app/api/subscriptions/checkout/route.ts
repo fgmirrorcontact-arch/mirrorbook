@@ -83,14 +83,20 @@ export async function POST(request: NextRequest) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
-  const session = await stripe.checkout.sessions.create({
-    mode: 'subscription',
-    customer: customerId,
-    line_items: [{ price: stripePriceId, quantity: 1 }],
-    success_url: `${appUrl}/subscription/success`,
-    cancel_url: `${appUrl}/formules`,
-    metadata: { service_id: service.id },
-  })
+  let session: Awaited<ReturnType<typeof stripe.checkout.sessions.create>>
+  try {
+    session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      customer: customerId,
+      line_items: [{ price: stripePriceId, quantity: 1 }],
+      success_url: `${appUrl}/subscription/success`,
+      cancel_url: `${appUrl}/formules`,
+      metadata: { service_id: service.id },
+    })
+  } catch (err) {
+    console.error('[subscriptions/checkout] stripe error', err)
+    return Response.json({ error: 'Erreur Stripe : ' + (err instanceof Error ? err.message : String(err)) }, { status: 502 })
+  }
 
   return Response.json({ url: session.url })
 }
