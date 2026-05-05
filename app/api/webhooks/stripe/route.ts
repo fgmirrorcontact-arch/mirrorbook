@@ -165,6 +165,11 @@ export async function POST(request: NextRequest) {
           .update({ status: 'active' })
           .eq('stripe_subscription_id', subId)
 
+        // Send Stripe invoice
+        void stripe.invoices.sendInvoice(invoice.id).catch((err) =>
+          console.error('[webhook] invoice send error', err)
+        )
+
         // Email abonnement activé ou renouvellement
         const { data: { user: subUser } } = await admin.auth.admin.getUserById(localSub.client_id)
         if (subUser?.email) {
