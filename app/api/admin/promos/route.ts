@@ -42,13 +42,13 @@ export async function POST(request: NextRequest) {
     .from('promo_codes')
     .insert({
       code,
-      description: description ?? null,
+      description: description || null,
       discount_type,
       discount_value,
       min_purchase_cents: min_purchase_cents ?? null,
       max_uses: max_uses ?? null,
-      valid_from: valid_from ?? null,
-      valid_until: valid_until ?? null,
+      valid_from: valid_from || null,
+      valid_until: valid_until || null,
       applicable_service_ids: applicable_service_ids ?? null,
       is_active,
     })
@@ -73,7 +73,13 @@ export async function PATCH(request: NextRequest) {
   if (!parsed.success) return Response.json({ error: 'Données invalides' }, { status: 422 })
 
   const admin = getSupabaseAdminClient()
-  const { data, error } = await admin.from('promo_codes').update(parsed.data).eq('id', id).select().single()
+  const updateData = {
+    ...parsed.data,
+    ...(parsed.data.valid_from !== undefined ? { valid_from: parsed.data.valid_from || null } : {}),
+    ...(parsed.data.valid_until !== undefined ? { valid_until: parsed.data.valid_until || null } : {}),
+    ...(parsed.data.description !== undefined ? { description: parsed.data.description || null } : {}),
+  }
+  const { data, error } = await admin.from('promo_codes').update(updateData).eq('id', id).select().single()
   if (error) return Response.json({ error: error.message }, { status: 400 })
 
   return Response.json({ promo: data })

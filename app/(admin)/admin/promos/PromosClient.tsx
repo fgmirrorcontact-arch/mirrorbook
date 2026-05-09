@@ -244,6 +244,11 @@ export default function AdminPromosClient({ promos }: AdminPromosClientProps) {
           </DialogHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="promo-label">Libellé <span className="text-gray-400 font-normal text-xs">(optionnel)</span></Label>
+              <Input id="promo-label" placeholder="Offre de bienvenue…" {...register('description')} />
+            </div>
+
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="promo-code">Code</Label>
@@ -293,18 +298,13 @@ export default function AdminPromosClient({ promos }: AdminPromosClientProps) {
               )}
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="promo-desc">Description</Label>
-              <Input id="promo-desc" placeholder="Promotion été…" {...register('description')} />
-            </div>
-
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="promo-from">Valide à partir du</Label>
+                <Label htmlFor="promo-from">Valide à partir du <span className="text-gray-400 font-normal text-xs">(laisser vide = sans limite)</span></Label>
                 <Input id="promo-from" type="date" {...register('valid_from')} />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="promo-until">Valide jusqu'au</Label>
+                <Label htmlFor="promo-until">Valide jusqu'au <span className="text-gray-400 font-normal text-xs">(laisser vide = sans limite)</span></Label>
                 <Input id="promo-until" type="date" {...register('valid_until')} />
               </div>
             </div>

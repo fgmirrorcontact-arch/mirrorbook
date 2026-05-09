@@ -82,9 +82,10 @@ export default function PaymentStep() {
       const discount = promo.discount_type === 'percentage'
         ? Math.round(subtotal * promo.discount_value / 100)
         : promo.discount_value
-      setPromoCode(promo.code, Math.min(discount, subtotal))
+      const applied = Math.min(discount, subtotal)
+      setPromoCode(promo.code, applied)
       setAppliedPromoId(promo.id)
-      toast({ title: `Code "${promo.code}" appliqué`, description: `-${promo.discount_type === 'percentage' ? `${promo.discount_value}%` : formatPrice(promo.discount_value)}` })
+      toast({ title: `Code "${promo.code}" appliqué`, description: `-${promo.discount_type === 'percentage' ? `${promo.discount_value}%` : formatPrice(applied)}` })
     } finally {
       setPromoLoading(false)
     }
