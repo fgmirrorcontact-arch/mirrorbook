@@ -222,20 +222,6 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
       </h2>
       <p className="text-gray-500 mb-6 font-light">Sélectionnez le type de lavage souhaité.</p>
 
-      {/* Regular services grouped by category */}
-      {[...categoryMap.entries()].map(([category, catServices]) => (
-        <div key={category || '__none'} className="mb-6">
-          {showHeaders && category && (
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-              {category}
-            </h3>
-          )}
-          <div className="grid sm:grid-cols-2 gap-4 items-start">
-            {catServices.map((service) => renderCard(service))}
-          </div>
-        </div>
-      ))}
-
       {/* Subscriptions */}
       {subscriptionServices.length > 0 && (
         <div className="mb-6">
@@ -249,6 +235,20 @@ export default function ServiceStep({ services, addons = [] }: ServiceStepProps)
           </div>
         </div>
       )}
+
+      {/* Regular services grouped by category */}
+      {[...categoryMap.entries()].map(([category, catServices]) => (
+        <div key={category || '__none'} className="mb-6">
+          {showHeaders && category && (
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+              {category}
+            </h3>
+          )}
+          <div className="grid sm:grid-cols-2 gap-4 items-start">
+            {catServices.map((service) => renderCard(service))}
+          </div>
+        </div>
+      ))}
 
       {subscribedNoToken && (
         <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">

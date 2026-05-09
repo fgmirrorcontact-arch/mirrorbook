@@ -64,6 +64,16 @@ export default async function HomePage() {
     subs?.forEach((s) => { if (s.service_id) activeServiceIds.add(s.service_id) })
   }
 
+  const SERVICE_ORDER = ['Duo', '3 portes', '5 portes', 'Pick up', 'Grand utilitaire']
+  const sortedServices = services?.slice().sort((a, b) => {
+    const ia = SERVICE_ORDER.indexOf(a.name)
+    const ib = SERVICE_ORDER.indexOf(b.name)
+    if (ia === -1 && ib === -1) return 0
+    if (ia === -1) return 1
+    if (ib === -1) return -1
+    return ia - ib
+  }) ?? []
+
   let tiersByService: Record<string, ServiceCommitmentTier[]> = {}
   if (services && services.length > 0) {
     const { data: tiers } = await admin
@@ -144,8 +154,8 @@ export default async function HomePage() {
             className="text-4xl sm:text-6xl lg:text-8xl font-extrabold italic uppercase leading-none tracking-tight mb-8"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            Votre véhicule mérite{' '}
-            <span className="text-lime">le meilleur.</span>
+            L&apos;abonnement{' '}
+            <span className="text-lime">qui brille !</span>
           </h1>
           <p className="text-lg lg:text-xl text-gray-400 max-w-2xl mb-12 leading-relaxed font-light">
             Abonnez-vous à nos formules de lavage mensuel, réservez votre créneau en ligne
@@ -216,8 +226,8 @@ export default async function HomePage() {
               },
               {
                 icon: Sparkles,
-                title: 'Résultat showroom',
-                body: 'Nos techniciens utilisent des produits professionnels pour un rendu irréprochable, intérieur comme extérieur.',
+                title: 'Résultat propre et durable',
+                body: 'Nos techniciens utilisent des produits professionnels pour un rendu intérieur irréprochable.',
               },
             ].map(({ icon: Icon, title, body }) => (
               <div key={title} className="bg-white rounded-xl border border-gray-200 p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out">
@@ -244,15 +254,15 @@ export default async function HomePage() {
               Nos formules
             </h2>
             <p className="text-gray-300 max-w-lg mx-auto text-base font-light">
-              Un abonnement pour chaque usage. Changez ou annulez à tout moment.
+              Un abonnement pour chaque type de véhicule. Prenez votre rendez-vous à tout moment.
             </p>
           </div>
 
-          {!services?.length ? (
+          {!sortedServices.length ? (
             <p className="text-center text-gray-400">Aucune formule disponible pour le moment.</p>
           ) : (
             <div className="flex flex-wrap justify-center gap-6">
-              {services.map((service) => (
+              {sortedServices.map((service) => (
                 <div key={service.id} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] flex">
                   <ServiceCard
                     service={service}
@@ -279,7 +289,7 @@ export default async function HomePage() {
                 Prestations à la séance
               </h2>
               <p className="text-gray-400 max-w-lg mx-auto text-base font-light">
-                Pas envie de vous engager ? Réservez une prestation ponctuelle sans abonnement.
+                 Pas envie de vous engager malgré l’économie potentielle ? Réservez une prestation ponctuelle sans abonnement.
               </p>
             </div>
 
@@ -320,13 +330,13 @@ export default async function HomePage() {
                 step: '02',
                 icon: CalendarCheck,
                 title: 'Je réserve',
-                body: 'Choisissez la date et le créneau qui vous conviennent depuis votre espace client, 24h/24.',
+                body: 'Choisissez la date et le créneau qui vous convient depuis votre espace client, 24h/24.',
               },
               {
                 step: '03',
                 icon: Sparkles,
                 title: 'Je récupère mon véhicule propre',
-                body: 'Déposez votre voiture et repassez la chercher propre, brillante et prête à rouler.',
+                body: 'Déposez votre voiture, patientez dans notre salle d’attente…. Et repassez la chercher propre, brillante et prête à rouler.',
               },
             ].map(({ step, icon: Icon, title, body }, i) => (
               <div key={step} className="relative flex flex-col items-center text-center">
@@ -504,7 +514,14 @@ export default async function HomePage() {
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0 text-gray-500" />
-                {CONTACT.phone}
+                <a
+                  href="https://wa.me/33695558107"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
+                  +33 6 95 55 81 07
+                </a>
               </li>
               <li className="flex items-start gap-2">
                 <Clock className="h-4 w-4 mt-0.5 shrink-0 text-gray-500" />
