@@ -41,7 +41,7 @@ export default function BookingWizard({ services, addons = [], initialServiceId 
     const applicable = addons.filter(
       (a) => a.is_active && (a.applicable_to.length === 0 || a.applicable_to.includes(service.id))
     )
-    setStep(applicable.length > 0 && !service.is_subscription ? 'addon' : 'slot')
+    setStep(applicable.length > 0 ? 'addon' : 'slot')
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
