@@ -192,7 +192,7 @@ export default function AdminPromosClient({ promos }: AdminPromosClientProps) {
                     {promo.discount_type === 'percentage'
                       ? `${parseFloat(String(promo.discount_value))}%`
                       : formatPrice(Number(promo.discount_value))}
-                    {promo.min_purchase_cents && (
+                    {!!promo.min_purchase_cents && (
                       <p className="text-xs text-gray-400 font-normal">dès {formatPrice(promo.min_purchase_cents)}</p>
                     )}
                   </td>
