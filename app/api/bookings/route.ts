@@ -3,8 +3,8 @@ import * as z from 'zod'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createCalendarEvent } from '@/lib/google-calendar'
-import { sendEmail } from '@/lib/email'
-import { bookingConfirmedEmail } from '@/lib/emails/templates'
+import { sendEmail, ADMIN_EMAIL } from '@/lib/email'
+import { bookingConfirmedEmail, adminNewBookingEmail } from '@/lib/emails/templates'
 
 // ── Validation schema ─────────────────────────────────────────────────────────
 const createBookingSchema = z.object({
@@ -151,9 +151,9 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // Email de confirmation (fire and forget)
+  // Email de confirmation client + notification admin
+  const firstName = profile?.full_name?.split(' ')[0] ?? 'vous'
   if (user.email) {
-    const firstName = profile?.full_name?.split(' ')[0] ?? 'vous'
     void sendEmail(
       user.email,
       `Réservation confirmée — ${refResult}`,
@@ -165,6 +165,21 @@ export async function POST(request: NextRequest) {
         endAt: endAt.toISOString(),
         totalCents: service.price_cents + addonTotal,
         paymentMethod: data.payment_method,
+      })
+    )
+  }
+  if (ADMIN_EMAIL) {
+    void sendEmail(
+      ADMIN_EMAIL,
+      `Nouvelle réservation — ${refResult}`,
+      adminNewBookingEmail({
+        clientName: profile?.full_name ?? 'Client',
+        bookingRef: refResult,
+        serviceName: service.name,
+        addonNames: addonRows.map((a) => a.name),
+        startAt: startAt.toISOString(),
+        endAt: endAt.toISOString(),
+        totalCents: service.price_cents + addonTotal,
       })
     )
   }
