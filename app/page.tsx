@@ -64,22 +64,6 @@ export default async function HomePage() {
     subs?.forEach((s) => { if (s.service_id) activeServiceIds.add(s.service_id) })
   }
 
-  const SERVICE_ORDER = [
-    'Offre DUO',
-    'Nettoyage intérieur véhicule 3 portes',
-    'Nettoyage intérieur véhicule 5 portes',
-    'Nettoyage intérieur utilitaire léger & pickup',
-    'Nettoyage intérieur grand utilitaire & minibus',
-  ]
-  const sortedServices = services?.slice().sort((a, b) => {
-    const ia = SERVICE_ORDER.indexOf(a.name)
-    const ib = SERVICE_ORDER.indexOf(b.name)
-    if (ia === -1 && ib === -1) return 0
-    if (ia === -1) return 1
-    if (ib === -1) return -1
-    return ia - ib
-  }) ?? []
-
   let tiersByService: Record<string, ServiceCommitmentTier[]> = {}
   if (services && services.length > 0) {
     const { data: tiers } = await admin
@@ -264,11 +248,11 @@ export default async function HomePage() {
             </p>
           </div>
 
-          {!sortedServices.length ? (
+          {!services?.length ? (
             <p className="text-center text-gray-400">Aucune formule disponible pour le moment.</p>
           ) : (
             <div className="flex flex-wrap justify-center gap-6">
-              {sortedServices.map((service) => (
+              {services.map((service) => (
                 <div key={service.id} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] flex">
                   <ServiceCard
                     service={service}
