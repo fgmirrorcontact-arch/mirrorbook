@@ -1,20 +1,14 @@
-import { getSupabaseServerClient } from '@/lib/supabase/server'
+import { type NextRequest } from 'next/server'
 import { sendEmail } from '@/lib/email'
 import { welcomeEmail } from '@/lib/emails/templates'
 
-export async function POST() {
-  const supabase = await getSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return Response.json({ ok: false }, { status: 401 })
+export async function POST(request: NextRequest) {
+  const body = await request.json().catch(() => ({}))
+  const email: string | undefined = body.email
+  const firstName: string = body.firstName ?? 'vous'
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', user.id)
-    .single()
+  if (!email) return Response.json({ ok: false }, { status: 400 })
 
-  const firstName = profile?.full_name?.split(' ')[0] ?? 'vous'
-  void sendEmail(user.email, 'Bienvenue sur Mirrorbook !', welcomeEmail(firstName))
-
+  void sendEmail(email, 'Bienvenue sur Mirrorbook !', welcomeEmail(firstName))
   return Response.json({ ok: true })
 }

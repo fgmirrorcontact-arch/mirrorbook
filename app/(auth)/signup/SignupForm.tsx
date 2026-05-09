@@ -43,7 +43,11 @@ export default function SignupForm() {
       setAuthError(error.message)
       return
     }
-    void fetch('/api/auth/welcome', { method: 'POST' })
+    void fetch('/api/auth/welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: values.email, firstName: values.full_name.trim().split(' ')[0] }),
+    })
     router.push(redirectTo)
   }
 
