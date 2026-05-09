@@ -64,7 +64,13 @@ export default async function HomePage() {
     subs?.forEach((s) => { if (s.service_id) activeServiceIds.add(s.service_id) })
   }
 
-  const SERVICE_ORDER = ['Duo', '3 portes', '5 portes', 'Pick up', 'Grand utilitaire']
+  const SERVICE_ORDER = [
+    'Offre DUO',
+    'Nettoyage intérieur véhicule 3 portes',
+    'Nettoyage intérieur véhicule 5 portes',
+    'Nettoyage intérieur utilitaire léger & pickup',
+    'Nettoyage intérieur grand utilitaire & minibus',
+  ]
   const sortedServices = services?.slice().sort((a, b) => {
     const ia = SERVICE_ORDER.indexOf(a.name)
     const ib = SERVICE_ORDER.indexOf(b.name)
