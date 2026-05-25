@@ -146,6 +146,8 @@ export async function POST(request: NextRequest) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
+  const taxRates = process.env.STRIPE_TAX_RATE_ID ? [process.env.STRIPE_TAX_RATE_ID] : []
+
   const lineItems = [
     // Skip service base price when token covers it
     ...(isTokenHybrid ? [] : [{
@@ -155,6 +157,7 @@ export async function POST(request: NextRequest) {
         product_data: { name: service.name },
       },
       quantity: 1 as const,
+      ...(taxRates.length ? { tax_rates: taxRates } : {}),
     }]),
     ...addonRows.map((a) => ({
       price_data: {
@@ -163,6 +166,7 @@ export async function POST(request: NextRequest) {
         product_data: { name: a.name },
       },
       quantity: 1 as const,
+      ...(taxRates.length ? { tax_rates: taxRates } : {}),
     })),
   ]
 

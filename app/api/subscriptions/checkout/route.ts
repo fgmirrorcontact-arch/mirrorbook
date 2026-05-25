@@ -174,6 +174,8 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  const taxRates = process.env.STRIPE_TAX_RATE_ID ? [process.env.STRIPE_TAX_RATE_ID] : []
+
   // Line items: first month + add-ons
   const lineItems = [
     {
@@ -183,6 +185,7 @@ export async function POST(request: NextRequest) {
         product_data: { name: service.name },
       },
       quantity: 1 as const,
+      ...(taxRates.length ? { tax_rates: taxRates } : {}),
     },
     ...addonRows.map((a) => ({
       price_data: {
@@ -191,6 +194,7 @@ export async function POST(request: NextRequest) {
         product_data: { name: a.name },
       },
       quantity: 1 as const,
+      ...(taxRates.length ? { tax_rates: taxRates } : {}),
     })),
   ]
 
