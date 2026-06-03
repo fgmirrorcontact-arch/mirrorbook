@@ -80,6 +80,14 @@ export async function POST(request: NextRequest) {
   const startAt = new Date(data.start_at)
   const endAt = new Date(startAt.getTime() + totalDuration * 60 * 1000)
 
+  // Only admins can create free bookings
+  if (data.payment_method === 'free') {
+    const { data: profileRole } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    if (profileRole?.role !== 'admin') {
+      return Response.json({ error: 'Méthode de paiement non autorisée' }, { status: 403 })
+    }
+  }
+
   // Consume token before booking (validates ownership + availability atomically)
   if (data.payment_method === 'subscription_token') {
     if (!data.token_id) {
