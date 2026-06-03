@@ -143,7 +143,7 @@ export default function PaymentStep() {
           if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Erreur lors de la réservation')
           window.location.href = `/confirmation/${data.booking.booking_ref}`
         }
-      } else if (totalCents === 0) {
+      } else if (!selectedService.is_subscription && totalCents === 0) {
         const res = await fetch('/api/bookings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
