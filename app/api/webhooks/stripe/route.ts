@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
                   serviceName: svcName,
                   startAt: booking.start_at,
                   endAt: booking.end_at,
-                  totalCents: 0,
+                  totalCents: session.amount_total ?? 0,
                   paymentMethod: 'stripe_one_time',
                 })
               ).catch((err) => console.error('[webhook] email booking confirmed error', err))
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
                   addonNames,
                   startAt: booking.start_at,
                   endAt: booking.end_at,
-                  totalCents: 0,
+                  totalCents: session.amount_total ?? 0,
                 })
               ).catch((err) => console.error('[webhook] email admin notification error', err))
             }
@@ -243,7 +243,7 @@ export async function POST(request: NextRequest) {
                   serviceName: svcName,
                   startAt: booking.start_at,
                   endAt: booking.end_at,
-                  totalCents: 0,
+                  totalCents: session.amount_total ?? 0,
                   paymentMethod: 'stripe_one_time',
                 })
               )
@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
                   addonNames,
                   startAt: booking.start_at,
                   endAt: booking.end_at,
-                  totalCents: 0,
+                  totalCents: session.amount_total ?? 0,
                 })
               ).catch((err) => console.error('[webhook] email admin notification error', err))
             }
