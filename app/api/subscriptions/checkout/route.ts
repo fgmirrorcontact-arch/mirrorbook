@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
       end_at: endAt.toISOString(),
       status: 'pending',
       payment_method: 'stripe_one_time',
-      total_price_cents: addonTotal,
+      total_price_cents: basePriceCents + addonTotal,
       discount_cents: 0,
       promo_code_id: null,
       notes: null,
