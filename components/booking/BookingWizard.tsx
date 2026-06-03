@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useBookingStore } from '@/store/bookingStore'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
-import type { Service, ServiceAddon } from '@/types'
+import type { Service, ServiceAddon, ServiceCommitmentTier } from '@/types'
 import ServiceStep from './steps/ServiceStep'
 import AddonStep from './steps/AddonStep'
 import SlotStep from './steps/SlotStep'
@@ -27,10 +27,11 @@ interface BookingWizardProps {
   services: Service[]
   addons?: ServiceAddon[]
   initialServiceId?: string
+  initialTier?: ServiceCommitmentTier
 }
 
-export default function BookingWizard({ services, addons = [], initialServiceId }: BookingWizardProps) {
-  const { step, setStep, setService, reset } = useBookingStore()
+export default function BookingWizard({ services, addons = [], initialServiceId, initialTier }: BookingWizardProps) {
+  const { step, setStep, setService, setTier, reset } = useBookingStore()
 
   useEffect(() => {
     if (!initialServiceId) return
@@ -38,6 +39,9 @@ export default function BookingWizard({ services, addons = [], initialServiceId 
     if (!service) return
     reset()
     setService(service)
+    if (initialTier) {
+      setTier({ id: initialTier.id, commitment_months: initialTier.commitment_months, price_cents: initialTier.price_cents })
+    }
     const applicable = addons.filter(
       (a) => a.is_active && (a.applicable_to.length === 0 || a.applicable_to.includes(service.id))
     )

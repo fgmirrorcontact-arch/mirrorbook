@@ -2,14 +2,14 @@ import Link from 'next/link'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import BookingWizard from '@/components/booking/BookingWizard'
 import { Button } from '@/components/ui/button'
-import type { Service, ServiceAddon } from '@/types'
+import type { Service, ServiceAddon, ServiceCommitmentTier } from '@/types'
 
 export const metadata = {
   title: 'Réserver — Mirrorbook',
 }
 
-export default async function BookPage({ searchParams }: { searchParams: Promise<{ service?: string }> }) {
-  const { service: initialServiceId } = await searchParams
+export default async function BookPage({ searchParams }: { searchParams: Promise<{ service?: string; tier?: string }> }) {
+  const { service: initialServiceId, tier: initialTierId } = await searchParams
   const supabase = await getSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -25,6 +25,16 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
     .select('*')
     .eq('is_active', true)
     .order('sort_order', { ascending: true })
+
+  let initialTier: ServiceCommitmentTier | undefined
+  if (initialTierId) {
+    const { data: tier } = await supabase
+      .from('service_commitment_tiers')
+      .select('*')
+      .eq('id', initialTierId)
+      .single()
+    if (tier) initialTier = tier as ServiceCommitmentTier
+  }
 
   return (
     <div className="min-h-screen bg-aluminium">
@@ -55,6 +65,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
           services={(services as Service[]) ?? []}
           addons={(addons as ServiceAddon[]) ?? []}
           initialServiceId={initialServiceId}
+          initialTier={initialTier}
         />
       </main>
     </div>

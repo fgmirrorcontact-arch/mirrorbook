@@ -93,7 +93,7 @@ export function ServiceCard({ service, tiers, isActive }: ServiceCardProps) {
               </div>
             )}
             <div className="mt-4">
-              <Link href={`/book?service=${service.id}`} className="block">
+              <Link href={`/book?service=${service.id}${activeTier ? `&tier=${activeTier.id}` : ''}`} className="block">
                 <Button size="lg" className="w-full font-bold uppercase tracking-wider">
                   Réserver
                 </Button>
