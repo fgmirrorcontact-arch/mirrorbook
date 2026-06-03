@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import BookingWizard from '@/components/booking/BookingWizard'
 import { Button } from '@/components/ui/button'
 import type { Service, ServiceAddon, ServiceCommitmentTier } from '@/types'
@@ -28,7 +29,8 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
 
   let initialTier: ServiceCommitmentTier | undefined
   if (initialTierId) {
-    const { data: tier } = await supabase
+    const admin = getSupabaseAdminClient()
+    const { data: tier } = await admin
       .from('service_commitment_tiers')
       .select('*')
       .eq('id', initialTierId)
