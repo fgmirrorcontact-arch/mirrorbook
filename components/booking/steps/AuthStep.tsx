@@ -20,6 +20,7 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 const signupSchema = z.object({
   full_name: z.string().min(2, 'Le prénom et nom sont requis'),
+  company_name: z.string().optional(),
   email: z.email({ error: 'Adresse e-mail invalide' }),
   password: z.string().min(8, 'Minimum 8 caractères'),
 })
@@ -71,7 +72,7 @@ export default function AuthStep() {
     const { error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
-      options: { data: { full_name: values.full_name } },
+      options: { data: { full_name: values.full_name, company_name: values.company_name || undefined } },
     })
     setIsLoading(false)
     if (error) {
@@ -175,6 +176,17 @@ export default function AuthStep() {
               {signupForm.formState.errors.full_name && (
                 <p className="text-xs text-red-600">{signupForm.formState.errors.full_name.message}</p>
               )}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="signup-company">
+                Société <span className="text-gray-400 font-normal text-xs">(optionnel)</span>
+              </Label>
+              <Input
+                id="signup-company"
+                placeholder="Dupont SAS"
+                autoComplete="organization"
+                {...signupForm.register('company_name')}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="signup-email">Adresse e-mail</Label>

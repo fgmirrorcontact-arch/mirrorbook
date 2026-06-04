@@ -25,9 +25,11 @@ export default async function SubscriptionSuccessPage(props: { searchParams: Pro
 
     if (booking) {
       const dt = new Date(booking.start_at)
+      const dayLabel = dt.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Paris' })
+      const timeLabel = dt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).replace(':', 'h')
       bookingDisplay = {
         ref: booking.booking_ref,
-        dateLabel: format(dt, "EEEE d MMMM 'à' HH'h'mm", { locale: fr }),
+        dateLabel: `${dayLabel} à ${timeLabel}`,
       }
 
       const admin = getSupabaseAdminClient()
