@@ -367,6 +367,12 @@ export default function PaymentStep() {
         </div>
       )}
 
+      {selectedService && !selectedService.is_subscription && (
+        <p className="text-xs text-gray-400 mb-4">
+          Un supplément de 20&nbsp;€ peut être appliqué si le véhicule présente une saleté extrême à son arrivée.
+        </p>
+      )}
+
       <div className="flex justify-between">
         <Button variant="outline" onClick={() => setStep('slot')}>
           Retour
