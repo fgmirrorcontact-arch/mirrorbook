@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Loader2, Calendar, Tag, CreditCard, Ticket, X } from 'lucide-react'
+import { Loader2, Calendar, Tag, CreditCard, Ticket, X, Info } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 
@@ -368,9 +368,12 @@ export default function PaymentStep() {
       )}
 
       {selectedService && !selectedService.is_subscription && (
-        <p className="text-xs text-gray-400 mb-4">
-          Un supplément de 20&nbsp;€ peut être appliqué si le véhicule présente une saleté extrême à son arrivée.
-        </p>
+        <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-4">
+          <Info className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-sm text-amber-800">
+            Un supplément de 20&nbsp;€ peut être appliqué si le véhicule présente une saleté extrême à son arrivée.
+          </p>
+        </div>
       )}
 
       <div className="flex justify-between">
