@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
         if (session.metadata?.type === 'subscription_initial') {
           // Single payment covering first month + add-ons, then subscription created via API
-          const { booking_id, stripe_price_id, service_id, stripe_coupon_id } = session.metadata
+          const { booking_id, stripe_price_id, service_id, stripe_coupon_id, base_price_cents, service_name } = session.metadata
 
           // Confirm the booking
           await admin
@@ -64,9 +64,17 @@ export async function POST(request: NextRequest) {
 
           // Create Stripe subscription — trial_end = 30 days so first auto-charge is next month
           const trialEnd = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60
+          const subscriptionItem = {
+            price_data: {
+              currency: 'eur' as const,
+              unit_amount: Number(base_price_cents ?? 0),
+              recurring: { interval: 'month' as const },
+              product_data: { name: service_name ?? 'Abonnement' },
+            },
+          }
           const stripeSub = await stripe.subscriptions.create({
             customer: session.customer as string,
-            items: [{ price: stripe_price_id }],
+            items: [subscriptionItem],
             ...(paymentMethodId ? { default_payment_method: paymentMethodId } : {}),
             trial_end: trialEnd,
             // Apply promo coupon to all future invoices

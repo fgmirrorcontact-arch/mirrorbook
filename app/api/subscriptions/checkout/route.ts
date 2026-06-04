@@ -217,6 +217,8 @@ export async function POST(request: NextRequest) {
         type: 'subscription_initial',
         booking_id: booking.id,
         stripe_price_id: stripePriceId,
+        base_price_cents: String(basePriceCents),
+        service_name: service.name,
         service_id: service.id,
         ...(stripeCouponId ? { stripe_coupon_id: stripeCouponId } : {}),
       },
