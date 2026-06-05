@@ -1,13 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { toast } from '@/components/ui/use-toast'
 import { formatPrice } from '@/lib/utils'
 import RescheduleModal from '@/components/booking/RescheduleModal'
 
@@ -34,9 +32,6 @@ const STATUS_LABELS: Record<BookingStatus, { label: string; variant: 'default' |
 }
 
 export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
-  const router = useRouter()
-  const [cancelling, setCancelling] = useState<string | null>(null)
-  const [confirmCancel, setConfirmCancel] = useState<string | null>(null)
   const [reschedule, setReschedule] = useState<Booking | null>(null)
 
   const now = new Date()
@@ -46,25 +41,6 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
       (booking.status === 'pending' || booking.status === 'confirmed') &&
       new Date(booking.start_at) > now
     )
-  }
-
-  async function cancelBooking(id: string) {
-    if (confirmCancel !== id) { setConfirmCancel(id); return }
-    setCancelling(id)
-    setConfirmCancel(null)
-    const res = await fetch(`/api/bookings/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'cancelled' }),
-    })
-    setCancelling(null)
-    if (!res.ok) {
-      const d = await res.json().catch(() => ({}))
-      toast({ title: 'Erreur', description: d.error ?? 'Impossible d\'annuler', variant: 'destructive' })
-      return
-    }
-    toast({ title: 'Réservation annulée' })
-    router.refresh()
   }
 
   return (
@@ -112,7 +88,6 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
             {bookings.map((booking) => {
               const status = STATUS_LABELS[booking.status] ?? { label: booking.status, variant: 'secondary' as const }
               const actionable = isFutureActionable(booking)
-              const isConfirmingCancel = confirmCancel === booking.id
               return (
                 <div
                   key={booking.id}
@@ -133,48 +108,14 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
                     <span className="font-semibold text-charbon text-sm">{formatPrice(booking.total_price_cents)}</span>
 
                     {actionable && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 text-xs"
-                          onClick={() => setReschedule(booking)}
-                        >
-                          Modifier le créneau
-                        </Button>
-
-                        {isConfirmingCancel ? (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              className="h-8 text-xs"
-                              onClick={() => cancelBooking(booking.id)}
-                              disabled={cancelling === booking.id}
-                            >
-                              {cancelling === booking.id ? '…' : 'Confirmer'}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 text-xs"
-                              onClick={() => setConfirmCancel(null)}
-                            >
-                              Non
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 text-xs text-red-500 hover:text-red-600 hover:border-red-300"
-                            onClick={() => cancelBooking(booking.id)}
-                            disabled={cancelling === booking.id}
-                          >
-                            Annuler
-                          </Button>
-                        )}
-                      </>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs"
+                        onClick={() => setReschedule(booking)}
+                      >
+                        Modifier le créneau
+                      </Button>
                     )}
                   </div>
                 </div>
