@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Loader2, Calendar, Tag, CreditCard, Ticket, X, Info } from 'lucide-react'
+import { Loader2, Calendar, Tag, Ticket, X, Info } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 
@@ -319,51 +319,16 @@ export default function PaymentStep() {
         </CardContent>
       </Card>
 
-      {/* Payment method selector — shown if tokens are available */}
+      {/* Token info — shown if tokens are available */}
       {tokensLoaded && availableTokens.length > 0 && (
-        <div className="mb-6 space-y-2">
-          <p className="text-sm font-medium text-gray-700">Mode de paiement</p>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setPaymentMethod('token')}
-              className={`flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition-colors duration-200 ${
-                paymentMethod === 'token'
-                  ? 'border-vert bg-vert/5'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <Ticket className={`h-5 w-5 shrink-0 ${paymentMethod === 'token' ? 'text-vert' : 'text-gray-400'}`} />
-              <div>
-                <p className={`text-sm font-semibold ${paymentMethod === 'token' ? 'text-vert' : 'text-gray-700'}`}>
-                  Token abonnement
-                </p>
-                <p className="text-xs text-gray-500">
-                  {hasAddons
-                    ? `Prestation incluse · ${formatPrice(addonsTotalCents)} pour les suppléments`
-                    : `${availableTokens.length} disponible${availableTokens.length > 1 ? 's' : ''}`}
-                </p>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setPaymentMethod('stripe')}
-              className={`flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition-colors duration-200 ${
-                paymentMethod === 'stripe'
-                  ? 'border-vert bg-vert/5'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <CreditCard className={`h-5 w-5 shrink-0 ${paymentMethod === 'stripe' ? 'text-vert' : 'text-gray-400'}`} />
-              <div>
-                <p className={`text-sm font-semibold ${paymentMethod === 'stripe' ? 'text-vert' : 'text-gray-700'}`}>
-                  Payer par carte
-                </p>
-                <p className="text-xs text-gray-500">{formatPrice(totalCents)}</p>
-              </div>
-            </button>
-          </div>
+        <div className="mb-6 flex items-center gap-2.5 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+          <Ticket className="h-4 w-4 text-green-600 shrink-0" />
+          <p className="text-sm text-green-800">
+            <span className="font-semibold">Token abonnement utilisé</span>
+            {hasAddons
+              ? ` · Prestation incluse, ${formatPrice(addonsTotalCents)} pour les suppléments`
+              : ` · ${availableTokens.length} disponible${availableTokens.length > 1 ? 's' : ''}`}
+          </p>
         </div>
       )}
 
