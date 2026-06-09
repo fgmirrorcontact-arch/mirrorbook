@@ -15,7 +15,7 @@ import { AlertCircle } from 'lucide-react'
 const schema = z.object({
   full_name: z.string().min(2, 'Le nom est requis'),
   company_name: z.string().optional(),
-  phone: z.string().optional(),
+  phone: z.string().min(1, 'Le numéro de téléphone est requis'),
   email: z.email({ error: 'Adresse e-mail invalide' }),
   password: z.string().min(8, 'Minimum 8 caractères'),
 })
@@ -38,7 +38,7 @@ export default function SignupForm() {
     const { error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
-      options: { data: { full_name: values.full_name, company_name: values.company_name || undefined, phone: values.phone || undefined } },
+      options: { data: { full_name: values.full_name, company_name: values.company_name || undefined, phone: values.phone } },
     })
     if (error) {
       setAuthError(error.message)
@@ -105,9 +105,7 @@ export default function SignupForm() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="phone" className="text-gray-300">
-                Téléphone <span className="text-gray-500 font-normal text-xs">(optionnel)</span>
-              </Label>
+              <Label htmlFor="phone" className="text-gray-300">Téléphone</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -116,6 +114,9 @@ export default function SignupForm() {
                 className="bg-white/5 border-white/20 text-white placeholder:text-gray-600 focus:border-lime focus:ring-lime"
                 {...register('phone')}
               />
+              {errors.phone && (
+                <p className="text-xs text-red-400">{errors.phone.message}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
