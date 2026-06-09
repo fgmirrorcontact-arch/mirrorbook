@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
   ] = await Promise.all([
     supabase.from('services').select('name, price_cents, duration_minutes').eq('id', data.service_id).single(),
     supabase.from('employees').select('google_calendar_id').eq('id', data.employee_id).single(),
-    supabase.from('profiles').select('full_name').eq('id', user.id).single(),
+    supabase.from('profiles').select('full_name, phone').eq('id', user.id).single(),
   ])
 
   if (serviceError || !service) {
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
     const eventId = await createCalendarEvent({
       calendarId,
       summary: `${service.name}${addonRows.length > 0 ? ' + ' + addonRows.map(a => a.name).join(' + ') : ''} — ${profile?.full_name ?? 'Client'}`,
-      description: `Réf : ${refResult}${data.notes ? `\n${data.notes}` : ''}`,
+      description: buildCalDescription(refResult, (profile as { full_name?: string; phone?: string | null } | null)?.phone, addonRows.map((a) => a.name), data.notes ?? null),
       startAt: startAt.toISOString(),
       endAt: endAt.toISOString(),
     })
@@ -208,6 +208,14 @@ export async function POST(request: NextRequest) {
   }
 
   return Response.json({ booking }, { status: 201 })
+}
+
+function buildCalDescription(ref: string, phone: string | null | undefined, addonNames: string[], notes: string | null): string {
+  const parts = [`Réf : ${ref}`]
+  if (phone) parts.push(`Tél : ${phone}`)
+  if (addonNames.length) parts.push(`Options : ${addonNames.join(', ')}`)
+  if (notes) parts.push(notes)
+  return parts.join('\n')
 }
 
 // ── GET /api/bookings (admin only) ────────────────────────────────────────────

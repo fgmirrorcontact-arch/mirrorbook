@@ -94,12 +94,13 @@ export async function POST(request: NextRequest) {
   ] = await Promise.all([
     admin.from('services').select('name, price_cents, duration_minutes').eq('id', data.service_id).single(),
     admin.from('employees').select('google_calendar_id').eq('id', data.employee_id).single(),
-    clientName ? Promise.resolve({ data: null }) : admin.from('profiles').select('full_name').eq('id', clientId).single(),
+    clientName ? Promise.resolve({ data: null }) : admin.from('profiles').select('full_name, phone').eq('id', clientId).single(),
   ])
 
   if (serviceError || !service) return Response.json({ error: 'Prestation introuvable' }, { status: 404 })
 
   clientName = clientName ?? clientProfile?.full_name ?? null
+  const clientPhone = data.new_client?.phone ?? (clientProfile as { full_name?: string; phone?: string | null } | null)?.phone ?? null
 
   // Fetch addons
   let addonTotal = 0
@@ -189,7 +190,7 @@ export async function POST(request: NextRequest) {
     const eventId = await createCalendarEvent({
       calendarId,
       summary: `${service.name}${addonRows.length > 0 ? ' + ' + addonRows.map(a => a.name).join(' + ') : ''} — ${clientName ?? 'Client'}`,
-      description: `Réf : ${refResult}${data.notes ? `\n${data.notes}` : ''}`,
+      description: [`Réf : ${refResult}`, ...(clientPhone ? [`Tél : ${clientPhone}`] : []), ...(data.notes ? [data.notes] : [])].join('\n'),
       startAt: startAt.toISOString(),
       endAt: endAt.toISOString(),
     })

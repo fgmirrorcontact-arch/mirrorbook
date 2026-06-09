@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
             // Emails
             const { data: { user: clientUser } } = await admin.auth.admin.getUserById(booking.client_id)
             const { data: profile } = await admin
-              .from('profiles').select('full_name').eq('id', booking.client_id).single()
+              .from('profiles').select('full_name, phone').eq('id', booking.client_id).single()
             const firstName = profile?.full_name?.split(' ')[0] ?? 'vous'
             const svcName = (booking.services as unknown as { name: string } | null)?.name ?? serviceName
 
@@ -177,14 +177,12 @@ export async function POST(request: NextRequest) {
               ?? process.env.GOOGLE_CALENDAR_ID
               ?? ''
             const calServiceName = (booking.services as unknown as { name: string } | null)?.name ?? 'Réservation'
-            const { data: calProfile } = await admin
-              .from('profiles').select('full_name').eq('id', booking.client_id).single()
 
             if (calendarId) {
               const eventId = await createCalendarEvent({
                 calendarId,
-                summary: `${calServiceName} — ${calProfile?.full_name ?? 'Client'}`,
-                description: buildCalDescription(booking),
+                summary: `${calServiceName} — ${profile?.full_name ?? 'Client'}`,
+                description: buildCalDescription(booking, (profile as { full_name?: string; phone?: string | null } | null)?.phone),
                 startAt: booking.start_at,
                 endAt: booking.end_at,
               })
@@ -226,7 +224,7 @@ export async function POST(request: NextRequest) {
           if (booking) {
             const { data: clientProfile } = await admin
               .from('profiles')
-              .select('full_name')
+              .select('full_name, phone')
               .eq('id', booking.client_id)
               .single()
 
@@ -278,7 +276,7 @@ export async function POST(request: NextRequest) {
               const eventId = await createCalendarEvent({
                 calendarId,
                 summary: `${serviceName} — ${clientProfile?.full_name ?? 'Client'}`,
-                description: buildCalDescription(booking),
+                description: buildCalDescription(booking, (clientProfile as { full_name?: string; phone?: string | null } | null)?.phone),
                 startAt: booking.start_at,
                 endAt: booking.end_at,
               })
@@ -426,8 +424,9 @@ function buildCalDescription(booking: {
   booking_ref: string
   notes: string | null
   booking_addons?: { addon: { name: string } | null }[]
-}): string {
+}, phone?: string | null): string {
   const parts = [`Réf : ${booking.booking_ref}`]
+  if (phone) parts.push(`Tél : ${phone}`)
   const addonNames = booking.booking_addons
     ?.map((ba) => ba.addon?.name)
     .filter(Boolean) as string[] | undefined
