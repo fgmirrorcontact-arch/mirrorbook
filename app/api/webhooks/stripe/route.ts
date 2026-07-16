@@ -308,10 +308,17 @@ export async function POST(request: NextRequest) {
       case 'invoice.paid': {
         const invoice = event.data.object as Stripe.Invoice
         // Skip $0 trial invoices — tokens for month 1 are issued in checkout.session.completed
-        if ((invoice.amount_paid ?? 0) === 0) break
+        const amountPaid = (invoice as unknown as { amount_paid?: number }).amount_paid ?? 0
+        if (amountPaid === 0) { console.log('[webhook] invoice.paid skipped — amount 0', invoice.id); break }
 
-        const subId = (invoice.parent?.subscription_details?.subscription ?? null) as string | null
-        if (!subId) break
+        // Try new API path first (2024+), fall back to legacy invoice.subscription
+        const rawSub = invoice.parent?.subscription_details?.subscription
+          ?? (invoice as unknown as { subscription?: string }).subscription
+          ?? null
+        const subId = rawSub && typeof rawSub === 'object' ? (rawSub as { id: string }).id : rawSub as string | null
+        if (!subId) { console.log('[webhook] invoice.paid skipped — no subId', invoice.id); break }
+
+        console.log('[webhook] invoice.paid processing', { invoiceId: invoice.id, subId })
 
         const { data: localSub } = await admin
           .from('subscriptions')
@@ -319,7 +326,7 @@ export async function POST(request: NextRequest) {
           .eq('stripe_subscription_id', subId)
           .single()
 
-        if (!localSub) break
+        if (!localSub) { console.log('[webhook] invoice.paid — localSub not found for subId', subId); break }
 
         const svcInfo = localSub.services as unknown as { name: string; tokens_per_renewal: number | null } | null
         const tokensPerRenewal = svcInfo?.tokens_per_renewal ?? 0
@@ -351,11 +358,13 @@ export async function POST(request: NextRequest) {
           const firstName = subProfile?.full_name?.split(' ')[0] ?? 'vous'
           const periodEnd = localSub.current_period_end ?? new Date().toISOString()
 
-          void sendEmail(
+          await sendEmail(
             subUser.email,
             `Vos crédits ont été renouvelés — ${serviceName}`,
             tokensRenewedEmail({ firstName, serviceName, tokensCount: tokensPerRenewal, periodEnd, invoiceUrl })
-          )
+          ).catch((err) => console.error('[webhook] tokensRenewedEmail error', err))
+        } else {
+          console.log('[webhook] invoice.paid — no email for client', localSub.client_id)
         }
 
         break
