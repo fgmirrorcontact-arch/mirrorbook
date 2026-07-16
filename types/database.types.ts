@@ -652,6 +652,48 @@ export type Database = {
         }
         Relationships: []
       }
+      email_logs: {
+        Row: {
+          id: string
+          user_id: string | null
+          email: string
+          type: string
+          subject: string | null
+          status: 'sent' | 'pending' | 'error'
+          scheduled_for: string | null
+          sent_at: string | null
+          error_message: string | null
+          metadata: Record<string, unknown>
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          email: string
+          type: string
+          subject?: string | null
+          status?: 'sent' | 'pending' | 'error'
+          scheduled_for?: string | null
+          sent_at?: string | null
+          error_message?: string | null
+          metadata?: Record<string, unknown>
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          email?: string
+          type?: string
+          subject?: string | null
+          status?: 'sent' | 'pending' | 'error'
+          scheduled_for?: string | null
+          sent_at?: string | null
+          error_message?: string | null
+          metadata?: Record<string, unknown>
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<never, never>
     Functions: {
