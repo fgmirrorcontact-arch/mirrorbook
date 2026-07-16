@@ -321,8 +321,9 @@ export function tokensRenewedEmail(params: {
   serviceName: string
   tokensCount: number
   periodEnd: string
+  invoiceUrl?: string
 }) {
-  const { firstName, serviceName, tokensCount, periodEnd } = params
+  const { firstName, serviceName, tokensCount, periodEnd, invoiceUrl } = params
   return base(`
     <div style="display:inline-block;background:#dbeafe;color:#1d4ed8;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;margin-bottom:16px;">
       Crédits renouvelés
@@ -339,5 +340,8 @@ export function tokensRenewedEmail(params: {
       row('Prochain renouvellement', fmtDate(periodEnd))
     )}
     ${btn('Réserver ma séance', `${APP_URL}/book`)}
+    ${invoiceUrl ? `<p style="margin:20px 0 0;font-size:13px;color:#6b7280;">
+      <a href="${invoiceUrl}" style="color:#203727;text-decoration:underline;">Voir ma facture</a>
+    </p>` : ''}
   `)
 }

@@ -342,9 +342,7 @@ export async function POST(request: NextRequest) {
           .update({ status: 'active' })
           .eq('stripe_subscription_id', subId)
 
-        void stripe.invoices.sendInvoice(invoice.id).catch((err) =>
-          console.error('[webhook] invoice send error', err)
-        )
+        const invoiceUrl = (invoice as unknown as { hosted_invoice_url?: string }).hosted_invoice_url ?? undefined
 
         const { data: { user: subUser } } = await admin.auth.admin.getUserById(localSub.client_id)
         if (subUser?.email) {
@@ -356,7 +354,7 @@ export async function POST(request: NextRequest) {
           void sendEmail(
             subUser.email,
             `Vos crédits ont été renouvelés — ${serviceName}`,
-            tokensRenewedEmail({ firstName, serviceName, tokensCount: tokensPerRenewal, periodEnd })
+            tokensRenewedEmail({ firstName, serviceName, tokensCount: tokensPerRenewal, periodEnd, invoiceUrl })
           )
         }
 
