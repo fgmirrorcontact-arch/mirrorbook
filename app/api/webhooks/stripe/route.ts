@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
                 status: 'sent',
                 sent_at: new Date().toISOString(),
                 metadata: { serviceName, tokensCount: tokensPerRenewal },
-              }).catch((err) => console.error('[webhook] email_log insert error', err))
+              }).then(({ error }) => { if (error) console.error('[webhook] email_log insert error', error) })
             }
 
             if (ADMIN_EMAIL) {
@@ -442,7 +442,7 @@ export async function POST(request: NextRequest) {
               status: 'sent',
               sent_at: new Date().toISOString(),
               metadata: { serviceName: svcName },
-            }).catch((err) => console.error('[webhook] email_log insert error', err))
+            }).then(({ error }) => { if (error) console.error('[webhook] email_log insert error', error) })
           }
         }
         break
