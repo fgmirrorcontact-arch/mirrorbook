@@ -316,6 +316,30 @@ export function paymentFailedEmail(params: {
   `)
 }
 
+export function subscriptionReminderEmail(params: {
+  firstName: string
+  serviceName: string
+  tokensCount: number
+}) {
+  const { firstName, serviceName, tokensCount } = params
+  const seances = `${tokensCount} séance${tokensCount > 1 ? 's' : ''} disponible${tokensCount > 1 ? 's' : ''}`
+  return base(`
+    <div style="display:inline-block;background:#fef9c3;color:#92400e;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;margin-bottom:16px;">
+      Rappel abonnement
+    </div>
+    <h1 style="margin:0 0 8px;font-size:24px;color:#111827;">Vous avez des séances disponibles !</h1>
+    <p style="margin:0 0 24px;color:#6b7280;font-size:15px;line-height:1.6;">
+      Bonjour ${firstName}, votre abonnement <strong>${serviceName}</strong> a été renouvelé il y a 5 jours
+      et vous avez encore <strong>${seances}</strong>.
+      N'oubliez pas de prendre votre rendez-vous !
+    </p>
+    ${btn('Réserver ma séance', `${APP_URL}/book`)}
+    <p style="margin:24px 0 0;color:#9ca3af;font-size:13px;">
+      Vos crédits sont valables jusqu'au prochain renouvellement mensuel.
+    </p>
+  `)
+}
+
 export function tokensRenewedEmail(params: {
   firstName: string
   serviceName: string

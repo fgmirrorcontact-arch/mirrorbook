@@ -150,6 +150,15 @@ export async function POST(request: NextRequest) {
                   periodEnd: new Date(trialEnd * 1000).toISOString(),
                 })
               ).catch((err) => console.error('[webhook] email subscription activated error', err))
+              void admin.from('email_logs').insert({
+                user_id: booking.client_id,
+                email: clientUser.email,
+                type: 'subscription_activated',
+                subject: `Votre abonnement ${serviceName} est actif !`,
+                status: 'sent',
+                sent_at: new Date().toISOString(),
+                metadata: { serviceName, tokensCount: tokensPerRenewal },
+              }).catch((err) => console.error('[webhook] email_log insert error', err))
             }
 
             if (ADMIN_EMAIL) {
@@ -363,6 +372,31 @@ export async function POST(request: NextRequest) {
             `Vos crédits ont été renouvelés — ${serviceName}`,
             tokensRenewedEmail({ firstName, serviceName, tokensCount: tokensPerRenewal, periodEnd, invoiceUrl })
           ).catch((err) => console.error('[webhook] tokensRenewedEmail error', err))
+
+          // Log email + schedule 5-day reminder
+          const now = new Date()
+          const fiveDaysLater = new Date(now)
+          fiveDaysLater.setDate(fiveDaysLater.getDate() + 5)
+          void admin.from('email_logs').insert([
+            {
+              user_id: localSub.client_id,
+              email: subUser.email,
+              type: 'tokens_renewed',
+              subject: `Vos crédits ont été renouvelés — ${serviceName}`,
+              status: 'sent',
+              sent_at: now.toISOString(),
+              metadata: { serviceName, tokensCount: tokensPerRenewal },
+            },
+            {
+              user_id: localSub.client_id,
+              email: subUser.email,
+              type: 'subscription_reminder',
+              subject: 'Rappel — vous avez des séances disponibles',
+              status: 'pending',
+              scheduled_for: fiveDaysLater.toISOString(),
+              metadata: { serviceName, tokensCount: tokensPerRenewal, subscriptionId: localSub.id },
+            },
+          ]).catch((err) => console.error('[webhook] email_log insert error', err))
         } else {
           console.log('[webhook] invoice.paid — no email for client', localSub.client_id)
         }
@@ -395,11 +429,20 @@ export async function POST(request: NextRequest) {
               .from('profiles').select('full_name').eq('id', failedSub.client_id).single()
             const firstName = failedProfile?.full_name?.split(' ')[0] ?? 'vous'
             const invoiceUrl = (invoice as unknown as { hosted_invoice_url?: string }).hosted_invoice_url ?? undefined
-            void sendEmail(
+            await sendEmail(
               failedUser.email,
               `Échec de paiement — ${svcName}`,
               paymentFailedEmail({ firstName, serviceName: svcName, invoiceUrl })
-            ).catch((err) => console.error('[webhook] email payment failed error', err))
+            )
+            void admin.from('email_logs').insert({
+              user_id: failedSub.client_id,
+              email: failedUser.email,
+              type: 'payment_failed',
+              subject: `Échec de paiement — ${svcName}`,
+              status: 'sent',
+              sent_at: new Date().toISOString(),
+              metadata: { serviceName: svcName },
+            }).catch((err) => console.error('[webhook] email_log insert error', err))
           }
         }
         break

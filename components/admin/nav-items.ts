@@ -9,6 +9,7 @@ import {
   BarChart3,
   Clock,
   UserCog,
+  Mail,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -29,4 +30,5 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/admin/disponibilites', label: 'Disponibilités', icon: Clock },
   { href: '/admin/promos', label: 'Codes promo', icon: Tag },
   { href: '/admin/reports', label: 'Rapports', icon: BarChart3 },
+  { href: '/admin/mails', label: 'Mails', icon: Mail },
 ]

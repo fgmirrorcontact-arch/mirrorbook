@@ -1,7 +1,7 @@
 import { type NextRequest } from 'next/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { sendEmail } from '@/lib/email'
-import { bookingReminderEmail } from '@/lib/emails/templates'
+import { bookingReminderEmail, subscriptionReminderEmail } from '@/lib/emails/templates'
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
@@ -61,5 +61,70 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return Response.json({ sent, total: bookings?.length ?? 0 })
+  // ─── Rappels abonnement (J+5 sans réservation) ───────────────────────────
+  const { data: pendingReminders } = await admin
+    .from('email_logs')
+    .select('id, user_id, email, metadata')
+    .eq('type', 'subscription_reminder')
+    .eq('status', 'pending')
+    .lte('scheduled_for', new Date().toISOString())
+
+  let sentReminders = 0
+  for (const reminder of pendingReminders ?? []) {
+    try {
+      const meta = (reminder.metadata ?? {}) as { serviceName?: string; tokensCount?: number; subscriptionId?: string }
+
+      // Check if the client has booked since renewal (5 days ago)
+      const fiveDaysAgo = new Date()
+      fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5)
+      const { count: bookingCount } = await admin
+        .from('bookings')
+        .select('id', { count: 'exact', head: true })
+        .eq('client_id', reminder.user_id)
+        .in('status', ['confirmed', 'pending'])
+        .gte('created_at', fiveDaysAgo.toISOString())
+
+      if (bookingCount && bookingCount > 0) {
+        await admin.from('email_logs').update({ status: 'sent', sent_at: new Date().toISOString(), error_message: 'skipped — réservation existante' }).eq('id', reminder.id)
+        continue
+      }
+
+      // Check remaining tokens
+      const { data: tokens } = await admin
+        .from('subscription_tokens')
+        .select('id')
+        .eq('client_id', reminder.user_id)
+        .eq('status', 'available')
+
+      const availableTokens = tokens?.length ?? 0
+      if (availableTokens === 0) {
+        await admin.from('email_logs').update({ status: 'sent', sent_at: new Date().toISOString(), error_message: 'skipped — pas de tokens' }).eq('id', reminder.id)
+        continue
+      }
+
+      const { data: subProfile } = await admin.from('profiles').select('full_name').eq('id', reminder.user_id).single()
+      const firstName = subProfile?.full_name?.split(' ')[0] ?? 'vous'
+      const serviceName = meta.serviceName ?? 'votre formule'
+      const subject = `Rappel — vous avez ${availableTokens} séance${availableTokens > 1 ? 's' : ''} disponible${availableTokens > 1 ? 's' : ''}`
+
+      await sendEmail(
+        reminder.email,
+        subject,
+        subscriptionReminderEmail({ firstName, serviceName, tokensCount: availableTokens })
+      )
+
+      await admin.from('email_logs').update({
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+        subject,
+      }).eq('id', reminder.id)
+
+      sentReminders++
+    } catch (err) {
+      console.error('[cron/reminders] subscription reminder error', reminder.id, err)
+      await admin.from('email_logs').update({ status: 'error', error_message: String(err) }).eq('id', reminder.id)
+    }
+  }
+
+  return Response.json({ sent, total: bookings?.length ?? 0, sentReminders, pendingReminders: pendingReminders?.length ?? 0 })
 }
