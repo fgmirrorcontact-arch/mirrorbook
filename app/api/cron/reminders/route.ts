@@ -72,6 +72,10 @@ export async function GET(request: NextRequest) {
   let sentReminders = 0
   for (const reminder of pendingReminders ?? []) {
     try {
+      if (!reminder.user_id) {
+        await admin.from('email_logs').update({ status: 'error', error_message: 'user_id manquant' }).eq('id', reminder.id)
+        continue
+      }
       const meta = (reminder.metadata ?? {}) as { serviceName?: string; tokensCount?: number; subscriptionId?: string }
 
       // Check if the client has booked since renewal (5 days ago)
