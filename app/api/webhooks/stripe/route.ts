@@ -396,7 +396,7 @@ export async function POST(request: NextRequest) {
               scheduled_for: fiveDaysLater.toISOString(),
               metadata: { serviceName, tokensCount: tokensPerRenewal, subscriptionId: localSub.id },
             },
-          ]).catch((err) => console.error('[webhook] email_log insert error', err))
+          ]).then(({ error }) => { if (error) console.error('[webhook] email_log insert error', error) })
         } else {
           console.log('[webhook] invoice.paid — no email for client', localSub.client_id)
         }
