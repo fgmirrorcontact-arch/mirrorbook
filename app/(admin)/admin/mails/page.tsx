@@ -61,7 +61,7 @@ export default async function AdminMailsPage() {
   const { data: subscriptions } = await supabase
     .from('subscriptions')
     .select('id, client_id, profiles(full_name), services(name)')
-    .in('status', ['active', 'past_due', 'trialing'])
+    .in('status', ['active', 'past_due'])
     .order('created_at', { ascending: false })
 
   const clientIds = subscriptions?.map((s) => s.client_id).filter(Boolean) ?? []
