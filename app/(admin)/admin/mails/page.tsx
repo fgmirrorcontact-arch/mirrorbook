@@ -7,59 +7,106 @@ export const metadata = {
   title: 'Admin — Mails',
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  subscription_activated: 'Abonnement activé',
-  tokens_renewed: 'Crédits renouvelés',
-  subscription_reminder: 'Rappel abonnement',
-  payment_failed: 'Échec paiement',
-  booking_confirmed: 'Réservation confirmée',
-  booking_reminder: 'Rappel RDV',
-  welcome: 'Bienvenue',
+type EmailLog = {
+  user_id: string | null
+  type: string
+  status: string
+  sent_at: string | null
+  scheduled_for: string | null
+  error_message: string | null
 }
 
-const STATUS_CONFIG: Record<string, { label: string; variant: 'success' | 'warning' | 'destructive' }> = {
-  sent: { label: 'Envoyé', variant: 'success' },
-  pending: { label: 'En attente', variant: 'warning' },
-  error: { label: 'Erreur', variant: 'destructive' },
+function StatusCell({ log }: { log?: EmailLog }) {
+  if (!log) {
+    return <span className="text-gray-300 text-xs">—</span>
+  }
+  if (log.status === 'sent') {
+    const date = log.sent_at ? format(new Date(log.sent_at), 'd MMM', { locale: fr }) : null
+    return (
+      <div className="flex flex-col items-start gap-0.5">
+        <Badge variant="success">Envoyé</Badge>
+        {date && <span className="text-xs text-gray-400">{date}</span>}
+      </div>
+    )
+  }
+  if (log.status === 'pending') {
+    const date = log.scheduled_for ? format(new Date(log.scheduled_for), 'd MMM', { locale: fr }) : null
+    return (
+      <div className="flex flex-col items-start gap-0.5">
+        <Badge variant="warning">Prévu</Badge>
+        {date && <span className="text-xs text-gray-400">{date}</span>}
+      </div>
+    )
+  }
+  if (log.status === 'error') {
+    return (
+      <div className="flex flex-col items-start gap-0.5">
+        <Badge variant="destructive">Erreur</Badge>
+        {log.error_message && <span className="text-xs text-red-400 max-w-[120px] truncate">{log.error_message}</span>}
+      </div>
+    )
+  }
+  return <span className="text-gray-300 text-xs">—</span>
 }
 
 export default async function AdminMailsPage() {
   const supabase = await getSupabaseServerClient()
 
-  const { data: logs } = await supabase
-    .from('email_logs')
-    .select('*, profiles(full_name)')
-    .order('created_at', { ascending: false })
-    .limit(500)
+  // Current month window
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const monthLabel = format(now, 'MMMM yyyy', { locale: fr })
 
-  const sentCount = logs?.filter((l) => l.status === 'sent').length ?? 0
-  const pendingCount = logs?.filter((l) => l.status === 'pending').length ?? 0
-  const errorCount = logs?.filter((l) => l.status === 'error').length ?? 0
+  // Active subscribers
+  const { data: subscriptions } = await supabase
+    .from('subscriptions')
+    .select('id, client_id, profiles(full_name), services(name)')
+    .in('status', ['active', 'past_due', 'trialing'])
+    .order('created_at', { ascending: false })
+
+  const clientIds = subscriptions?.map((s) => s.client_id).filter(Boolean) ?? []
+
+  // Get known emails from logs (most recent per user)
+  const { data: allLogs } = clientIds.length
+    ? await supabase
+        .from('email_logs')
+        .select('user_id, email')
+        .in('user_id', clientIds)
+        .order('created_at', { ascending: false })
+    : { data: [] }
+
+  const emailByUserId: Record<string, string> = {}
+  for (const l of allLogs ?? []) {
+    if (l.user_id && !emailByUserId[l.user_id]) emailByUserId[l.user_id] = l.email
+  }
+
+  // This month's logs
+  const { data: monthLogs } = clientIds.length
+    ? await supabase
+        .from('email_logs')
+        .select('user_id, type, status, sent_at, scheduled_for, error_message')
+        .in('user_id', clientIds)
+        .in('type', ['tokens_renewed', 'subscription_reminder', 'payment_failed'])
+        .gte('created_at', startOfMonth.toISOString())
+    : { data: [] }
+
+  // Build map: client_id → { type → log }
+  const logsByClient: Record<string, Record<string, EmailLog>> = {}
+  for (const log of monthLogs ?? []) {
+    if (!log.user_id) continue
+    if (!logsByClient[log.user_id]) logsByClient[log.user_id] = {}
+    // Keep most recent per type
+    if (!logsByClient[log.user_id][log.type]) {
+      logsByClient[log.user_id][log.type] = log as EmailLog
+    }
+  }
 
   return (
     <div className="p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mails</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            Historique des e-mails envoyés aux abonnés
-          </p>
-        </div>
-      </div>
-
-      {/* Résumé */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Envoyés</p>
-          <p className="text-2xl font-bold text-green-600">{sentCount}</p>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">En attente</p>
-          <p className="text-2xl font-bold text-amber-500">{pendingCount}</p>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Erreurs</p>
-          <p className="text-2xl font-bold text-red-500">{errorCount}</p>
+          <h1 className="text-2xl font-bold text-gray-900">Suivi mails</h1>
+          <p className="text-sm text-gray-500 mt-0.5 capitalize">{monthLabel} · {subscriptions?.length ?? 0} abonné(s)</p>
         </div>
       </div>
 
@@ -72,57 +119,50 @@ export default async function AdminMailsPage() {
                   Client
                 </th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  Type
-                </th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">
-                  Objet
-                </th>
-                <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  Statut
+                  Formule
                 </th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  Date
+                  Crédits renouvelés
+                </th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Rappel J+5
+                </th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Échec paiement
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {(logs ?? []).length === 0 ? (
+              {(subscriptions ?? []).length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-5 py-10 text-center text-gray-400 text-sm">
-                    Aucun e-mail enregistré
+                    Aucun abonné actif
                   </td>
                 </tr>
               ) : (
-                (logs ?? []).map((log) => {
-                  const statusConfig = STATUS_CONFIG[log.status] ?? { label: log.status, variant: 'secondary' as const }
-                  const typeLabel = TYPE_LABELS[log.type] ?? log.type
-                  const dateValue = log.status === 'pending' ? log.scheduled_for : log.sent_at ?? log.created_at
+                (subscriptions ?? []).map((sub) => {
+                  const clientLogs = logsByClient[sub.client_id] ?? {}
+                  const email = emailByUserId[sub.client_id]
+                  const name = (sub.profiles as { full_name?: string | null } | null)?.full_name
+                  const serviceName = (sub.services as { name?: string } | null)?.name
 
                   return (
-                    <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-5 py-3 font-medium text-gray-900">
-                        {(log.profiles as { full_name?: string } | null)?.full_name ?? log.email}
-                        <span className="block text-xs text-gray-400 font-normal">{log.email}</span>
+                    <tr key={sub.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-5 py-4">
+                        <p className="font-medium text-gray-900">{name ?? '—'}</p>
+                        {email && <p className="text-xs text-gray-400 mt-0.5">{email}</p>}
                       </td>
-                      <td className="px-5 py-3 text-gray-700">
-                        {typeLabel}
+                      <td className="px-5 py-4 text-gray-600 text-xs">
+                        {serviceName ?? '—'}
                       </td>
-                      <td className="px-5 py-3 text-gray-500 text-xs hidden md:table-cell max-w-xs truncate">
-                        {log.subject ?? '—'}
-                        {log.error_message && (
-                          <span className="block text-red-500 mt-0.5">{log.error_message}</span>
-                        )}
+                      <td className="px-5 py-4">
+                        <StatusCell log={clientLogs['tokens_renewed']} />
                       </td>
-                      <td className="px-5 py-3 text-center">
-                        <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
+                      <td className="px-5 py-4">
+                        <StatusCell log={clientLogs['subscription_reminder']} />
                       </td>
-                      <td className="px-5 py-3 text-gray-600 text-xs">
-                        {dateValue
-                          ? format(new Date(dateValue), log.status === 'pending' ? "d MMM yyyy 'à' HH:mm" : "d MMM yyyy 'à' HH:mm", { locale: fr })
-                          : '—'}
-                        {log.status === 'pending' && (
-                          <span className="block text-amber-500 mt-0.5">Prévu</span>
-                        )}
+                      <td className="px-5 py-4">
+                        <StatusCell log={clientLogs['payment_failed']} />
                       </td>
                     </tr>
                   )
