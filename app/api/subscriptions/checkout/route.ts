@@ -106,12 +106,18 @@ export async function POST(request: NextRequest) {
     const customer = await stripe.customers.create({
       email: user.email,
       name: customerName,
+      // Drives the language of Stripe invoices, receipts and billing emails
+      preferred_locales: ['fr-FR'],
       metadata: { supabase_user_id: user.id },
     })
     customerId = customer.id
     await admin.from('profiles').update({ stripe_customer_id: customerId }).eq('id', user.id)
-  } else if (customerName) {
-    void stripe.customers.update(customerId, { name: customerName })
+  } else {
+    // Awaited so the locale is set before invoices are finalized
+    await stripe.customers.update(customerId, {
+      preferred_locales: ['fr-FR'],
+      ...(customerName ? { name: customerName } : {}),
+    }).catch((err) => console.error('[subscriptions/checkout] customer update error', err))
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
@@ -202,6 +208,7 @@ export async function POST(request: NextRequest) {
   try {
     session = await stripe.checkout.sessions.create({
       mode: 'payment',
+      locale: 'fr',
       customer: customerId,
       line_items: lineItems,
       ...(stripeCouponId ? { discounts: [{ coupon: stripeCouponId }] } : {}),

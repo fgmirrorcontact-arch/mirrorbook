@@ -68,6 +68,8 @@ export async function POST(request: NextRequest) {
             customer: session.customer as string,
             items: [{ price: stripe_price_id }],
             ...(paymentMethodId ? { default_payment_method: paymentMethodId } : {}),
+            // Apply the manual tax rate to every renewal invoice (same rate as the initial payment)
+            ...(process.env.STRIPE_TAX_RATE_ID ? { default_tax_rates: [process.env.STRIPE_TAX_RATE_ID] } : {}),
             trial_end: trialEnd,
             // Apply promo coupon to all future invoices
             ...(stripe_coupon_id ? { discounts: [{ coupon: stripe_coupon_id }] } : {}),
